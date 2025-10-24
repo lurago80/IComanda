@@ -1,0 +1,567 @@
+1. procedure TFrelgru.BitBtn1Click(Sender: TObject);
+begin
+qryconsulta.close;
+qryconsulta.SQL.Clear;
+qryconsulta.SQL.Add( 'select p1.id, p3.codigointerno, p3.descricao, p2.quantidade, p4.precocusto, p4.precovenda, p4.atacado from produto p1, produtoempresa p2, produtoeservico p3 , produtoeservicoempresa p4 where p1.id = p2.id and p2.id = p3.id and ');
+qryconsulta.SQL.Add( ' p3.id = p4.id and p3.grupo = :d0 order by p3.descricao ');
+qryconsulta.ParamByName('d0').AsInteger  := StrToInt(edit1.Text);
+qryconsulta.open;
+if dm1.q11.IsEmpty then
+  begin
+    ShowMessage('Nenhum registro encontrado.');
+  end
+  else
+  begin
+    TNumericField(qryconsulta.FieldByName('precocusto')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(qryconsulta.FieldByName('precovenda')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(qryconsulta.FieldByName('atacado')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(qryconsulta.FieldByName('quantidade')).DisplayFormat := ',0.00;-,0.00';
+  end;
+end;
+
+--------------------------------------------------------------------------------------------------------------------------
+
+
+2. procedure TFbuspro.BuscaProduto_Novo(AValue: string);
+var
+  codigo: string;
+  xFiltroAtivo: string;
+begin
+  codigo := '0';
+  if IsNumerico(AValue) then
+    codigo := AValue;
+
+  DBGrid1.DataSource := DSqryCons;
+
+  // Determinar filtro de ativo com base nas regras
+    if (parametro.CONSULTA_PRODUTO_INATIVO) and
+       (Assigned(Fbalcao) and Fbalcao.imgDoc.Visible) then
+      xFiltroAtivo := ' ' // permite listar inativos
+    else
+//      xFiltroAtivo := ' AND p3.ativo = 1 ';
+    begin
+      if ComboBox2.ItemIndex = 0 then
+           xFiltroAtivo := ' AND p3.ativo = 1 '
+           else
+           xFiltroAtivo := ' AND p3.ativo = 0 ';
+    end;
+
+  QryConsulta.Close;
+  QryConsulta.SQL.Clear;
+  QryConsulta.SQL.Text :=
+    'SELECT p1.id, p1.codigobarra, p2.quantidade, p3.descricao, p4.precocusto, p4.precovenda, ' +
+    '       p4.precodolar, p4.percentual, p3.codigointerno, p2.quantidademinima, p2.localizacao, ' +
+    '       p3.un_medida, p3.grupo, p3.grade, p3.cfop, p3.csosn, p3.cest, p4.precodolar, p3.ativo, ' +
+    '       p2.dataultimacompra, p4.precocustomedio, p3.datainclusao, p2.dataultimavenda, ' +
+    '       p3.tipo, p3.categoria, p3.ref_cor, p3.cor, p3.tamanho, p3.ntam, p3.composicao, p3.titulo, ' +
+    '       p3.codestacao, p3.partida, p3.tipo_produto, p4.atacado, p3.marca, p3.sacokg, ' +
+    '       p3.codrastreavel, p1.pesavel, p3.cst_origem, p3.cst, p1.impressao, p1.codigobarras1, ' +
+    '       p1.imagem, p4.preco3, p3.icms_st, p3.ipi, p3.despesas, p3.frete, p3.cf, p3.tot_custo, ' +
+    '       p3.margem, p3.ncm, p3.codestacao, p3.cst_pis, p3.aliq_pis, p3.cst_cofins, p3.aliq_cofins, ' +
+    '       p3.cst_ipi, p3.aliq_ipi, p3.enquadra_ipi, p3.fcp, p3.mva, p3.data_alteracao, p3.caracteristica, ' +
+    '       p3.cfop_inter, p3.naturezareceita, p3.icms, p3.fracaoml, p3.red_basecalculo, p3.monofasico, ' +
+    '       p4.pessoaid, p4.margem_seguranca, p4.custo_seguranca, p3.caixam2, p1.pesoliquido, ' +
+    '       p1.pesobruto, p3.grupo_fiscal, p3.pesobobina, p3.corte, p3.defensivo, p1.diasvalidade ' +
+    'FROM produto p1 ' +
+    'INNER JOIN produtoempresa p2 ON p1.id = p2.id ' +
+    'INNER JOIN produtoeservico p3 ON p1.id = p3.id ' +
+    'INNER JOIN produtoeservicoempresa p4 ON p1.id = p4.id ' +
+    'WHERE (p1.codigobarra = :codigoBarra ' +
+    '       OR p3.descricao LIKE :desc ' +
+    '       OR p3.caracteristica LIKE :carac ' +
+    '       OR p1.id = :codigoNum ' +
+    '       OR p3.codigointerno = :codigoInt) ' +
+    xFiltroAtivo +
+    ' ORDER BY p3.descricao';
+
+  // Parâmetros
+  QryConsulta.ParamByName('codigoBarra').AsString := AValue;
+  QryConsulta.ParamByName('desc').AsString := '%' + AValue + '%';
+  QryConsulta.ParamByName('carac').AsString := '%' + AValue + '%';
+  QryConsulta.ParamByName('codigoInt').AsString := AValue;
+  QryConsulta.ParamByName('codigoNum').AsInteger := StrToIntDef(codigo, 0);
+
+  QryConsulta.Open;
+
+  // Formatadores para preços
+  if parametro.DIGITO = 2 then
+  begin
+    TNumericField(QryConsulta.FieldByName('precovenda')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(QryConsulta.FieldByName('precodolar')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(QryConsulta.FieldByName('atacado')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(QryConsulta.FieldByName('precocusto')).DisplayFormat := ',0.00;-,0.00';
+  end
+  else
+  begin
+    TNumericField(QryConsulta.FieldByName('precovenda')).DisplayFormat := ',0.000;-,0.000';
+    TNumericField(QryConsulta.FieldByName('precodolar')).DisplayFormat := ',0.000;-,0.000';
+    TNumericField(QryConsulta.FieldByName('atacado')).DisplayFormat := ',0.000;-,0.000';
+    TNumericField(QryConsulta.FieldByName('precocusto')).DisplayFormat := ',0.000;-,0.000';
+  end;
+end;
+
+--------------------------------------------------------------------------------------------------------------------------
+
+3. // vendas
+//aqui iniciamos a venda (pegamos o ultimo numero e adicionamos + 1) 
+
+procedure TFbalcao.novo;
+begin
+  preco := '0';
+
+  pnlCaixaFechado.Visible := false;
+  Panel6.Visible := true;
+  // Panel7.Visible := false;
+  Label9.Caption := '';
+  lblConsumidor.Caption := '';
+
+  Edit3.Text := IntToStr(GUsuario.Operador);
+
+  if Parametro.Tipo = 3 then
+  begin
+    Label9.Caption := '0';
+    lblConsumidor.Caption := 'Cliente Consumidor';
+    ComboBox1.ItemIndex := 0;
+    Edit1.Text := '0001';
+  end
+  else
+  begin
+    busca_cliente;
+
+    Edit1.Text := '0001';
+    Edit1.SetFocus;
+  end;
+  Label11.Caption := DateToStr(date);
+  Label12.Caption := TimeToStr(time);
+
+  busca_codigo;
+
+  contador := 1;
+
+  BitBtn1.Enabled := false;
+  BitBtn2.Enabled := true;
+  BitBtn6.Enabled := true;
+
+  fim := '0';
+  new := '1';
+  edit2.Clear;
+end;
+
+//// aqui salvamos a tabela vendas
+
+procedure TFbalcao.s_vendas;
+var
+  nComanda,nMesa:Integer;
+begin
+  qryExecutar.Close;
+  qryExecutar.SQL.Clear;
+  qryExecutar.SQL.add('update vendas set cliente=:d0,data_saida=:d1,hora_saida=:d2,formas_pgto=:d3,tot_produtos=:d4,total=:d5,operador=:d6,sequencia=:d7,');
+  qryExecutar.SQL.add('       avista=:d8,modelo=:d9,serie=:d10,subserie=:d11,desconto=:d12,acrescimo=:d13,especie=:d14,loja=:d15,vale=:d16, dinheiro=:d17,');
+  qryExecutar.SQL.add('       cheque=:d18, cartao=:d19, boleto=:d20, troco=:d21, quantidade=:d22,lancado=:d23, vendedor = :d24, caixa=:d25, n_comanda=:n_comanda,n_mesa=:n_mesa where nota = :d26 and origem = :d27');
+  qryExecutar.ParamByName('d0').AsInteger := StrToInt(Label9.Caption);
+  qryExecutar.ParamByName('d1').AsDate := StrToDate(Label11.Caption);
+  qryExecutar.ParamByName('d2').AsTime := StrToTime(Label12.Caption);
+  qryExecutar.ParamByName('d3').AsString := ComboBox1.Text;
+  qryExecutar.ParamByName('d4').AsFloat := (StrToFloatDef(Label16.Caption, 0) + + rDESCO - RACRESCIMO );
+  if ComboBox1.ItemIndex = 2 then
+    qryExecutar.ParamByName('d5').AsFloat := StrToFloatDef(Label16.Caption, 0)
+  else
+    qryExecutar.ParamByName('d5').AsFloat := StrToFloatDef(Label16.Caption, 0); //rSUBT; // rAPAGAR;
+  qryExecutar.ParamByName('d6').AsInteger := GUsuario.Operador; //  StrToInt(Edit3.Text);  //
+  qryExecutar.ParamByName('d7').AsString := seq;
+  qryExecutar.ParamByName('d8').AsString := '1';
+  qryExecutar.ParamByName('d9').AsString := 'D2';
+  qryExecutar.ParamByName('d10').AsString := '001';
+  qryExecutar.ParamByName('d11').AsString := '01';
+  qryExecutar.ParamByName('d12').AsFloat := rDESCO;
+  qryExecutar.ParamByName('d13').AsFloat := RACRESCIMO; //acresc;
+  if ComboBox1.Text = 'Á VISTA' then
+    qryExecutar.ParamByName('d14').AsString := Especie
+  else
+    qryExecutar.ParamByName('d14').AsString := 'CARTEIRA';
+  qryExecutar.ParamByName('d15').AsString := atacado;
+  qryExecutar.ParamByName('d16').AsFloat := RVALE;
+
+  if Especie = 'DINHEIRO' then
+  begin
+    qryExecutar.ParamByName('d17').AsFloat := StrToFloatDef(FloatToStr(rSUBT), 0);
+  end
+  else
+  begin
+    if Especie = 'CHEQUE' then
+    begin
+      qryExecutar.ParamByName('d18').AsFloat := StrToFloatDef(FloatToStr(rSUBT), 0);
+    end
+    else
+    begin
+      if (Especie = 'CARTAO') or (Especie = 'DEBITO') or (Especie = 'CREDITO') then
+      begin
+        qryExecutar.ParamByName('d19').AsFloat := StrToFloatDef(FloatToStr(rSUBT), 0);
+      end
+      else
+      begin
+        if Especie = 'BOLETO' then
+        begin
+          qryExecutar.ParamByName('d20').AsFloat := StrToFloatDef(FloatToStr(rSUBT), 0);
+        end;
+      end;
+    end;
+  end;
+
+  qryExecutar.ParamByName('d21').AsFloat := rTROCO;
+  qryExecutar.ParamByName('d22').AsString := Label14.Caption;
+  qryExecutar.ParamByName('d23').AsString := 'EFETIVADO';
+
+  if Parametro.VENDEDOR then
+  qryExecutar.ParamByName('d24').AsInteger := StrToIntDef(Edit3.Text, 0) else
+  qryExecutar.ParamByName('d24').AsInteger := 0;
+
+  qryExecutar.ParamByName('d25').AsInteger := StrToInt(DM1.TERMINAL);
+  qryExecutar.ParamByName('d26').AsString := AjustaStr_zero_esq(StaticText2.Caption, 6);
+  qryExecutar.ParamByName('d27').AsString := 'BA';
+
+
+  // Nº Comanda e mesa
+  if not TryStrToInt(edtComanda.Text, nComanda) then
+    nComanda := 0;
+  if not TryStrToInt(edtMesa.Text, nMesa) then
+    nMesa := 0;
+  qryexecutar.ParamByName('n_comanda').AsInteger := nComanda;
+  qryexecutar.ParamByName('n_mesa').AsInteger := nMesa;
+
+
+  qryExecutar.ExecSQL;
+end;
+
+--------------------------------------------------------------------------------------------------------------------------
+
+4. ITEVENDAS
+
+ procedure TFbalcao.s_itevendas;
+var
+  contador: Integer;
+  qryVerificaDuplicidade : TIBQuery;
+begin
+
+  qryVerificaDuplicidade := TIBQuery.Create(nil);
+  qryVerificaDuplicidade.Database := dm1.Data2;
+
+  // Iniciar transação
+  if not dm1.TRANS2.InTransaction then
+    dm1.TRANS2.StartTransaction;
+
+  try
+    // Inicializa o contador com o próximo valor disponível para o item
+    qryConsulta.Close;
+    qryConsulta.SQL.Clear;
+    qryConsulta.SQL.Add('SELECT COALESCE(MAX(item), 0) + 1 AS NextItem FROM itevendas WHERE nota = :nota AND origem = :origem');
+    qryConsulta.ParamByName('nota').AsString := StaticText2.Caption; // Ajuste conforme necessário
+    qryConsulta.ParamByName('origem').AsString := 'BA'; // Ajuste conforme necessário
+    qryConsulta.Open;
+
+    // Define o contador para o próximo item disponível
+    contador := qryConsulta.FieldByName('NextItem').AsInteger;
+
+    // Consulta para selecionar itens temporários
+    qryTMPItens.Close;
+    qryTMPItens.SQL.Clear;
+    qryTMPItens.SQL.Add('SELECT * FROM frente_tmpitvendas WHERE cupom = :d0 AND operador = :d1 AND tipo = 1 ORDER BY cupom, item');
+    qryTMPItens.ParamByName('d0').AsString := StaticText2.Caption; // Cupom
+    qryTMPItens.ParamByName('d1').AsInteger := StrToInt(Edit3.Text); // Operador
+    qryTMPItens.Open;
+
+    // Loop para inserir itens
+    while not qryTMPItens.Eof do
+    begin
+      // Verificar se o item já existe
+      qryVerificaDuplicidade.Close;
+      qryVerificaDuplicidade.SQL.Clear;
+      qryVerificaDuplicidade.SQL.Add('SELECT first 1 nota FROM itevendas WHERE nota = :nota AND modelo = :modelo AND origem = :origem AND item = :item');
+      qryVerificaDuplicidade.ParamByName('nota').AsString := StaticText2.Caption; // Ajuste conforme necessário
+      qryVerificaDuplicidade.ParamByName('modelo').AsString := qryTMPItens.FieldByName('modelo').AsString; // Ajuste conforme necessário
+      qryVerificaDuplicidade.ParamByName('origem').AsString := 'BA'; // Ajuste conforme necessário
+      qryVerificaDuplicidade.ParamByName('item').AsInteger := contador;
+      qryVerificaDuplicidade.Open;
+
+      // Se já existir, incrementa o contador e pula para o próximo item
+      if not qryVerificaDuplicidade.IsEmpty then
+      begin
+        contador := contador + 1;
+        qryTMPItens.Next;
+        Continue;
+      end;
+
+      // Inserção de item no itevendas
+      qryExecutar.Close;
+      qryExecutar.SQL.Clear;
+      qryExecutar.SQL.Add('INSERT INTO itevendas (nota, modelo, serie, subserie, origem, emissao, item, codigo, barras, cfop, st, und, qtd, preco, desconto, acrescimo, total, cancelado, sequencia, preco_custo, serial, icms, sinalm)');
+      qryExecutar.SQL.Add('VALUES (:nota, :modelo, :serie, :subserie, :origem, :emissao, :item, :codigo, :barras, :cfop, :st, :und, :qtd, :preco, :desconto, :acrescimo, :total, :cancelado, :sequencia, :preco_custo, :serial, :icms, :sinalm)');
+      qryExecutar.ParamByName('nota').AsString := StaticText2.Caption;
+      qryExecutar.ParamByName('modelo').AsString := qryTMPItens.FieldByName('modelo').AsString;
+      qryExecutar.ParamByName('serie').AsString := '';
+      qryExecutar.ParamByName('subserie').AsString := '';
+      qryExecutar.ParamByName('origem').AsString := 'BA';
+      qryExecutar.ParamByName('emissao').AsDate := StrToDate(Label11.Caption); // Data de emissão
+      qryExecutar.ParamByName('item').AsInteger := contador;
+      qryExecutar.ParamByName('codigo').AsInteger := qryTMPItens.FieldByName('codigo').AsInteger;
+      qryExecutar.ParamByName('barras').AsString := qryTMPItens.FieldByName('barras').AsString;
+      qryExecutar.ParamByName('cfop').AsInteger := 5102;
+      qryExecutar.ParamByName('st').AsString := '0000';
+      qryExecutar.ParamByName('und').AsString := qryTMPItens.FieldByName('und').AsString;
+      qryExecutar.ParamByName('qtd').AsFloat := qryTMPItens.FieldByName('qtd').AsFloat;
+      qryExecutar.ParamByName('preco').AsFloat := qryTMPItens.FieldByName('preco').AsFloat;
+      qryExecutar.ParamByName('desconto').AsFloat := qryTMPItens.FieldByName('desconto').AsFloat + qryTMPItens.FieldByName('desconto1').AsFloat; // Soma de descontos
+      qryExecutar.ParamByName('acrescimo').AsFloat := qryTMPItens.FieldByName('acrescimo').AsFloat;
+      qryExecutar.ParamByName('total').AsFloat := qryTMPItens.FieldByName('total').AsFloat;
+      qryExecutar.ParamByName('cancelado').AsString := '0';
+      qryExecutar.ParamByName('sequencia').AsInteger := StrToIntDef(StaticText2.Caption, 0);
+      qryExecutar.ParamByName('preco_custo').AsFloat := qryTMPItens.FieldByName('precocusto').AsFloat;
+
+      if Parametro.Tipo = 2 then
+         qryExecutar.ParamByName('serial').AsString := qryTMPItens.FieldByName('serial').AsString
+      else
+        qryExecutar.ParamByName('serial').AsString := '';
+
+      qryExecutar.ParamByName('icms').AsFloat := qryTMPItens.FieldByName('icms').AsFloat;
+      qryExecutar.ParamByName('sinalm').AsInteger := IfThen(parametro.ESTOQUE, -1, 0);
+
+      qryExecutar.ExecSQL;
+
+      // Incrementa o contador após inserção
+      contador := contador + 1;
+      qryTMPItens.Next;
+    end;
+
+    // Confirmar transação ao final se não houver erros
+    dm1.TRANS2.Commit;
+    qryVerificaDuplicidade.Free;
+  except
+    on E: Exception do
+    begin
+      // Reverter transação em caso de erro
+      dm1.TRANS2.Rollback;
+      qryVerificaDuplicidade.Free;
+      ShowMessage('Erro ao inserir item: ' + E.Message);
+    end;
+  end;
+end;
+
+--------------------------------------------------------------------------------------------------------------------------
+
+5. tabela frente_tmpitvendas (temporaria)
+
+procedure TFbalcao.salva_temp;
+var
+  v1, v2, v3, v4, v5, Q1, V6, q2, q3: real;
+  descricaoOriginal, descricaoLimpa: string;
+begin
+  qryConsulta.Close;
+  qryConsulta.SQL.Clear;
+  qryConsulta.SQL.add('select cupom from frente_tmpitvendas where cupom = :d0 and item = :d1 and operador = :d2 and tipo = 1');
+  qryConsulta.ParamByName('d0').AsString := AjustaStr_zero_esq(nota, 6);
+  qryConsulta.ParamByName('d1').AsInteger := contador;
+  qryConsulta.ParamByName('d2').AsInteger := StrToInt(Edit3.Text);
+  qryConsulta.open;
+
+  if qryConsulta.IsEmpty then
+  begin
+    qryExecutar.Close;
+    qryExecutar.SQL.Clear;
+    qryExecutar.SQL.add('insert into frente_tmpitvendas (cupom,N_caixa,data,hora,operador,item,codigo,barras,descricao,qtd,preco,tributacao,icms,iss,und,desconto,acrescimo,total,serial,tipo) ');
+    qryExecutar.SQL.add(' values (:d0,:d1,:d2,:d3,:d4,:d5,:d6,:d7,:d8,:d9,:d10,:d11,:d12,:d13,:d14,:d15,:d16,:d17,:d18,:tipo)');
+    qryExecutar.ParamByName('d0').AsString := StaticText2.Caption;
+    qryExecutar.ParamByName('d1').AsString := '1';
+    qryExecutar.ParamByName('d2').AsDate := date;
+    qryExecutar.ParamByName('d3').AsTime := time;
+    qryExecutar.ParamByName('d4').AsInteger := StrToInt(Edit3.Text);
+    qryExecutar.ParamByName('d5').AsInteger := contador;
+    if not Parametro.PRODUTO then
+    begin
+      qryExecutar.ParamByName('d6').AsInteger := DM1.Q7.FieldByName('id').AsInteger;
+      qryExecutar.ParamByName('d7').AsString := DM1.Q7.FieldByName('codigobarra').AsString;
+      qryExecutar.ParamByName('d8').AsString := DM1.Q7.FieldByName('descricao').AsString;
+      v1 := 0;
+      v2 := 0;
+      v3 := 0;
+      v4 := 0;
+      if bal = '1' then
+      begin
+        v1 := Peso;
+      end
+      else
+      begin
+        v1 := DM1.Q7.FieldByName('precovenda').AsFloat;
+      end;
+      v2 := (v1 / 100) * 85;
+      v3 := v2 + ((v2 / 100) * 60);
+      v4 := StrToFloatDef(Edit1.Text, 0);
+      v5 := v1 * v4;
+      q2 := 0;
+      q3 := 0;
+      V6 := 0;
+
+      if bal = '1' then
+      begin
+        q2 := Peso;
+
+        q3 := DM1.Q7.FieldByName('precovenda').AsFloat;
+
+        V6 := q3 / q2;
+      end;
+
+      if bal = '1' then
+      begin
+        if V6 > 0 then
+        begin
+          qryExecutar.ParamByName('d9').AsFloat := V6;
+        end
+        else
+        begin
+          MessageDlg('QUANTIDADE NÃO PODE SER ZERO (0,00)!', mtInformation, [mbOK], 0);
+          Edit2.Clear;
+          Edit2.SetFocus;
+          exit;
+        end;
+      end
+      else
+      begin
+        if StrToFloat(Edit1.Text) > 0 then
+        begin
+          qryExecutar.ParamByName('d9').AsFloat := StrToFloatDef(Edit1.Text, 0);
+        end
+        else
+        begin
+          MessageDlg('QUANTIDADE NÃO PODE SER ZERO (0,00)!', mtInformation, [mbOK], 0);
+          Edit2.Clear;
+          Edit2.SetFocus;
+          exit;
+        end;
+      end;
+
+      if v1 > 0 then
+      begin
+        qryExecutar.ParamByName('d10').AsFloat := v1;
+      end
+      else
+      begin
+        MessageDlg('PREÇO UNITÁRIO NÃO PODE SER ZERO (0,00)!', mtInformation, [mbOK], 0);
+        Edit2.Clear;
+        Edit2.SetFocus;
+        exit;
+      end;
+
+      qryExecutar.ParamByName('d11').AsString := '';
+      qryExecutar.ParamByName('d12').AsFloat := v3;
+      qryExecutar.ParamByName('d13').AsFloat := 0;
+      qryExecutar.ParamByName('d14').AsString := DM1.Q7.FieldByName('sigla').AsString;
+      qryExecutar.ParamByName('d15').AsFloat := 0;
+      qryExecutar.ParamByName('d16').AsFloat := 0;
+      qryExecutar.ParamByName('d17').AsFloat := v5;
+      qryExecutar.ParamByName('d18').AsString := atacado;
+      qryExecutar.ParamByName('tipo').AsInteger := 1;
+      qryExecutar.ExecSQL;
+    end
+    else
+    begin
+      descricaoOriginal := Copy(qryProduto.FieldByName('descricao').AsString, 1, 75);
+      descricaoLimpa := LimparDescricao(descricaoOriginal);
+
+      qryExecutar.ParamByName('d6').AsInteger := qryProduto.FieldByName('id').AsInteger;
+      qryExecutar.ParamByName('d7').AsString := qryProduto.FieldByName('codigobarra').AsString;
+      qryExecutar.ParamByName('d8').AsString := descricaolimpa;  //Copy(qryProduto.FieldByName('descricao').AsString, 1, 75);
+      v1 := 0;
+      v2 := 0;
+      v3 := 0;
+      v4 := 0;
+      if bal = '1' then
+        v1 := Peso
+      else
+        v1 := qryProduto.FieldByName('precovenda').AsFloat;
+      v2 := (v1 / 100) * 85;
+      v3 := v2 + ((v2 / 100) * 60);
+      v4 := StrToFloatDef(Edit1.Text, 0);
+      v5 := v1 * v4;
+      q2 := 0;
+      q3 := 0;
+      V6 := 0;
+
+      if bal = '1' then
+      begin
+        q2 := Peso;
+
+        q3 := qryProduto.FieldByName('precovenda').AsFloat;
+
+        V6 := q3 / q2;
+      end;
+
+      if bal = '1' then
+      begin
+        if V6 > 0 then
+        begin
+          qryExecutar.ParamByName('d9').AsFloat := V6;
+        end
+        else
+        begin
+          MessageDlg('QUANTIDADE NÃO PODE SER ZERO (0,00)!', mtInformation, [mbOK], 0);
+          Edit2.Clear;
+          Edit2.SetFocus;
+          exit;
+        end;
+      end
+      else
+      begin
+        if StrToFloat(Edit1.Text) > 0 then
+        begin
+          qryExecutar.ParamByName('d9').AsFloat := StrToFloatDef(Edit1.Text, 0);
+        end
+        else
+        begin
+          MessageDlg('QUANTIDADE NÃO PODE SER ZERO (0,00)!', mtInformation, [mbOK], 0);
+          Edit2.Clear;
+          Edit2.SetFocus;
+          exit;
+        end;
+      end;
+
+      if v1 > 0 then
+      begin
+        qryExecutar.ParamByName('d10').AsFloat := v1;
+      end
+      else
+      begin
+        MessageDlg('PREÇO UNITÁRIO NÃO PODE SER ZERO (0,00)!', mtInformation, [mbOK], 0);
+        Edit2.Clear;
+        Edit2.SetFocus;
+        exit;
+      end;
+
+      qryExecutar.ParamByName('d11').AsString := '';
+      qryExecutar.ParamByName('d12').AsFloat := v3;
+      qryExecutar.ParamByName('d13').AsFloat := 0;
+      qryExecutar.ParamByName('d14').AsString := qryProduto.FieldByName('un_medida').AsString;
+      qryExecutar.ParamByName('d15').AsFloat := 0;
+      qryExecutar.ParamByName('d16').AsFloat := 0;
+      qryExecutar.ParamByName('d17').AsFloat := v5;
+      qryExecutar.ParamByName('d18').AsString := atacado;
+      qryExecutar.ParamByName('tipo').AsInteger := 1;
+      qryExecutar.ExecSQL;
+    end;
+
+    qryTMPItens.Close;
+    qryTMPItens.SQL.Text := 'select * from frente_tmpitvendas where cupom = :d0 and tipo = 1 order by cupom, item';
+    qryTMPItens.ParamByName('d0').AsString := StaticText2.Caption;
+    qryTMPItens.open;
+    TNumericField(qryTMPItens.FieldByName('preco')).DisplayFormat := ',0.00;-,0.00';
+    TNumericField(qryTMPItens.FieldByName('total')).DisplayFormat := ',0.00;-,0.00';
+
+    contador := contador + 1;
+    Edit2.SetFocus;
+  end
+  else
+  begin
+    contador := contador + 1;
+    salva_temp;
+    Edit2.SetFocus;
+  end
+end;
+
