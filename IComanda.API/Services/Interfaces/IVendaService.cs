@@ -11,4 +11,6 @@ public interface IVendaService
     Task<IEnumerable<VendaDto>> GetVendasHojeAsync();
     Task<IEnumerable<VendaDto>> GetVendasPorComandaAsync(int comanda);
     Task<IEnumerable<VendaDto>> GetVendasPorMesaAsync(int mesa);
+    Task<ConferenciaMesaDto?> GetConferenciaMesaAsync(int mesa);
+    Task<ConferenciaMesaDto?> GetConferenciaComandaAsync(int comanda);
 }

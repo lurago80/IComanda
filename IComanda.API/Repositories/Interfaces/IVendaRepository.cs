@@ -12,4 +12,6 @@ public interface IVendaRepository
     Task<IEnumerable<Venda>> GetVendasHojeAsync();
     Task<IEnumerable<Venda>> GetVendasPorComandaAsync(int comanda);
     Task<IEnumerable<Venda>> GetVendasPorMesaAsync(int mesa);
+    Task<Venda?> GetVendaAbertaPorMesaAsync(int mesa);
+    Task<Venda?> GetVendaAbertaPorComandaAsync(int comanda);
 }

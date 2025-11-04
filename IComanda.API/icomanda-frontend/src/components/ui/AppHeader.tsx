@@ -1,13 +1,14 @@
-import { History, LogOut, Search, ShoppingCart, User } from 'lucide-react'
+import { History, LogOut, Receipt, Search, ShoppingCart, User } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useCartStore } from '../../store/cartStore'
 
 interface AppHeaderProps {
   onSearch?: (query: string) => void
   onOpenHistory?: () => void
+  onOpenConferencia?: () => void
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenConferencia }) => {
   const { toggleCart, getTotalItems, getTotalPrice } = useCartStore()
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
@@ -71,6 +72,17 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory }) => {
           
           {/* Ações */}
           <div className="flex items-center space-x-3">
+            {onOpenConferencia && (
+            <button
+              onClick={onOpenConferencia}
+              className="w-12 h-12 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-center text-amber-600 hover:text-amber-700 hover:bg-amber-100 hover:border-amber-300 transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label="Conferência de Mesa/Comanda"
+              title="Conferência"
+            >
+              <Receipt className="w-5 h-5" />
+            </button>
+            )}
+            
             {onOpenHistory && (
             <button
               onClick={onOpenHistory}

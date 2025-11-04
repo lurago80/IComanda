@@ -194,4 +194,40 @@ public class VendaRepository : IVendaRepository
 
         return await connection.QueryAsync<Venda>(sql, new { Mesa = mesa });
     }
+
+    public async Task<Venda?> GetVendaAbertaPorMesaAsync(int mesa)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = @"
+            SELECT nota, modelo, serie, subserie, origem, emissao, hora, cliente,
+                   data_saida, hora_saida, formas_pgto, tot_produtos, total, operador,
+                   sequencia, avista, desconto, acrescimo, especie, loja, vale,
+                   dinheiro, cheque, cartao, boleto, troco, quantidade, lancado,
+                   vendedor, caixa, comanda, mesa, numero_pessoas
+            FROM vendas 
+            WHERE mesa = @Mesa AND lancado = 'ABERTO' AND origem = 'BA'
+            ORDER BY data_saida DESC, hora_saida DESC
+            ROWS 1";
+
+        return await connection.QueryFirstOrDefaultAsync<Venda>(sql, new { Mesa = mesa });
+    }
+
+    public async Task<Venda?> GetVendaAbertaPorComandaAsync(int comanda)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = @"
+            SELECT nota, modelo, serie, subserie, origem, emissao, hora, cliente,
+                   data_saida, hora_saida, formas_pgto, tot_produtos, total, operador,
+                   sequencia, avista, desconto, acrescimo, especie, loja, vale,
+                   dinheiro, cheque, cartao, boleto, troco, quantidade, lancado,
+                   vendedor, caixa, comanda, mesa, numero_pessoas
+            FROM vendas 
+            WHERE comanda = @Comanda AND lancado = 'ABERTO' AND origem = 'BA'
+            ORDER BY data_saida DESC, hora_saida DESC
+            ROWS 1";
+
+        return await connection.QueryFirstOrDefaultAsync<Venda>(sql, new { Comanda = comanda });
+    }
 }

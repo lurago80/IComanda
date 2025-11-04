@@ -174,4 +174,80 @@ public class VendasController : ControllerBase
             return StatusCode(500, "Erro interno do servidor");
         }
     }
+
+    /// <summary>
+    /// Obtém conferência de mesa (pré-conta) - Mostra itens e total para cliente
+    /// </summary>
+    /// <param name="mesa">Número da mesa</param>
+    /// <returns>Conferência da mesa</returns>
+    /// <response code="200">Conferência encontrada</response>
+    /// <response code="404">Mesa não possui venda aberta</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpGet("conferencia/mesa/{mesa}")]
+    [ProducesResponseType(typeof(ConferenciaMesaDto), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ConferenciaMesaDto>> GetConferenciaMesa(int mesa)
+    {
+        try
+        {
+            _logger.LogInformation("📋 Solicitando conferência da mesa: {Mesa}", mesa);
+
+            var conferencia = await _vendaService.GetConferenciaMesaAsync(mesa);
+
+            if (conferencia == null)
+            {
+                _logger.LogWarning("❌ Mesa {Mesa} não possui venda aberta", mesa);
+                return NotFound(new { mensagem = $"Mesa {mesa} não possui venda aberta" });
+            }
+
+            _logger.LogInformation("✅ Conferência da mesa {Mesa}: {Total} itens, R$ {Valor}", 
+                mesa, conferencia.TotalItens, conferencia.Total);
+
+            return Ok(conferencia);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar conferência da mesa: {Mesa}", mesa);
+            return StatusCode(500, new { mensagem = "Erro interno do servidor" });
+        }
+    }
+
+    /// <summary>
+    /// Obtém conferência de comanda (pré-conta) - Mostra itens e total para cliente
+    /// </summary>
+    /// <param name="comanda">Número da comanda</param>
+    /// <returns>Conferência da comanda</returns>
+    /// <response code="200">Conferência encontrada</response>
+    /// <response code="404">Comanda não possui venda aberta</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpGet("conferencia/comanda/{comanda}")]
+    [ProducesResponseType(typeof(ConferenciaMesaDto), 200)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ConferenciaMesaDto>> GetConferenciaComanda(int comanda)
+    {
+        try
+        {
+            _logger.LogInformation("📋 Solicitando conferência da comanda: {Comanda}", comanda);
+
+            var conferencia = await _vendaService.GetConferenciaComandaAsync(comanda);
+
+            if (conferencia == null)
+            {
+                _logger.LogWarning("❌ Comanda {Comanda} não possui venda aberta", comanda);
+                return NotFound(new { mensagem = $"Comanda {comanda} não possui venda aberta" });
+            }
+
+            _logger.LogInformation("✅ Conferência da comanda {Comanda}: {Total} itens, R$ {Valor}", 
+                comanda, conferencia.TotalItens, conferencia.Total);
+
+            return Ok(conferencia);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar conferência da comanda: {Comanda}", comanda);
+            return StatusCode(500, new { mensagem = "Erro interno do servidor" });
+        }
+    }
 }

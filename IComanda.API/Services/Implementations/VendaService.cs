@@ -160,4 +160,84 @@ public class VendaService : IVendaService
         var vendas = await _vendaRepository.GetVendasPorMesaAsync(mesa);
         return _mapper.Map<IEnumerable<VendaDto>>(vendas);
     }
+
+    public async Task<ConferenciaMesaDto?> GetConferenciaMesaAsync(int mesa)
+    {
+        _logger.LogInformation($"📋 Buscando conferência da mesa {mesa}");
+
+        // Buscar venda aberta da mesa
+        var venda = await _vendaRepository.GetVendaAbertaPorMesaAsync(mesa);
+        if (venda == null)
+        {
+            _logger.LogWarning($"❌ Nenhuma venda aberta encontrada para mesa {mesa}");
+            return null;
+        }
+
+        // Buscar itens temporários
+        var itensTemp = await _itemTemporarioRepository.GetItensPorCupomAsync(venda.Nota, venda.Operador);
+        
+        var conferencia = new ConferenciaMesaDto
+        {
+            Mesa = mesa,
+            Comanda = venda.Comanda,
+            Garcom = $"Operador {venda.Operador}", // TODO: buscar nome do usuário
+            DataHora = venda.Emissao.Add(venda.Hora),
+            Itens = itensTemp.Select(i => new ItemConferenciaDto
+            {
+                Descricao = i.Descricao,
+                Qtd = i.Qtd,
+                PrecoUnitario = i.Preco,
+                Total = i.Total
+            }).ToList(),
+            Subtotal = venda.TotProdutos,
+            Desconto = venda.Desconto,
+            Acrescimo = venda.Acrescimo,
+            Total = venda.Total,
+            TotalItens = itensTemp.Count()
+        };
+
+        _logger.LogInformation($"✅ Conferência da mesa {mesa}: {conferencia.TotalItens} itens, Total: R$ {conferencia.Total:N2}");
+
+        return conferencia;
+    }
+
+    public async Task<ConferenciaMesaDto?> GetConferenciaComandaAsync(int comanda)
+    {
+        _logger.LogInformation($"📋 Buscando conferência da comanda {comanda}");
+
+        // Buscar venda aberta da comanda
+        var venda = await _vendaRepository.GetVendaAbertaPorComandaAsync(comanda);
+        if (venda == null)
+        {
+            _logger.LogWarning($"❌ Nenhuma venda aberta encontrada para comanda {comanda}");
+            return null;
+        }
+
+        // Buscar itens temporários
+        var itensTemp = await _itemTemporarioRepository.GetItensPorCupomAsync(venda.Nota, venda.Operador);
+        
+        var conferencia = new ConferenciaMesaDto
+        {
+            Mesa = venda.Mesa,
+            Comanda = comanda,
+            Garcom = $"Operador {venda.Operador}", // TODO: buscar nome do usuário
+            DataHora = venda.Emissao.Add(venda.Hora),
+            Itens = itensTemp.Select(i => new ItemConferenciaDto
+            {
+                Descricao = i.Descricao,
+                Qtd = i.Qtd,
+                PrecoUnitario = i.Preco,
+                Total = i.Total
+            }).ToList(),
+            Subtotal = venda.TotProdutos,
+            Desconto = venda.Desconto,
+            Acrescimo = venda.Acrescimo,
+            Total = venda.Total,
+            TotalItens = itensTemp.Count()
+        };
+
+        _logger.LogInformation($"✅ Conferência da comanda {comanda}: {conferencia.TotalItens} itens, Total: R$ {conferencia.Total:N2}");
+
+        return conferencia;
+    }
 }

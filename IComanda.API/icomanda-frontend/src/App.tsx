@@ -10,6 +10,7 @@ import CartFAB from './components/cart/CartFAB';
 import AppHeader from './components/ui/AppHeader';
 import { useToast } from './hooks/useToast';
 import Login from './pages/Login';
+import ConferenciaMesaPage from './pages/ConferenciaMesa';
 import { Grupo } from './types/api';
 
 const queryClient = new QueryClient();
@@ -18,6 +19,7 @@ function App() {
   const [grupoSelecionado, setGrupoSelecionado] = useState<Grupo | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [showHistory, setShowHistory] = useState<boolean>(false);
+  const [showConferencia, setShowConferencia] = useState<boolean>(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { toasts, removeToast } = useToast();
 
@@ -41,6 +43,14 @@ function App() {
     setShowHistory(false);
   };
 
+  const handleOpenConferencia = () => {
+    setShowConferencia(true);
+  };
+
+  const handleCloseConferencia = () => {
+    setShowConferencia(false);
+  };
+
   const handleBackToCategories = () => {
     setGrupoSelecionado(null);
     setSearchQuery('');
@@ -50,12 +60,21 @@ function App() {
     return <Login />;
   }
 
+  if (showConferencia) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <ConferenciaMesaPage onClose={handleCloseConferencia} />
+      </QueryClientProvider>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <div className="min-h-screen bg-bg">
         <AppHeader 
           onSearch={handleSearch}
           onOpenHistory={handleOpenHistory}
+          onOpenConferencia={handleOpenConferencia}
         />
         
         <main className="pb-20">
