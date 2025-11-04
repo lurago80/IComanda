@@ -23,6 +23,9 @@ const CartDrawer: React.FC = () => {
   const [showSuccess, setShowSuccess] = useState(false)
   const [clienteSelecionado, setClienteSelecionado] = useState<Cliente | null>(null)
   const [showClienteSearch, setShowClienteSearch] = useState(false)
+  const [numeroComanda, setNumeroComanda] = useState('')
+  const [numeroMesa, setNumeroMesa] = useState('')
+  const [numeroPessoas, setNumeroPessoas] = useState('')
   const { showSuccess: showSuccessToast, showError } = useToast()
 
   const totalPrice = getTotalPrice()
@@ -33,6 +36,12 @@ const CartDrawer: React.FC = () => {
 
   const handleFinalizarPedido = async () => {
     if (items.length === 0) return
+
+    // Validar comanda obrigatória
+    if (!numeroComanda || numeroComanda.trim() === '') {
+      showError('Comanda obrigatória', 'Por favor, informe o número da comanda.')
+      return
+    }
 
     setIsProcessing(true)
     
@@ -57,6 +66,9 @@ const CartDrawer: React.FC = () => {
         cpfCnpjCliente: clienteSelecionado?.documento,
         operador: operadorId, // ID do garçom/operador logado
         vendedor: operadorId, // Mesmo ID para vendedor
+        comanda: parseInt(numeroComanda) || null,
+        mesa: numeroMesa ? parseInt(numeroMesa) : null,
+        numeroPessoas: numeroPessoas ? parseInt(numeroPessoas) : null,
         itens: items.map(item => ({
           codigo: item.produto.id,
           qtd: item.quantidade,
@@ -68,8 +80,16 @@ const CartDrawer: React.FC = () => {
       
       // Mostrar sucesso
       setShowSuccess(true)
-      showSuccessToast('Pedido finalizado!', `Pedido #${venda.nota} criado com sucesso.`)
+      const msgComanda = numeroComanda ? ` - Comanda ${numeroComanda}` : ''
+      const msgMesa = numeroMesa ? ` - Mesa ${numeroMesa}` : ''
+      showSuccessToast('Pedido finalizado!', `Pedido #${venda.nota}${msgComanda}${msgMesa}`)
+      
+      // Limpar campos
       clearCart()
+      setNumeroComanda('')
+      setNumeroMesa('')
+      setNumeroPessoas('')
+      setClienteSelecionado(null)
       
       // Fechar modal após 2 segundos
       setTimeout(() => {
@@ -199,11 +219,68 @@ const CartDrawer: React.FC = () => {
               )}
             </div>
 
+            {/* Informações da Comanda/Mesa */}
+            {items.length > 0 && (
+              <div className="border-t border-amber-100 p-6 bg-amber-50/30">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Informações do Pedido</h3>
+                
+                <div className="space-y-3">
+                  {/* Número da Comanda - OBRIGATÓRIO */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Nº Comanda <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      value={numeroComanda}
+                      onChange={(e) => setNumeroComanda(e.target.value)}
+                      placeholder="Digite o número da comanda"
+                      className="w-full px-4 py-3 bg-white border-2 border-amber-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all text-gray-800 placeholder-gray-400"
+                      min="1"
+                    />
+                  </div>
+
+                  {/* Grid para Mesa e Pessoas */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Número da Mesa */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Nº Mesa
+                      </label>
+                      <input
+                        type="number"
+                        value={numeroMesa}
+                        onChange={(e) => setNumeroMesa(e.target.value)}
+                        placeholder="Opcional"
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all text-gray-800 placeholder-gray-400"
+                        min="1"
+                      />
+                    </div>
+
+                    {/* Número de Pessoas */}
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Pessoas
+                      </label>
+                      <input
+                        type="number"
+                        value={numeroPessoas}
+                        onChange={(e) => setNumeroPessoas(e.target.value)}
+                        placeholder="Opcional"
+                        className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all text-gray-800 placeholder-gray-400"
+                        min="1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Seleção de Cliente */}
             {items.length > 0 && (
               <div className="border-t border-amber-100 p-6">
                 <div className="mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Cliente</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Cliente (Opcional)</h3>
                   
                   {clienteSelecionado ? (
                     <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
