@@ -11,6 +11,16 @@ public class CriarVendaRequest
     public int Cliente { get; set; }
 
     /// <summary>
+    /// Nome do cliente (para exibição)
+    /// </summary>
+    public string? NomeCliente { get; set; }
+
+    /// <summary>
+    /// CPF/CNPJ do cliente (para exibição)
+    /// </summary>
+    public string? CpfCnpjCliente { get; set; }
+
+    /// <summary>
     /// Forma de pagamento
     /// </summary>
     public string FormasPgto { get; set; } = string.Empty;

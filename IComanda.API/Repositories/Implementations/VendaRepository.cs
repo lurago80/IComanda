@@ -27,16 +27,24 @@ public class VendaRepository : IVendaRepository
     {
         using var connection = _connectionFactory.CreateConnection();
 
+        // DEBUG
+        Console.WriteLine($"=== DEBUG VENDA ===");
+        Console.WriteLine($"CFOPS: [{venda.Cfops}]");
+        Console.WriteLine($"Natureza: [{venda.Natureza}]");
+        Console.WriteLine($"Saida: [{venda.Saida}]");
+        Console.WriteLine($"Loja: [{venda.Loja}]");
+        Console.WriteLine($"==================");
+
         var sql = @"
             INSERT INTO vendas (
-                nota, modelo, serie, subserie, origem, emissao, hora, cliente, 
-                data_saida, hora_saida, formas_pgto, tot_produtos, total, operador, 
+                nota, modelo, serie, subserie, origem, emissao, hora, saida, cfops, natureza,
+                cliente, data_saida, hora_saida, formas_pgto, tot_produtos, total, operador, 
                 sequencia, avista, desconto, acrescimo, especie, loja, vale, 
                 dinheiro, cheque, cartao, boleto, troco, quantidade, lancado, 
                 vendedor, caixa, comanda, mesa, numero_pessoas
             ) VALUES (
-                @Nota, @Modelo, @Serie, @Subserie, @Origem, @Emissao, @Hora, @Cliente,
-                @DataSaida, @HoraSaida, @FormasPgto, @TotProdutos, @Total, @Operador,
+                @Nota, @Modelo, @Serie, @Subserie, @Origem, @Emissao, @Hora, @Saida, @Cfops, @Natureza,
+                @Cliente, @DataSaida, @HoraSaida, @FormasPgto, @TotProdutos, @Total, @Operador,
                 @Sequencia, @Avista, @Desconto, @Acrescimo, @Especie, @Loja, @Vale,
                 @Dinheiro, @Cheque, @Cartao, @Boleto, @Troco, @Quantidade, @Lancado,
                 @Vendedor, @Caixa, @Comanda, @Mesa, @NumeroPessoas
@@ -51,6 +59,9 @@ public class VendaRepository : IVendaRepository
             venda.Origem,
             venda.Emissao,
             venda.Hora,
+            venda.Saida,
+            venda.Cfops,
+            venda.Natureza,
             venda.Cliente,
             venda.DataSaida,
             venda.HoraSaida,

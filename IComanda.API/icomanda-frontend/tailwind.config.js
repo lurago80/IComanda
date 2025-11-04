@@ -6,50 +6,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Paleta moderna inspirada no iFood
+        // Paleta acolhedora para Padaria
         primary: {
-          50: '#fef2f2',
-          100: '#fee2e2',
-          200: '#fecaca',
-          300: '#fca5a5',
-          400: '#f87171',
-          500: '#E11D2E', // Vermelho principal
-          600: '#dc2626',
-          700: '#b91c1c',
-          800: '#991b1b',
-          900: '#7f1d1d',
-          DEFAULT: '#E11D2E',
+          50: '#fef9f3',
+          100: '#fef1e6',
+          200: '#fce0c4',
+          300: '#facca1',
+          400: '#f7a965',
+          500: '#f59e0b', // Laranja dourado (cor de pão)
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          DEFAULT: '#f59e0b',
           foreground: '#FFFFFF'
         },
         accent: {
-          DEFAULT: '#FFDC5D', // Amarelo dourado
-          foreground: '#1f2937'
+          DEFAULT: '#fbbf24', // Amarelo suave
+          foreground: '#78350f'
         },
         background: {
-          DEFAULT: '#0B0B0C',
-          secondary: '#121214',
-          tertiary: '#1a1a1c'
+          DEFAULT: '#fef9f3',
+          secondary: '#fef5eb',
+          tertiary: '#fef1e3'
         },
         card: {
-          DEFAULT: '#18181B',
-          secondary: '#1f1f23',
-          hover: '#2a2a2e'
+          DEFAULT: '#FFFFFF',
+          secondary: '#fffbf5',
+          hover: '#fef5eb'
         },
         border: {
-          DEFAULT: '#2A2A2E',
-          secondary: '#3a3a3e',
-          accent: '#4a4a4e'
+          DEFAULT: '#f3e8d9',
+          secondary: '#e7d5bd',
+          accent: '#d6c4a8'
         },
         text: {
-          primary: '#FFFFFF',
-          secondary: '#A1A1AA',
-          muted: '#71717A',
-          accent: '#E11D2E'
+          primary: '#292524',
+          secondary: '#57534e',
+          muted: '#78716c',
+          accent: '#ea580c'
         },
-        success: '#10B981',
-        warning: '#F59E0B',
-        error: '#EF4444',
-        info: '#3B82F6'
+        success: '#16a34a',
+        warning: '#f59e0b',
+        error: '#dc2626',
+        info: '#0284c7'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

@@ -6,6 +6,30 @@ export interface Grupo {
   quantidadeProdutos: number;
 }
 
+export interface Cliente {
+  id: number;
+  nome: string;
+  cpfCnpj?: string;
+  telefone?: string;
+  celular?: string;
+  email?: string;
+  endereco1?: string;
+  cidade1?: string;
+  uf1?: string;
+  cep1?: string;
+  fantasia?: string;
+  ativo: boolean;
+  bloqueado: boolean;
+  dataCadastro?: string;
+  limite?: number;
+  classificacao?: string;
+  idVendedor: number;
+  nomeCompleto: string;
+  documento: string;
+  contato: string;
+  enderecoCompleto: string;
+}
+
 export interface Produto {
   id: number;
   codigoBarra: string;

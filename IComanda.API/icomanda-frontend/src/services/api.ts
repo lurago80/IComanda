@@ -1,7 +1,7 @@
 import axios from 'axios';
-import { BuscarProdutoRequest, CriarVendaRequest, Grupo, Produto, Venda } from '../types/api';
+import { BuscarProdutoRequest, Cliente, CriarVendaRequest, Grupo, Produto, Venda } from '../types/api';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:65375/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -90,6 +90,34 @@ export const vendasService = {
     const response = await api.get(`/vendas/mesa/${mesa}`);
     return response.data;
   },
+};
+
+// Serviços para Clientes
+export const clientesService = {
+  buscar: async (params: { q?: string; ativo?: boolean; naoBloqueado?: boolean; pagina?: number; itensPorPagina?: number }): Promise<Cliente[]> => {
+    const response = await api.get('/clientes/buscar', { params });
+    return response.data;
+  },
+
+  getById: async (id: number): Promise<Cliente> => {
+    const response = await api.get(`/clientes/${id}`);
+    return response.data;
+  },
+
+  getByCpfCnpj: async (cpfCnpj: string): Promise<Cliente> => {
+    const response = await api.get(`/clientes/cpf-cnpj/${cpfCnpj}`);
+    return response.data;
+  },
+
+  getByVendedor: async (idVendedor: number): Promise<Cliente[]> => {
+    const response = await api.get(`/clientes/vendedor/${idVendedor}`);
+    return response.data;
+  },
+
+  contar: async (params: { q?: string; ativo?: boolean; naoBloqueado?: boolean }): Promise<number> => {
+    const response = await api.get('/clientes/contar', { params });
+    return response.data;
+  }
 };
 
 export default api;

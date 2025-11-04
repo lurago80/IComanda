@@ -1,5 +1,5 @@
-import { History, Search, ShoppingCart } from 'lucide-react'
-import React from 'react'
+import { History, LogOut, Search, ShoppingCart, User } from 'lucide-react'
+import React, { useEffect, useState } from 'react'
 import { useCartStore } from '../../store/cartStore'
 
 interface AppHeaderProps {
@@ -11,6 +11,26 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory }) => {
   const { toggleCart, getTotalItems, getTotalPrice } = useCartStore()
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
+  const [nomeUsuario, setNomeUsuario] = useState<string>('')
+
+  useEffect(() => {
+    const usuarioLogadoStr = localStorage.getItem('usuario_logado');
+    if (usuarioLogadoStr) {
+      try {
+        const usuarioInfo = JSON.parse(usuarioLogadoStr);
+        setNomeUsuario(usuarioInfo.nome || 'Usuário');
+      } catch {
+        setNomeUsuario('Usuário');
+      }
+    }
+  }, []);
+
+  const handleLogout = () => {
+    if (window.confirm('Deseja realmente sair do sistema?')) {
+      localStorage.removeItem('usuario_logado');
+      window.location.reload();
+    }
+  };
 
   return (
     <header className="sticky top-0 z-50 glass-effect border-b border-border/30">
@@ -18,29 +38,53 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory }) => {
         {/* Logo e Título */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-primary via-primary/90 to-primary/80 rounded-3xl flex items-center justify-center shadow-glow">
-              <span className="text-white font-bold text-2xl">🍔</span>
+            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-2xl">🥐</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gradient">IComanda</h1>
-              <p className="text-sm text-text-secondary font-medium">Sistema de Pedidos</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">IComanda</h1>
+              <p className="text-sm text-gray-600 font-medium">Sistema de Pedidos - Padaria</p>
             </div>
           </div>
 
+          {/* Usuário e Ações */}
+          <div className="flex items-center space-x-2">
+            {nomeUsuario && (
+              <div className="flex items-center space-x-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-2xl">
+                <User className="w-4 h-4 text-amber-600" />
+                <span className="text-sm font-semibold text-gray-700">{nomeUsuario}</span>
+              </div>
+            )}
+            <button
+              onClick={handleLogout}
+              className="w-10 h-10 bg-red-50 border border-red-200 rounded-2xl flex items-center justify-center text-red-600 hover:bg-red-100 hover:border-red-300 transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label="Sair do sistema"
+              title="Sair do sistema"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex-1"></div>
+          
           {/* Ações */}
           <div className="flex items-center space-x-3">
             {onOpenHistory && (
-              <button
-                onClick={onOpenHistory}
-                className="w-12 h-12 bg-card border border-border rounded-2xl flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-card-hover hover:border-border-secondary transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                <History className="w-5 h-5" />
-              </button>
+            <button
+              onClick={onOpenHistory}
+              className="w-12 h-12 bg-card border border-border rounded-2xl flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-card-hover hover:border-border-secondary transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label="Abrir histórico de pedidos"
+            >
+              <History className="w-5 h-5" />
+            </button>
             )}
             
             <button
               onClick={toggleCart}
               className="relative w-12 h-12 bg-card border border-border rounded-2xl flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-card-hover hover:border-border-secondary transition-all duration-300 hover:scale-105 active:scale-95"
+              aria-label={`Abrir carrinho de compras. ${totalItems} itens no carrinho`}
             >
               <ShoppingCart className="w-5 h-5" />
               {totalItems > 0 && (
@@ -61,6 +105,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory }) => {
               placeholder="Buscar produtos..."
               className="input-modern w-full pl-14 pr-5 py-4 text-lg"
               onChange={(e) => onSearch(e.target.value)}
+              aria-label="Buscar produtos"
             />
           </div>
         )}

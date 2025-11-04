@@ -14,8 +14,10 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IProdutoRepository, ProdutoRepository>();
         services.AddScoped<IGrupoRepository, GrupoRepository>();
         services.AddScoped<IVendaRepository, VendaRepository>();
+        services.AddScoped<IItemVendaTemporarioRepository, ItemVendaTemporarioRepository>();
         services.AddScoped<IComandaRepository, ComandaRepository>();
         services.AddScoped<IClienteRepository, ClienteRepository>();
+        // services.AddScoped<IUsuarioRepository, UsuarioRepository>(); // TEMPORARIAMENTE DESABILITADO
 
         return services;
     }
@@ -27,13 +29,14 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IVendaService, VendaService>();
         services.AddScoped<IComandaService, ComandaService>();
         services.AddScoped<IClienteService, ClienteService>();
+        // services.AddScoped<IAuthService, AuthService>(); // TEMPORARIAMENTE DESABILITADO
 
         return services;
     }
 
     public static IServiceCollection AddAutoMapperProfiles(this IServiceCollection services)
     {
-        services.AddAutoMapper(typeof(ProdutoMappingProfile));
+        services.AddAutoMapper(typeof(ProdutoMappingProfile), typeof(ClienteMappingProfile));
         return services;
     }
 }
