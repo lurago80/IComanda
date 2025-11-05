@@ -157,7 +157,12 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
                       
                       <div className="flex justify-between text-sm text-gray-600">
                         <span>Subtotal:</span>
-                        <span>R$ {formatarPreco(venda.subtotal)}</span>
+                        <span>R$ {formatarPreco(
+                          // Subtotal = Total dos produtos (antes de desconto/acréscimo)
+                          // Se subtotal não vier do backend, calcular: Total - Acrescimo + Desconto
+                          venda.subtotal ?? 
+                          (venda.total - (venda.acrescimo || 0) + (venda.desconto || 0))
+                        )}</span>
                       </div>
                     </motion.div>
                   ))}

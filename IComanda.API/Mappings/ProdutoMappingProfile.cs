@@ -51,7 +51,8 @@ public class ProdutoMappingProfile : Profile
             .ForMember(dest => dest.QuantidadeProdutos, opt => opt.MapFrom(src => src.QuantidadeProdutos));
 
         // Mapeamentos de Venda
-        CreateMap<Venda, VendaDto>();
+        CreateMap<Venda, VendaDto>()
+            .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.TotProdutos));
         CreateMap<ItemVenda, ItemVendaDto>();
 
         // Mapeamentos de Request para Entity

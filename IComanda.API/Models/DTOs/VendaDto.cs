@@ -17,6 +17,7 @@ public class VendaDto
     public TimeSpan HoraSaida { get; set; }
     public string FormasPgto { get; set; } = string.Empty;
     public decimal TotProdutos { get; set; }
+    public decimal Subtotal { get; set; }
     public decimal Total { get; set; }
     public int Operador { get; set; }
     public string Sequencia { get; set; } = string.Empty;
