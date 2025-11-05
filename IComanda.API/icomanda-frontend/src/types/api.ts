@@ -100,6 +100,9 @@ export interface BuscarProdutoRequest {
 
 export interface CriarVendaRequest {
   cliente: number;
+  nomeCliente?: string;
+  cpfCnpjCliente?: string;
+  operador: number;
   vendedor: number;
   mesa?: number;
   comanda?: number;

@@ -66,9 +66,9 @@ const CartDrawer: React.FC = () => {
         cpfCnpjCliente: clienteSelecionado?.documento,
         operador: operadorId, // ID do garçom/operador logado
         vendedor: operadorId, // Mesmo ID para vendedor
-        comanda: parseInt(numeroComanda) || null,
-        mesa: numeroMesa ? parseInt(numeroMesa) : null,
-        numeroPessoas: numeroPessoas ? parseInt(numeroPessoas) : null,
+        comanda: parseInt(numeroComanda), // Obrigatório (já validado)
+        mesa: numeroMesa ? parseInt(numeroMesa) : undefined,
+        numeroPessoas: numeroPessoas ? parseInt(numeroPessoas) : undefined,
         itens: items.map(item => ({
           codigo: item.produto.id,
           qtd: item.quantidade,
