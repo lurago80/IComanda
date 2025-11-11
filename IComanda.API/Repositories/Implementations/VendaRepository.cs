@@ -201,10 +201,11 @@ public class VendaRepository : IVendaRepository
 
         var sql = @"
             SELECT nota, modelo, serie, subserie, origem, emissao, hora, cliente,
-                   data_saida, hora_saida, formas_pgto, tot_produtos, total, operador,
+                   data_saida AS DataSaida, hora_saida AS HoraSaida, 
+                   formas_pgto AS FormasPgto, tot_produtos AS TotProdutos, total, operador,
                    sequencia, avista, desconto, acrescimo, especie, loja, vale,
                    dinheiro, cheque, cartao, boleto, troco, quantidade, lancado,
-                   vendedor, caixa, comanda, mesa, numero_pessoas
+                   vendedor, caixa, comanda, mesa, numero_pessoas AS NumeroPessoas
             FROM vendas 
             WHERE mesa = @Mesa AND lancado = 'ABERTO' AND origem = 'BA'
             ORDER BY data_saida DESC, hora_saida DESC
@@ -219,10 +220,11 @@ public class VendaRepository : IVendaRepository
 
         var sql = @"
             SELECT nota, modelo, serie, subserie, origem, emissao, hora, cliente,
-                   data_saida, hora_saida, formas_pgto, tot_produtos, total, operador,
+                   data_saida AS DataSaida, hora_saida AS HoraSaida, 
+                   formas_pgto AS FormasPgto, tot_produtos AS TotProdutos, total, operador,
                    sequencia, avista, desconto, acrescimo, especie, loja, vale,
                    dinheiro, cheque, cartao, boleto, troco, quantidade, lancado,
-                   vendedor, caixa, comanda, mesa, numero_pessoas
+                   vendedor, caixa, comanda, mesa, numero_pessoas AS NumeroPessoas
             FROM vendas 
             WHERE comanda = @Comanda AND lancado = 'ABERTO' AND origem = 'BA'
             ORDER BY data_saida DESC, hora_saida DESC

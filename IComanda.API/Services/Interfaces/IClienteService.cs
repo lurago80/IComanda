@@ -39,4 +39,18 @@ public interface IClienteService
     /// <param name="request">Parâmetros de busca</param>
     /// <returns>Total de clientes</returns>
     Task<int> ContarClientesAsync(BuscarClienteRequest request);
+
+    /// <summary>
+    /// Verifica se cliente existe por CPF/CNPJ ou Telefone
+    /// </summary>
+    /// <param name="cpfCnpjOuTelefone">CPF/CNPJ ou Telefone</param>
+    /// <returns>Response com status e dados do cliente</returns>
+    Task<VerificarClienteResponse> VerificarClienteAsync(string cpfCnpjOuTelefone);
+
+    /// <summary>
+    /// Cadastro rápido de cliente na abertura de comanda
+    /// </summary>
+    /// <param name="request">Dados do cliente</param>
+    /// <returns>Cliente cadastrado</returns>
+    Task<ClienteDto> CadastroRapidoAsync(CadastroRapidoClienteRequest request);
 }

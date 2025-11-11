@@ -194,4 +194,74 @@ public class ClienteRepository : IClienteRepository
 
         return await connection.QuerySingleAsync<int>(sql, parameters);
     }
+
+    public async Task<bool> ExistePorCpfCnpjAsync(string cpfCnpj)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = "SELECT COUNT(*) FROM CLIENTES WHERE CPFCNPJ = @CpfCnpj";
+        var count = await connection.QuerySingleAsync<int>(sql, new { CpfCnpj = cpfCnpj });
+
+        return count > 0;
+    }
+
+    public async Task<bool> ExistePorTelefoneAsync(string telefone)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = "SELECT COUNT(*) FROM CLIENTES WHERE TELEFONE = @Telefone";
+        var count = await connection.QuerySingleAsync<int>(sql, new { Telefone = telefone });
+
+        return count > 0;
+    }
+
+    public async Task<Cliente?> GetByTelefoneAsync(string telefone)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = @"
+            SELECT ID, NOME, CPFCNPJ, RGIE, TELEFONE, CELULAR, OBS, DATANAS,
+                   END1, NUM1, COMPL1, BAIRRO1, CIDADE1, UF1, EMAIL,
+                   END2, NUM2, COMPL2, BAIRRO2, CIDADE2, UF2,
+                   TABPRE, ATIVO, EMAIL1, CEP1, CEP2, CLASSIF, ACESSO, LIMITE,
+                   RG_ORGAO, RG_ESTADO, RG_EMISSAO, TELFAX, DT_CADASTRO,
+                   TIPO_PRODUTOR, IP, INCRA, NIRF, DECLA_ITR, CARRO,
+                   PLACA_CARRO1, PLACA_CARRO2, PLACA_CARRO3, MOTO,
+                   PLACA_MOTO1, PLACA_MOTO2, PLACA_MOTO3, FOTO, CEI,
+                   NUMPROPRIO, FANTASIA, CNAE, IDVENDEDOR, IBGE_UF,
+                   IBGE_MUNICIPIO, CONTRIBUINTE, MENSAL, SITE, BLOQUEADO, IDROTA
+            FROM CLIENTES
+            WHERE TELEFONE = @Telefone";
+
+        return await connection.QueryFirstOrDefaultAsync<Cliente>(sql, new { Telefone = telefone });
+    }
+
+    public async Task<bool> CriarClienteAsync(Cliente cliente)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var sql = @"
+            INSERT INTO CLIENTES (
+                NOME, CPFCNPJ, TELEFONE, CELULAR, FANTASIA, 
+                DT_CADASTRO, ATIVO, BLOQUEADO
+            ) VALUES (
+                @Nome, @CpfCnpj, @Telefone, @Celular, @Fantasia, 
+                @DataCadastro, @Ativo, 0
+            )";
+
+        var parameters = new
+        {
+            Nome = cliente.Nome,
+            CpfCnpj = cliente.CpfCnpj,
+            Telefone = cliente.Telefone,
+            Celular = cliente.Celular,
+            Fantasia = cliente.Fantasia,
+            DataCadastro = DateTime.Now,
+            Ativo = 1
+        };
+
+        var rowsAffected = await connection.ExecuteAsync(sql, parameters);
+
+        return rowsAffected > 0;
+    }
 }

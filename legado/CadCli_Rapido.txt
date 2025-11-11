@@ -1,0 +1,114 @@
+procedure TfrmCadRapCliente.b4Click(Sender: TObject);
+begin
+qryVerifica.Close;
+qryVerifica.SQL.Clear;
+qryVerifica.SQL.Add('select id from clientes where telefone = :telefone');
+qryVerifica.ParamByName('telefone').AsString:= edtTelefone.Text;
+qryVerifica.Open;
+if (not qryVerifica.IsEmpty) and (edtTelefone.Text <> '') then
+  begin
+    MessageDlg('TELEFONE JÁ CADASTRADO, FAVOR VERIFICAR!',TMsgDlgType.mtWarning,[mbOk],0);
+    edtTelefone.Clear;
+    if edtTelefone.CanFocus then edtTelefone.SetFocus;
+    exit;
+  end;
+
+qryVerifica.Close;
+qryVerifica.SQL.Clear;
+qryVerifica.SQL.Add('select id from clientes where celular = :celular');
+qryVerifica.ParamByName('celular').AsString:= edtCelular.Text;
+qryVerifica.Open;
+if (not qryVerifica.IsEmpty) and (edtCelular.Text <> '') then
+  begin
+    MessageDlg('CELULAR JÁ CADASTRADO, FAVOR VERIFICAR!',TMsgDlgType.mtWarning,[mbOk],0);
+    edtCelular.Clear;
+    if edtCelular.CanFocus then edtCelular.SetFocus;
+    exit;
+  end;
+
+qryVerifica.Close;
+qryVerifica.SQL.Clear;
+qryVerifica.SQL.Add('select id from clientes where nome = :descricao');
+qryVerifica.ParamByName('descricao').AsString:= edtnome.Text;
+qryVerifica.Open;
+if qryVerifica.IsEmpty then
+  begin
+    if novo = true then
+      begin
+        try
+          qryconsulta.Close;
+          qryconsulta.SQL.Clear;
+          qryconsulta.sql.add('insert into clientes (nome, telefone, celular, dt_cadastro, ativo,cidade1, uf1, datanas, fantasia) values (:nome, :telefone, :celular, :dt_cadastro, :ativo, :cidade1, :uf1,:datanas, :fantasia) ') ;
+          qryconsulta.ParamByName('nome').AsString := edtNome.Text;
+          qryconsulta.ParamByName('telefone').AsString := edtTelefone.Text;
+          qryconsulta.ParamByName('Celular').AsString := edtCelular.Text;
+          qryconsulta.ParamByName('dt_cadastro').AsDate := Now;
+          qryConsulta.ParamByName('ativo').AsInteger := 1;
+          qryconsulta.ParamByName('cidade1').AsString := edtCidade.Text;
+          qryconsulta.ParamByName('uf1').AsString := edtUf.Text;
+          if edtDataNasc.Text = '  /  /    ' then qryconsulta.ParamByName('datanas').Clear else qryconsulta.ParamByName('datanas').AsDate := StrToDate(edtDataNasc.Text);
+          qryconsulta.ParamByName('fantasia').AsString := edtFantasia.Text;
+          qryconsulta.ExecSQL;
+          if qryconsulta.Transaction.Active then
+          qryconsulta.Transaction.Commit;
+
+          Trava;
+          limpa;
+
+          MessageDlg('Seu registro foi salvo com sucesso!',mtInformation,[mbOk],0);
+
+          busca_ultimo_registro;
+
+          Close;
+        except
+          on e: exception do
+          begin
+           if qryconsulta.Transaction.Active then
+              qryconsulta.Transaction.Rollback;
+            MessageDlg('Erro ao Incluir Cliente Rápido' + #10#13 + 'Erro: ' + e.Message, mtError, [mbOK], 0);
+          end;
+        end;
+      end
+      else
+      begin
+        try
+          qryconsulta.Close;
+          qryconsulta.SQL.Clear;
+          qryconsulta.sql.add('update clientes set nome=:nome, telefone=:telefone, celular=:celular, cidade1=:cidade1, uf1=:uf1, datanas = :datanas, fantasia = :fantasia where id = :id ') ;
+          qryconsulta.ParamByName('nome').AsString := edtNome.Text;
+          qryconsulta.ParamByName('telefone').AsString := edtTelefone.Text;
+          qryconsulta.ParamByName('Celular').AsString := edtCelular.Text;
+          qryConsulta.ParamByName('id').AsInteger := StrToInt(edtid.Text);
+          qryconsulta.ParamByName('cidade1').AsString := edtCidade.Text;
+          qryconsulta.ParamByName('uf1').AsString := edtUf.Text;
+          if edtDataNasc.Text = '  /  /    ' then qryconsulta.ParamByName('datanas').Clear else qryconsulta.ParamByName('datanas').AsDate := StrToDate(edtDataNasc.Text);
+          qryconsulta.ParamByName('fantasia').AsString := edtFantasia.Text;
+          qryconsulta.ExecSQL;
+
+          if qryconsulta.Transaction.Active then
+          qryconsulta.Transaction.Commit;
+
+          Trava;
+          limpa;
+
+          MessageDlg('Seu registro foi atualizado com sucesso!',mtInformation,[mbOk],0);
+
+          Close;
+        except
+          on e: exception do
+          begin
+           if qryconsulta.Transaction.Active then
+              qryconsulta.Transaction.Rollback;
+            MessageDlg('Erro ao Alterar Cliente Rápido' + #10#13 + 'Erro: ' + e.Message, mtError, [mbOK], 0);
+          end;
+        end;
+      end;
+  end
+  else
+  begin
+    MessageDlg('CLIENTE JÁ ESTA CADASTRADO!',TMsgDlgType.mtWarning,[mbOk],0);
+    edtNome.Clear;
+    if edtNome.CanFocus then edtNome.SetFocus;
+    Exit;
+  end;
+end;

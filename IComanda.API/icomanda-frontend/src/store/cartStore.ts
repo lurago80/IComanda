@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { Produto } from '../types/api'
+import { Cliente, Produto } from '../types/api'
 
 export interface CartItem {
   produto: Produto
@@ -8,9 +8,25 @@ export interface CartItem {
   observacoes?: string
 }
 
+export interface ComandaAtiva {
+  numeroComanda: number
+  numeroMesa?: number
+  numeroPessoas?: number
+  cliente: Cliente
+  dataAbertura: Date
+}
+
+export interface VendaEmEdicao {
+  nota: string
+  mesa?: number
+  comanda?: number
+}
+
 interface CartStore {
   items: CartItem[]
   isOpen: boolean
+  comandaAtiva: ComandaAtiva | null
+  vendaEmEdicao: VendaEmEdicao | null
   addItem: (produto: Produto, quantidade?: number) => void
   removeItem: (produtoId: number) => void
   updateQuantity: (produtoId: number, quantidade: number) => void
@@ -19,6 +35,10 @@ interface CartStore {
   setCartOpen: (isOpen: boolean) => void
   getTotalItems: () => number
   getTotalPrice: () => number
+  setComandaAtiva: (comanda: ComandaAtiva | null) => void
+  fecharComanda: () => void
+  carregarPedidoParaEdicao: (venda: VendaEmEdicao, itens: Array<{descricao: string, qtd: number, precoUnitario: number}>) => void
+  finalizarEdicao: () => void
 }
 
 export const useCartStore = create<CartStore>()(
@@ -26,6 +46,8 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isOpen: false,
+      comandaAtiva: null,
+      vendaEmEdicao: null,
 
       addItem: (produto, quantidade = 1) => {
         set((state) => {
@@ -92,10 +114,61 @@ export const useCartStore = create<CartStore>()(
           0
         )
       },
+
+      setComandaAtiva: (comanda) => {
+        set({ comandaAtiva: comanda })
+      },
+
+      fecharComanda: () => {
+        set({ 
+          comandaAtiva: null,
+          items: []
+        })
+      },
+
+      carregarPedidoParaEdicao: (venda, itens) => {
+        // Converte os itens da conferência para produtos do carrinho
+        const cartItems: CartItem[] = itens.map((item, index) => ({
+          produto: {
+            id: index + 1000, // ID temporário para produtos da edição
+            codigoBarra: '',
+            codigoInterno: '',
+            descricao: item.descricao,
+            caracteristica: '',
+            quantidade: item.qtd,
+            precoCusto: 0,
+            precoVenda: item.precoUnitario,
+            atacado: 0,
+            preco3: 0,
+            unMedida: 'UN',
+            ativo: true,
+            grupo: 0,
+            pesavel: false
+          },
+          quantidade: item.qtd
+        }))
+
+        set({ 
+          items: cartItems,
+          vendaEmEdicao: venda,
+          isOpen: true // Abre o carrinho automaticamente
+        })
+      },
+
+      finalizarEdicao: () => {
+        set({ 
+          vendaEmEdicao: null,
+          items: []
+        })
+      },
     }),
     {
       name: 'icomanda-cart',
-      partialize: (state) => ({ items: state.items }),
+      partialize: (state) => ({ 
+        items: state.items,
+        comandaAtiva: state.comandaAtiva,
+        vendaEmEdicao: state.vendaEmEdicao
+      }),
     }
   )
 )

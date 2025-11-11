@@ -1,4 +1,4 @@
-import { History, LogOut, Receipt, Search, ShoppingCart, User } from 'lucide-react'
+import { ClipboardList, History, LogOut, Receipt, Search, ShoppingCart, User } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { useCartStore } from '../../store/cartStore'
 
@@ -6,10 +6,11 @@ interface AppHeaderProps {
   onSearch?: (query: string) => void
   onOpenHistory?: () => void
   onOpenConferencia?: () => void
+  onOpenAbrirComanda?: () => void
 }
 
-const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenConferencia }) => {
-  const { toggleCart, getTotalItems, getTotalPrice } = useCartStore()
+const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenConferencia, onOpenAbrirComanda }) => {
+  const { toggleCart, getTotalItems, getTotalPrice, comandaAtiva } = useCartStore()
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
   const [nomeUsuario, setNomeUsuario] = useState<string>('')
@@ -39,21 +40,21 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenCo
         {/* Logo e Título */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-3xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl">🥐</span>
+            <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-700 rounded-3xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-2xl">📋</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">IComanda</h1>
-              <p className="text-sm text-gray-600 font-medium">Sistema de Pedidos - Padaria</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-700 bg-clip-text text-transparent">iComanda</h1>
+              <p className="text-sm text-text-muted font-medium">In9ve Informática</p>
             </div>
           </div>
 
           {/* Usuário e Ações */}
           <div className="flex items-center space-x-2">
             {nomeUsuario && (
-              <div className="flex items-center space-x-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-2xl">
-                <User className="w-4 h-4 text-amber-600" />
-                <span className="text-sm font-semibold text-gray-700">{nomeUsuario}</span>
+              <div className="flex items-center space-x-2 px-3 py-2 bg-background-secondary border border-border rounded-2xl">
+                <User className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold text-text-primary">{nomeUsuario}</span>
               </div>
             )}
             <button
@@ -67,7 +68,36 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenCo
           </div>
         </div>
 
+        {/* Comanda Ativa */}
+        {comandaAtiva && (
+          <div className="mb-4 p-4 bg-success/10 border border-success/30 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-success">Comanda Ativa</span>
+              </div>
+              <div className="text-sm font-bold text-text-primary">
+                Comanda #{comandaAtiva.numeroComanda}
+                {comandaAtiva.numeroMesa && ` | Mesa ${comandaAtiva.numeroMesa}`}
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-6">
+          {/* Botão Nova Comanda */}
+          {onOpenAbrirComanda && !comandaAtiva && (
+            <button
+              onClick={onOpenAbrirComanda}
+              className="px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-semibold
+                         hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95
+                         flex items-center space-x-2 shadow-medium"
+            >
+              <ClipboardList className="w-5 h-5" />
+              <span>Nova Comanda</span>
+            </button>
+          )}
+          
           <div className="flex-1"></div>
           
           {/* Ações */}
@@ -75,7 +105,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenCo
             {onOpenConferencia && (
             <button
               onClick={onOpenConferencia}
-              className="w-12 h-12 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-center text-amber-600 hover:text-amber-700 hover:bg-amber-100 hover:border-amber-300 transition-all duration-300 hover:scale-105 active:scale-95"
+              className="w-12 h-12 bg-background-secondary border border-border rounded-2xl flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-card-hover hover:border-border-secondary transition-all duration-300 hover:scale-105 active:scale-95"
               aria-label="Conferência de Mesa/Comanda"
               title="Conferência"
             >

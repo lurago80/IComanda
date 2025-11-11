@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 
 const Login: React.FC = () => {
   const [nome, setNome] = useState('');
+  const [senha, setSenha] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (nome.trim()) {
+    if (nome.trim() && senha.trim()) {
       // Salva informações do usuário para usar nas vendas
       const usuarioInfo = {
         nome: nome.trim(),
@@ -18,18 +19,18 @@ const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-3xl shadow-2xl p-8 border border-amber-100">
+        <div className="bg-card rounded-3xl shadow-2xl p-8 border border-border">
           {/* Logo e Título */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <span className="text-4xl">🥐</span>
+            <div className="w-20 h-20 bg-primary rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <span className="text-4xl">📋</span>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold text-primary mb-2">
               IComanda
             </h1>
-            <p className="text-gray-600 font-medium">Sistema de Pedidos - Padaria</p>
+            <p className="text-text-secondary font-medium">Sistema de Pedidos - Padaria</p>
           </div>
 
           {/* Formulário */}
@@ -37,7 +38,7 @@ const Login: React.FC = () => {
             <div>
               <label 
                 htmlFor="nome" 
-                className="block text-sm font-semibold text-gray-700 mb-2"
+                className="block text-sm font-semibold text-text-primary mb-2"
               >
                 Nome do Usuário
               </label>
@@ -47,15 +48,33 @@ const Login: React.FC = () => {
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
                 placeholder="Digite seu nome"
-                className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-4 focus:ring-amber-100 transition-all text-gray-800 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-background-secondary border-2 border-border rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-text-primary placeholder-text-muted"
                 required
                 autoFocus
               />
             </div>
 
+            <div>
+              <label 
+                htmlFor="senha" 
+                className="block text-sm font-semibold text-text-primary mb-2"
+              >
+                Senha
+              </label>
+              <input
+                id="senha"
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                placeholder="Digite sua senha"
+                className="w-full px-4 py-3 bg-background-secondary border-2 border-border rounded-xl focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-text-primary placeholder-text-muted"
+                required
+              />
+            </div>
+
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold py-4 rounded-xl hover:from-amber-600 hover:to-orange-600 transform hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
+              className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-xl hover:bg-primary/90 transform hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg hover:shadow-xl"
             >
               Entrar no Sistema
             </button>
@@ -63,8 +82,8 @@ const Login: React.FC = () => {
 
           {/* Informação adicional */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500">
-              Digite qualquer nome para acessar
+            <p className="text-xs text-text-muted">
+              Digite qualquer nome e senha para acessar
             </p>
           </div>
         </div>

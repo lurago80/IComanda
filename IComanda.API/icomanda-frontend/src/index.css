@@ -30,21 +30,21 @@
     @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
   }
   
-  /* Scrollbar personalizada - Tema Padaria */
+  /* Scrollbar personalizada - Tema In9ve */
   ::-webkit-scrollbar {
     width: 8px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-amber-50;
+    @apply bg-background-secondary;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-amber-300 rounded-full;
+    @apply bg-primary/30 rounded-full;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-amber-400;
+    @apply bg-primary/50;
   }
 }
 

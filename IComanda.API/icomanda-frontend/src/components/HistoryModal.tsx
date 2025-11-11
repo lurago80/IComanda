@@ -52,24 +52,24 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed bottom-0 left-0 right-0 bg-white border-t border-amber-200 rounded-t-3xl z-50 max-h-[85vh] flex flex-col shadow-2xl"
+            className="fixed bottom-0 left-0 right-0 bg-card border-t border-border rounded-t-3xl z-50 max-h-[85vh] flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-amber-100">
+            <div className="flex items-center justify-between p-6 border-b border-border">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-amber-100 rounded-2xl flex items-center justify-center">
-                  <Receipt className="w-5 h-5 text-amber-600" />
+                <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center">
+                  <Receipt className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-800">Histórico de Pedidos</h2>
-                  <p className="text-sm text-gray-600">Vendas de hoje</p>
+                  <h2 className="text-xl font-bold text-text-primary">Histórico de Pedidos</h2>
+                  <p className="text-sm text-text-secondary">Vendas de hoje</p>
                 </div>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={onClose}
-                className="text-gray-500 hover:text-gray-800"
+                className="text-text-secondary hover:text-text-primary"
               >
                 <X className="w-5 h-5" />
               </Button>
@@ -80,9 +80,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
               {isLoading ? (
                 <div className="space-y-4">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="bg-amber-50 rounded-2xl p-4 animate-pulse border border-amber-100">
-                      <div className="h-4 bg-amber-200 rounded-lg w-3/4 mb-2"></div>
-                      <div className="h-3 bg-amber-200 rounded-lg w-1/2"></div>
+                    <div key={i} className="bg-background-secondary rounded-2xl p-4 animate-pulse border border-border">
+                      <div className="h-4 bg-border-secondary rounded-lg w-3/4 mb-2"></div>
+                      <div className="h-3 bg-border-secondary rounded-lg w-1/2"></div>
                     </div>
                   ))}
                 </div>
@@ -110,16 +110,16 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      className="bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
+                      className="bg-card border border-border rounded-2xl p-4 hover:bg-card-hover transition-colors"
                     >
                         <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-amber-200 rounded-xl flex items-center justify-center">
-                            <Receipt className="w-4 h-4 text-amber-700" />
+                          <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center">
+                            <Receipt className="w-4 h-4 text-primary" />
                           </div>
                           <div>
-                            <h3 className="font-semibold text-gray-800">Pedido #{venda.nota}</h3>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                            <h3 className="font-semibold text-text-primary">Pedido #{venda.nota}</h3>
+                            <div className="flex items-center space-x-4 text-sm text-text-secondary">
                               <div className="flex items-center space-x-1">
                                 <Calendar className="w-3 h-3" />
                                 <span>{formatarData(venda.emissao)}</span>
@@ -132,30 +132,30 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-lg font-bold text-amber-600">
+                          <p className="text-lg font-bold text-primary">
                             R$ {formatarPreco(venda.total)}
                           </p>
                           {venda.mesa && (
-                            <p className="text-xs text-gray-600">Mesa {venda.mesa}</p>
+                            <p className="text-xs text-text-secondary">Mesa {venda.mesa}</p>
                           )}
                         </div>
                       </div>
                       
                       {venda.desconto > 0 && (
-                        <div className="flex justify-between text-sm text-gray-600 mb-2">
+                        <div className="flex justify-between text-sm text-success mb-2">
                           <span>Desconto:</span>
                           <span>- R$ {formatarPreco(venda.desconto)}</span>
                         </div>
                       )}
                       
                       {venda.acrescimo > 0 && (
-                        <div className="flex justify-between text-sm text-gray-600 mb-2">
+                        <div className="flex justify-between text-sm text-error mb-2">
                           <span>Acréscimo:</span>
                           <span>+ R$ {formatarPreco(venda.acrescimo)}</span>
                         </div>
                       )}
                       
-                      <div className="flex justify-between text-sm text-gray-600">
+                      <div className="flex justify-between text-sm text-text-secondary">
                         <span>Subtotal:</span>
                         <span>R$ {formatarPreco(
                           // Subtotal = Total dos produtos (antes de desconto/acréscimo)
@@ -172,15 +172,15 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
 
             {/* Footer com resumo */}
             {vendas && vendas.length > 0 && (
-              <div className="border-t border-amber-100 p-6 bg-amber-50/50">
+              <div className="border-t border-border p-6 bg-background-secondary">
                 <div className="flex justify-between items-center">
                   <div>
-                    <p className="text-sm text-gray-600">Total de pedidos hoje:</p>
-                    <p className="text-lg font-semibold text-gray-800">{vendas.length}</p>
+                    <p className="text-sm text-text-secondary">Total de pedidos hoje:</p>
+                    <p className="text-lg font-semibold text-text-primary">{vendas.length}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-600">Faturamento:</p>
-                    <p className="text-xl font-bold text-amber-600">
+                    <p className="text-sm text-text-secondary">Faturamento:</p>
+                    <p className="text-xl font-bold text-primary">
                       R$ {formatarPreco(vendas.reduce((total, venda) => total + (venda.total || 0), 0))}
                     </p>
                   </div>

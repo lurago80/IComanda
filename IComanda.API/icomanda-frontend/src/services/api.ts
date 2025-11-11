@@ -117,6 +117,16 @@ export const clientesService = {
   contar: async (params: { q?: string; ativo?: boolean; naoBloqueado?: boolean }): Promise<number> => {
     const response = await api.get('/clientes/contar', { params });
     return response.data;
+  },
+
+  verificar: async (cpfCnpjOuTelefone: string): Promise<{existe: boolean; cliente: Cliente | null; mensagem: string}> => {
+    const response = await api.get(`/clientes/verificar/${cpfCnpjOuTelefone}`);
+    return response.data;
+  },
+
+  cadastroRapido: async (dados: {nome: string; cpfCnpj: string; telefone: string; celular?: string; fantasia?: string}): Promise<Cliente> => {
+    const response = await api.post('/clientes/cadastro-rapido', dados);
+    return response.data;
   }
 };
 

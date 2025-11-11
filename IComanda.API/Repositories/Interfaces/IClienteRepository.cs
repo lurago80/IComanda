@@ -39,4 +39,32 @@ public interface IClienteRepository
     /// <param name="request">Parâmetros de busca</param>
     /// <returns>Total de clientes</returns>
     Task<int> ContarClientesAsync(BuscarClienteRequest request);
+
+    /// <summary>
+    /// Verifica se já existe cliente com o CPF/CNPJ informado
+    /// </summary>
+    /// <param name="cpfCnpj">CPF ou CNPJ</param>
+    /// <returns>True se existe, False se não</returns>
+    Task<bool> ExistePorCpfCnpjAsync(string cpfCnpj);
+
+    /// <summary>
+    /// Verifica se já existe cliente com o telefone informado
+    /// </summary>
+    /// <param name="telefone">Telefone</param>
+    /// <returns>True se existe, False se não</returns>
+    Task<bool> ExistePorTelefoneAsync(string telefone);
+
+    /// <summary>
+    /// Obtém um cliente por telefone
+    /// </summary>
+    /// <param name="telefone">Telefone do cliente</param>
+    /// <returns>Cliente encontrado ou null</returns>
+    Task<Cliente?> GetByTelefoneAsync(string telefone);
+
+    /// <summary>
+    /// Cria um novo cliente (cadastro rápido)
+    /// </summary>
+    /// <param name="cliente">Dados do cliente</param>
+    /// <returns>True se cadastrado com sucesso</returns>
+    Task<bool> CriarClienteAsync(Cliente cliente);
 }

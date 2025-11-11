@@ -182,4 +182,92 @@ public class ClientesController : ControllerBase
             return StatusCode(500, "Erro interno do servidor");
         }
     }
+
+    /// <summary>
+    /// Verifica se um cliente existe por CPF/CNPJ ou Telefone
+    /// </summary>
+    /// <param name="cpfCnpjOuTelefone">CPF/CNPJ ou Telefone do cliente</param>
+    /// <returns>Informações sobre a existência do cliente</returns>
+    /// <response code="200">Verificação realizada</response>
+    /// <response code="400">Parâmetro inválido</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpGet("verificar/{cpfCnpjOuTelefone}")]
+    [ProducesResponseType(typeof(VerificarClienteResponse), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<VerificarClienteResponse>> VerificarCliente(string cpfCnpjOuTelefone)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(cpfCnpjOuTelefone))
+            {
+                return BadRequest("CPF/CNPJ ou Telefone é obrigatório");
+            }
+
+            _logger.LogInformation("Verificando cliente: {CpfCnpjOuTelefone}", cpfCnpjOuTelefone);
+
+            var resultado = await _clienteService.VerificarClienteAsync(cpfCnpjOuTelefone);
+
+            _logger.LogInformation("Cliente existe: {Existe}", resultado.Existe);
+
+            return Ok(resultado);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao verificar cliente: {CpfCnpjOuTelefone}", cpfCnpjOuTelefone);
+            return StatusCode(500, "Erro interno do servidor");
+        }
+    }
+
+    /// <summary>
+    /// Cadastro rápido de cliente (usado na abertura de comanda)
+    /// </summary>
+    /// <param name="request">Dados do cliente</param>
+    /// <returns>Cliente cadastrado</returns>
+    /// <response code="201">Cliente cadastrado com sucesso</response>
+    /// <response code="400">Dados inválidos ou cliente já existe</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpPost("cadastro-rapido")]
+    [ProducesResponseType(typeof(ClienteDto), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ClienteDto>> CadastroRapido([FromBody] CadastroRapidoClienteRequest request)
+    {
+        try
+        {
+            // Validações básicas
+            if (string.IsNullOrWhiteSpace(request.Nome))
+            {
+                return BadRequest("Nome é obrigatório");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.CpfCnpj))
+            {
+                return BadRequest("CPF/CNPJ é obrigatório");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.Telefone))
+            {
+                return BadRequest("Telefone é obrigatório");
+            }
+
+            _logger.LogInformation("Cadastrando cliente rápido: {Nome}", request.Nome);
+
+            var cliente = await _clienteService.CadastroRapidoAsync(request);
+
+            _logger.LogInformation("Cliente cadastrado: {Id} - {Nome}", cliente.Id, cliente.Nome);
+
+            return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, cliente);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Erro de validação ao cadastrar cliente");
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao cadastrar cliente rápido");
+            return StatusCode(500, "Erro interno do servidor");
+        }
+    }
 }

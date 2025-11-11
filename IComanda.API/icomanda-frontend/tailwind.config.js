@@ -6,50 +6,50 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Paleta acolhedora para Padaria
+        // Paleta In9ve Informática - Profissional e Moderna
         primary: {
-          50: '#fef9f3',
-          100: '#fef1e6',
-          200: '#fce0c4',
-          300: '#facca1',
-          400: '#f7a965',
-          500: '#f59e0b', // Laranja dourado (cor de pão)
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-          DEFAULT: '#f59e0b',
+          50: '#e6f0ff',
+          100: '#cce0ff',
+          200: '#99c2ff',
+          300: '#66a3ff',
+          400: '#3385ff',
+          500: '#0047AB', // Azul Royal In9ve
+          600: '#003d99',
+          700: '#003380',
+          800: '#002966',
+          900: '#001f4d',
+          DEFAULT: '#0047AB',
           foreground: '#FFFFFF'
         },
         accent: {
-          DEFAULT: '#fbbf24', // Amarelo suave
-          foreground: '#78350f'
+          DEFAULT: '#6B6B6B', // Cinza corporativo In9ve
+          foreground: '#FFFFFF'
         },
         background: {
-          DEFAULT: '#fef9f3',
-          secondary: '#fef5eb',
-          tertiary: '#fef1e3'
+          DEFAULT: '#F5F7FA',
+          secondary: '#E8ECF1',
+          tertiary: '#DDE3EA'
         },
         card: {
           DEFAULT: '#FFFFFF',
-          secondary: '#fffbf5',
-          hover: '#fef5eb'
+          secondary: '#F8FAFB',
+          hover: '#F0F4F8'
         },
         border: {
-          DEFAULT: '#f3e8d9',
-          secondary: '#e7d5bd',
-          accent: '#d6c4a8'
+          DEFAULT: '#E0E5EB',
+          secondary: '#D1D7DE',
+          accent: '#B8C1CC'
         },
         text: {
-          primary: '#292524',
-          secondary: '#57534e',
-          muted: '#78716c',
-          accent: '#ea580c'
+          primary: '#1A1A1A',
+          secondary: '#4A4A4A',
+          muted: '#6B6B6B',
+          accent: '#0047AB'
         },
         success: '#16a34a',
         warning: '#f59e0b',
         error: '#dc2626',
-        info: '#0284c7'
+        info: '#0047AB'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
