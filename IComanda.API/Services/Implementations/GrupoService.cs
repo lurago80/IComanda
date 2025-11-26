@@ -42,7 +42,6 @@ public class GrupoService : IGrupoService
         {
             Id = g.Id,
             Descricao = g.Descricao,
-            CodGrupo = g.CodGrupo,
             QuantidadeProdutos = g.QuantidadeProdutos
         });
     }

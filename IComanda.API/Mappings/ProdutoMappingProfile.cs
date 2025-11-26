@@ -47,7 +47,6 @@ public class ProdutoMappingProfile : Profile
         CreateMap<Grupo, GrupoDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Descricao, opt => opt.MapFrom(src => src.Descricao))
-            .ForMember(dest => dest.CodGrupo, opt => opt.MapFrom(src => src.CodGrupo))
             .ForMember(dest => dest.QuantidadeProdutos, opt => opt.MapFrom(src => src.QuantidadeProdutos));
 
         // Mapeamentos de Venda

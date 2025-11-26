@@ -19,7 +19,7 @@ public class GrupoRepository : IGrupoRepository
         using var connection = _connectionFactory.CreateConnection();
 
         var sql = @"
-            SELECT id, descricao, codgrupo
+            SELECT id, descricao
             FROM grupo
             ORDER BY descricao";
 
@@ -31,7 +31,7 @@ public class GrupoRepository : IGrupoRepository
         using var connection = _connectionFactory.CreateConnection();
 
         var sql = @"
-            SELECT id, descricao, codgrupo
+            SELECT id, descricao
             FROM grupo
             WHERE id = @Id";
 
@@ -43,11 +43,10 @@ public class GrupoRepository : IGrupoRepository
         using var connection = _connectionFactory.CreateConnection();
 
         var sql = @"
-            SELECT g.id, g.descricao, g.codgrupo,
-                   COUNT(p3.id) as QuantidadeProdutos
+            SELECT g.id, g.descricao, COUNT(p3.id) as QuantidadeProdutos
             FROM grupo g
             LEFT JOIN produtoeservico p3 ON g.id = p3.grupo AND p3.ativo = 1
-            GROUP BY g.id, g.descricao, g.codgrupo
+            GROUP BY g.id, g.descricao
             HAVING COUNT(p3.id) > 0
             ORDER BY g.descricao";
 
@@ -59,11 +58,11 @@ public class GrupoRepository : IGrupoRepository
         using var connection = _connectionFactory.CreateConnection();
 
         var sql = @"
-            SELECT g.id, g.descricao, g.codgrupo,
+            SELECT g.id, g.descricao,
                    COUNT(p3.id) as QuantidadeProdutos
             FROM grupo g
             LEFT JOIN produtoeservico p3 ON g.id = p3.grupo AND p3.ativo = 1
-            GROUP BY g.id, g.descricao, g.codgrupo
+            GROUP BY g.id, g.descricao
             ORDER BY g.descricao";
 
         var result = await connection.QueryAsync<dynamic>(sql);
@@ -71,8 +70,7 @@ public class GrupoRepository : IGrupoRepository
         return result.Select(r => new Grupo
         {
             Id = (int)r.id,
-            Descricao = r.descricao?.ToString() ?? "",
-            CodGrupo = (short)(r.codgrupo ?? 0),
+            Descricao = r.descricao?.ToString() ?? "",          
             QuantidadeProdutos = (int)r.QuantidadeProdutos
         });
     }

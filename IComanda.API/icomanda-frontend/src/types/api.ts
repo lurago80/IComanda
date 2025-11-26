@@ -2,7 +2,6 @@
 export interface Grupo {
   id: number;
   descricao: string;
-  codGrupo: number;
   quantidadeProdutos: number;
 }
 

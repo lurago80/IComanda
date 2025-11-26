@@ -115,7 +115,6 @@ public class GruposController : ControllerBase
                     {
                         Id = grupo.Id,
                         Descricao = grupo.Descricao,
-                        CodGrupo = grupo.CodGrupo,
                         QuantidadeProdutos = produtos.Count()
                     });
                 }
@@ -126,7 +125,6 @@ public class GruposController : ControllerBase
                     {
                         Id = grupo.Id,
                         Descricao = grupo.Descricao,
-                        CodGrupo = grupo.CodGrupo,
                         QuantidadeProdutos = 0
                     });
                 }

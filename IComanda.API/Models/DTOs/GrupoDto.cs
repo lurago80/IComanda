@@ -7,6 +7,5 @@ public class GrupoDto
 {
     public int Id { get; set; }
     public string Descricao { get; set; } = string.Empty;
-    public short CodGrupo { get; set; }
     public int QuantidadeProdutos { get; set; }
 }
