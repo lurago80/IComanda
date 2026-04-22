@@ -1,0 +1,431 @@
+Usando as configura├º├Áes de inicializa├º├úo de C:\VS_Code\icomanda\IComanda.API\Properties\launchSettings.json...
+========================================
+CONFIGURA├ç├âO DE BANCO DE DADOS
+========================================
+Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+Working Directory: C:\VS_Code\icomanda\IComanda.API
+Environment: Development
+appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+appsettings.json existe: True
+appsettings.Development.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.Development.json
+appsettings.Development.json existe: False
+Vari├ível ConnectionStrings__Firebird: N├âO DEFINIDA
+Connection String no appsettings.json: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;
+Caminho do banco: C:\iComanda\Dados\DADOSG5.FDB
+Arquivo existe: True
+========================================
+Ô£à Memory Cache provedor registrado (Para Redis, instale: dotnet add package StackExchange.Redis)
+Ô£à JWT configurado: Expira├º├úo Token=2h, Refresh=7d
+[20:41:10 INF] ========================================
+[20:41:10 INF] Iniciando IComanda API
+[20:41:10 INF] Modo: Production
+[20:41:10 INF] Porta configurada: 65375
+========================================
+­ƒöì VERIFICA├ç├âO DE CONNECTION STRING
+========================================
+Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+Working Directory: C:\VS_Code\icomanda\IComanda.API
+Environment: Development
+appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+appsettings.json existe: True
+Ô£à appsettings.json cont├®m 'ConnectionStrings'
+appsettings.Development.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.Development.json
+appsettings.Development.json existe: False
+Vari├ível de ambiente ConnectionStrings__Firebird: N├âO DEFINIDA
+[20:41:10 INF] Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;
+[20:41:10 INF] Caminho do banco: C:\iComanda\Dados\DADOSG5.FDB
+­ƒöî Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;
+­ƒôü Caminho do banco: C:\iComanda\Dados\DADOSG5.FDB
+­ƒôü Arquivo existe? True
+[20:41:10 INF] Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+­ƒôü Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+========================================
+[20:41:10 INF] ========================================
+info: IComanda.API.Data.DbConnectionFactory[0]
+      Ô£à [DbConnectionFactory] Connection String lida EXATAMENTE do appsettings.json
+[20:41:10 INF] Ô£à [DbConnectionFactory] Connection String lida EXATAMENTE do appsettings.json
+Ô£à Connection String lida do appsettings.json: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;
+warn: IComanda.API.Data.DbConnectionFactory[0]
+      ========================================
+[20:41:10 WRN] ========================================
+warn: IComanda.API.Data.DbConnectionFactory[0]
+      ­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+[20:41:10 WRN] ­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+[20:41:10 WRN]    Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+[20:41:10 WRN]    Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+[20:41:10 WRN]    Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+[20:41:10 WRN]    Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+[20:41:10 WRN]    appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Arquivo de banco existe: True
+[20:41:10 WRN]    Arquivo de banco existe: True
+========================================
+­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+   Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+   Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+­ƒôü Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+­ƒôü Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+­ƒôü appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+­ƒôü Arquivo de banco existe: True
+========================================
+Ô£à Tabela de hist├│rico (HISTORICO_ALTERACOES) verificada/criada.
+[20:41:10 INF] Tabela de hist├│rico verificada/criada na inicializa├º├úo.
+info: IComanda.API.Data.DbConnectionFactory[0]
+      Ô£à [DbConnectionFactory] Connection String lida EXATAMENTE do appsettings.json
+[20:41:10 INF] Ô£à [DbConnectionFactory] Connection String lida EXATAMENTE do appsettings.json
+Ô£à Connection String lida do appsettings.json: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;
+warn: IComanda.API.Data.DbConnectionFactory[0]
+      ========================================
+[20:41:10 WRN] ========================================
+warn: IComanda.API.Data.DbConnectionFactory[0]
+      ­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+[20:41:10 WRN] ­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+[20:41:10 WRN]    Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+[20:41:10 WRN]    Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+[20:41:10 WRN]    Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+[20:41:10 WRN]    Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+[20:41:10 WRN]    appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Arquivo de banco existe: True
+[20:41:10 WRN]    Arquivo de banco existe: True
+========================================
+­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+   Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+   Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+­ƒôü Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+­ƒôü Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+­ƒôü appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+­ƒôü Arquivo de banco existe: True
+========================================
+========================================
+­ƒöì VERIFICANDO TABELA REFRESH_TOKEN...
+info: IComanda.API.Repositories.Implementations.RefreshTokenRepository[0]
+      Ô£à [RefreshToken] Tabela REFRESH_TOKEN j├í existe no banco Firebird.
+[20:41:10 INF] Ô£à [RefreshToken] Tabela REFRESH_TOKEN j├í existe no banco Firebird.
+Ô£à Tabela REFRESH_TOKEN: j├í existe.
+[20:41:10 INF] Tabela REFRESH_TOKEN verificada/criada na inicializa├º├úo.
+========================================
+info: IComanda.API.Data.DbConnectionFactory[0]
+      Ô£à [DbConnectionFactory] Connection String lida EXATAMENTE do appsettings.json
+[20:41:10 INF] Ô£à [DbConnectionFactory] Connection String lida EXATAMENTE do appsettings.json
+Ô£à Connection String lida do appsettings.json: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;
+warn: IComanda.API.Data.DbConnectionFactory[0]
+      ========================================
+[20:41:10 WRN] ========================================
+warn: IComanda.API.Data.DbConnectionFactory[0]
+      ­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+[20:41:10 WRN] ­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+[20:41:10 WRN]    Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+[20:41:10 WRN]    Connection String: Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+[20:41:10 WRN]    Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+[20:41:10 WRN]    Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+[20:41:10 WRN]    appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+warn: IComanda.API.Data.DbConnectionFactory[0]
+         Arquivo de banco existe: True
+[20:41:10 WRN]    Arquivo de banco existe: True
+========================================
+­ƒöî [DbConnectionFactory] CONNECTION STRING CONFIGURADA:
+   Ô£à Fonte: appsettings.json (LIDO DIRETAMENTE DO ARQUIVO)
+   Server=localhost;Database=C:\iComanda\Dados\DADOSG5.FDB;User=SYSDBA;Password=***;Port=3050;Charset=UTF8;ConnectionTimeout=15
+­ƒôü Caminho do banco (EXATO do arquivo): C:\iComanda\Dados\DADOSG5.FDB
+­ƒôü Base Directory: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\
+­ƒôü appsettings.json path: C:\VS_Code\icomanda\IComanda.API\bin\Debug\net8.0\appsettings.json
+­ƒôü Arquivo de banco existe: True
+========================================
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      ­ƒöì [FV] Verificando estrutura de banco ÔÇö m├│dulo For├ºa de Vendas...
+[20:41:10 INF] ­ƒöì [FV] Verificando estrutura de banco ÔÇö m├│dulo For├ºa de Vendas...
+========================================
+­ƒöì FOR├çA DE VENDAS ÔÇö verificando tabelas...
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        Ô£à VENDEDOR.SENHA expandida para VARCHAR(72) (suporte a BCrypt)
+[20:41:10 INF]   Ô£à VENDEDOR.SENHA expandida para VARCHAR(72) (suporte a BCrypt)
+  Ô£à VENDEDOR.SENHA expandida para VARCHAR(72) (suporte a BCrypt)
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      [FV] Criando tabela PEDIDOS_FV...
+[20:41:10 INF] [FV] Criando tabela PEDIDOS_FV...
+  ­ƒö¿ Criando PEDIDOS_FV...
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Tabela PEDIDOS_FV: Dynamic SQL Error
+      SQL error code = -104
+      Token unknown - line 6, column 46
+      DEFAULT
+[20:41:10 WRN]   ÔÜá´©Å Tabela PEDIDOS_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 6, column 46
+DEFAULT
+  ÔÜá´©Å Tabela PEDIDOS_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 6, column 46
+DEFAULT
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Trigger TRG_PEDIDOS_FV_BI: Dynamic SQL Error
+      SQL error code = -204
+      Table unknown
+      PEDIDOS_FV
+      At line 2, column 38
+[20:41:10 WRN]   ÔÜá´©Å Trigger TRG_PEDIDOS_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+PEDIDOS_FV
+At line 2, column 38
+  ÔÜá´©Å Trigger TRG_PEDIDOS_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+PEDIDOS_FV
+At line 2, column 38
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_PFV_VENDEDOR: unsuccessful metadata update
+      Unknown columns in index IDX_PFV_VENDEDOR
+[20:41:10 WRN]   ÔÜá´©Å Index IDX_PFV_VENDEDOR: unsuccessful metadata update
+Unknown columns in index IDX_PFV_VENDEDOR
+  ÔÜá´©Å Index IDX_PFV_VENDEDOR: unsuccessful metadata update
+Unknown columns in index IDX_PFV_VENDEDOR
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_PFV_CLIENTE: unsuccessful metadata update
+      Unknown columns in index IDX_PFV_CLIENTE
+[20:41:10 WRN]   ÔÜá´©Å Index IDX_PFV_CLIENTE: unsuccessful metadata update
+Unknown columns in index IDX_PFV_CLIENTE
+  ÔÜá´©Å Index IDX_PFV_CLIENTE: unsuccessful metadata update
+Unknown columns in index IDX_PFV_CLIENTE
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_PFV_STATUS: unsuccessful metadata update
+      Unknown columns in index IDX_PFV_STATUS
+[20:41:10 WRN]   ÔÜá´©Å Index IDX_PFV_STATUS: unsuccessful metadata update
+Unknown columns in index IDX_PFV_STATUS
+  ÔÜá´©Å Index IDX_PFV_STATUS: unsuccessful metadata update
+Unknown columns in index IDX_PFV_STATUS
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_PFV_DATA: unsuccessful metadata update
+      Unknown columns in index IDX_PFV_DATA
+[20:41:10 WRN]   ÔÜá´©Å Index IDX_PFV_DATA: unsuccessful metadata update
+Unknown columns in index IDX_PFV_DATA
+  ÔÜá´©Å Index IDX_PFV_DATA: unsuccessful metadata update
+Unknown columns in index IDX_PFV_DATA
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      [FV] Criando tabela ITENS_PEDIDO_FV...
+[20:41:10 INF] [FV] Criando tabela ITENS_PEDIDO_FV...
+  ­ƒö¿ Criando ITENS_PEDIDO_FV...
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Tabela ITENS_PEDIDO_FV: Dynamic SQL Error
+      SQL error code = -104
+      Token unknown - line 8, column 42
+      DEFAULT
+[20:41:11 WRN]   ÔÜá´©Å Tabela ITENS_PEDIDO_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 8, column 42
+DEFAULT
+  ÔÜá´©Å Tabela ITENS_PEDIDO_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 8, column 42
+DEFAULT
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Trigger TRG_ITENS_PEDIDO_FV_BI: Dynamic SQL Error
+      SQL error code = -204
+      Table unknown
+      ITENS_PEDIDO_FV
+      At line 2, column 43
+[20:41:11 WRN]   ÔÜá´©Å Trigger TRG_ITENS_PEDIDO_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+ITENS_PEDIDO_FV
+At line 2, column 43
+  ÔÜá´©Å Trigger TRG_ITENS_PEDIDO_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+ITENS_PEDIDO_FV
+At line 2, column 43
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_IPFV_PEDIDO: unsuccessful metadata update
+      Unknown columns in index IDX_IPFV_PEDIDO
+[20:41:11 WRN]   ÔÜá´©Å Index IDX_IPFV_PEDIDO: unsuccessful metadata update
+Unknown columns in index IDX_IPFV_PEDIDO
+  ÔÜá´©Å Index IDX_IPFV_PEDIDO: unsuccessful metadata update
+Unknown columns in index IDX_IPFV_PEDIDO
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      [FV] Criando tabela VISITAS_FV...
+[20:41:11 INF] [FV] Criando tabela VISITAS_FV...
+  ­ƒö¿ Criando VISITAS_FV...
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Tabela VISITAS_FV: Dynamic SQL Error
+      SQL error code = -104
+      Token unknown - line 8, column 47
+      DEFAULT
+[20:41:11 WRN]   ÔÜá´©Å Tabela VISITAS_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 8, column 47
+DEFAULT
+  ÔÜá´©Å Tabela VISITAS_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 8, column 47
+DEFAULT
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Trigger TRG_VISITAS_FV_BI: Dynamic SQL Error
+      SQL error code = -204
+      Table unknown
+      VISITAS_FV
+      At line 2, column 38
+[20:41:11 WRN]   ÔÜá´©Å Trigger TRG_VISITAS_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+VISITAS_FV
+At line 2, column 38
+  ÔÜá´©Å Trigger TRG_VISITAS_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+VISITAS_FV
+At line 2, column 38
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_VFV_VENDEDOR: unsuccessful metadata update
+      Unknown columns in index IDX_VFV_VENDEDOR
+[20:41:11 WRN]   ÔÜá´©Å Index IDX_VFV_VENDEDOR: unsuccessful metadata update
+Unknown columns in index IDX_VFV_VENDEDOR
+  ÔÜá´©Å Index IDX_VFV_VENDEDOR: unsuccessful metadata update
+Unknown columns in index IDX_VFV_VENDEDOR
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_VFV_DATA: unsuccessful metadata update
+      Unknown columns in index IDX_VFV_DATA
+[20:41:11 WRN]   ÔÜá´©Å Index IDX_VFV_DATA: unsuccessful metadata update
+Unknown columns in index IDX_VFV_DATA
+  ÔÜá´©Å Index IDX_VFV_DATA: unsuccessful metadata update
+Unknown columns in index IDX_VFV_DATA
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      [FV] Criando tabela METAS_FV...
+[20:41:11 INF] [FV] Criando tabela METAS_FV...
+  ­ƒö¿ Criando METAS_FV...
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Tabela METAS_FV: Dynamic SQL Error
+      SQL error code = -104
+      Token unknown - line 7, column 41
+      DEFAULT
+[20:41:11 WRN]   ÔÜá´©Å Tabela METAS_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 7, column 41
+DEFAULT
+  ÔÜá´©Å Tabela METAS_FV: Dynamic SQL Error
+SQL error code = -104
+Token unknown - line 7, column 41
+DEFAULT
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Trigger TRG_METAS_FV_BI: Dynamic SQL Error
+      SQL error code = -204
+      Table unknown
+      METAS_FV
+      At line 2, column 36
+[20:41:11 WRN]   ÔÜá´©Å Trigger TRG_METAS_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+METAS_FV
+At line 2, column 36
+  ÔÜá´©Å Trigger TRG_METAS_FV_BI: Dynamic SQL Error
+SQL error code = -204
+Table unknown
+METAS_FV
+At line 2, column 36
+warn: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        ÔÜá´©Å Index IDX_MFV_VENDEDOR: unsuccessful metadata update
+      Unknown columns in index IDX_MFV_VENDEDOR
+[20:41:11 WRN]   ÔÜá´©Å Index IDX_MFV_VENDEDOR: unsuccessful metadata update
+Unknown columns in index IDX_MFV_VENDEDOR
+  ÔÜá´©Å Index IDX_MFV_VENDEDOR: unsuccessful metadata update
+Unknown columns in index IDX_MFV_VENDEDOR
+Ô£à FOR├çA DE VENDAS ÔÇö verifica├º├úo conclu├¡da.
+========================================
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      Ô£à [FV] Verifica├º├úo de estrutura conclu├¡da.
+[20:41:11 INF] Ô£à [FV] Verifica├º├úo de estrutura conclu├¡da.
+warn: Microsoft.AspNetCore.Server.Kestrel[0]
+      Overriding address(es) 'http://localhost:5000'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+[20:41:11 WRN] Overriding address(es) 'http://localhost:5000'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+fail: Microsoft.Extensions.Hosting.Internal.Host[11]
+      Hosting failed to start
+      System.IO.IOException: Failed to bind to address http://127.0.0.1:65375: address already in use.
+       ---> Microsoft.AspNetCore.Connections.AddressInUseException: Normalmente ├® permitida apenas uma utiliza├º├úo de cada endere├ºo de soquete (protocolo/endere├ºo de rede/porta).
+       ---> System.Net.Sockets.SocketException (10048): Normalmente ├® permitida apenas uma utiliza├º├úo de cada endere├ºo de soquete (protocolo/endere├ºo de rede/porta).
+         at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+         at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+         at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+         at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+         at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+         --- End of inner exception stack trace ---
+         at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+         at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+      --- End of stack trace from previous location ---
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.EndpointsStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+         at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+         at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+         at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+[20:41:11 ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address http://127.0.0.1:65375: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Normalmente ├® permitida apenas uma utiliza├º├úo de cada endere├ºo de soquete (protocolo/endere├ºo de rede/porta).
+ ---> System.Net.Sockets.SocketException (10048): Normalmente ├® permitida apenas uma utiliza├º├úo de cada endere├ºo de soquete (protocolo/endere├ºo de rede/porta).
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.EndpointsStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindAsync(ListenOptions[] listenOptions, AddressBindContext context, Func`2 useHttps, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__15_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+Unhandled exception. System.ObjectDisposedException: Cannot access a disposed object.
+Object name: 'IServiceProvider'.
+   at Microsoft.Extensions.DependencyInjection.ServiceLookup.ThrowHelper.ThrowObjectDisposedException()
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(ServiceIdentifier serviceIdentifier, ServiceProviderEngineScope serviceProviderEngineScope)
+   at Microsoft.Extensions.DependencyInjection.ServiceProvider.GetService(Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService(IServiceProvider provider, Type serviceType)
+   at Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService[T](IServiceProvider provider)
+   at Program.<Main>$(String[] args) in C:\VS_Code\icomanda\IComanda.API\Program.cs:line 683
+   at Program.<Main>(String[] args)

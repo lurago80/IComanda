@@ -14,6 +14,7 @@ public class ItemVenda
     public int Item { get; set; }
     public int Codigo { get; set; }
     public string Barras { get; set; } = string.Empty;
+    public string? Descricao { get; set; }
     public int Cfop { get; set; } = 5102;
     public string St { get; set; } = "0000";
     public string Und { get; set; } = string.Empty;

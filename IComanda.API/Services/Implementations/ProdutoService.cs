@@ -66,4 +66,64 @@ public class ProdutoService : IProdutoService
 
         return (produtosDto, total);
     }
+
+    public async Task<ProdutoCompletoDto?> GetProdutoCompletoAsync(int id)
+    {
+        return await _produtoRepository.GetProdutoCompletoAsync(id);
+    }
+
+    public async Task<IEnumerable<ProdutoCompletoDto>> BuscarProdutosCompletosAsync(string? termo, bool? ativo = null, int pagina = 1, int itensPorPagina = 50)
+    {
+        return await _produtoRepository.BuscarProdutosCompletosAsync(termo, ativo, pagina, itensPorPagina);
+    }
+
+    public async Task<int> CriarProdutoAsync(CriarProdutoRequest request)
+    {
+        // Validações básicas
+        if (string.IsNullOrWhiteSpace(request.Descricao))
+        {
+            throw new ArgumentException("A descrição do produto é obrigatória");
+        }
+
+        if (request.TipoItemId <= 0)
+        {
+            throw new ArgumentException("O tipo de item é obrigatório");
+        }
+
+        if (request.UnidadeMedidaId <= 0)
+        {
+            throw new ArgumentException("A unidade de medida é obrigatória");
+        }
+
+        if (request.PessoaId <= 0)
+        {
+            throw new ArgumentException("O ID da pessoa é obrigatório");
+        }
+
+        return await _produtoRepository.CriarProdutoCompletoAsync(request);
+    }
+
+    public async Task<bool> AtualizarProdutoAsync(int id, AtualizarProdutoRequest request)
+    {
+        // Verificar se o produto existe
+        var produtoExistente = await _produtoRepository.GetProdutoCompletoAsync(id);
+        if (produtoExistente == null)
+        {
+            throw new KeyNotFoundException($"Produto com ID {id} não encontrado");
+        }
+
+        return await _produtoRepository.AtualizarProdutoCompletoAsync(id, request);
+    }
+
+    public async Task<bool> ExcluirProdutoAsync(int id)
+    {
+        // Verificar se o produto existe
+        var produtoExistente = await _produtoRepository.GetProdutoCompletoAsync(id);
+        if (produtoExistente == null)
+        {
+            throw new KeyNotFoundException($"Produto com ID {id} não encontrado");
+        }
+
+        return await _produtoRepository.ExcluirProdutoAsync(id);
+    }
 }

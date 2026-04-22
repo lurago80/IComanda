@@ -14,11 +14,10 @@ const Header: React.FC<HeaderProps> = ({ totalItens, totalValor, onAbrirCarrinho
         <div className="flex items-center justify-between">
           {/* Logo e Título */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">🍔</span>
+            <div className="h-14 rounded-xl flex items-center justify-center overflow-hidden px-4 py-1">
+              <img src="/iComanda.jpg" alt="iComanda Logo" className="h-full w-auto object-contain" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">IComanda</h1>
               <p className="text-sm text-gray-500">Sistema de Pedidos</p>
             </div>
           </div>

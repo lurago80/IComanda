@@ -8,4 +8,7 @@ public interface IGrupoService
     Task<GrupoDto?> GetGrupoAsync(int id);
     Task<IEnumerable<GrupoDto>> GetGruposComQuantidadeAsync();
     Task<IEnumerable<GrupoDto>> GetGruposComQuantidadeTodosAsync();
+    Task<GrupoDto> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false);
+    Task<GrupoDto> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false);
+    Task<bool> ExcluirGrupoAsync(int id);
 }

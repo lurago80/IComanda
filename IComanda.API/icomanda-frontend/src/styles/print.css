@@ -1,25 +1,33 @@
-/* Estilos para Impressão Térmica */
+/* Estilos para Impressão */
 @media print {
-  /* Ocultar tudo exceto o cupom */
-  body * {
+  /* Esconder apenas botões/filtros em qualquer impressão (relatórios, etc.) */
+  .no-print {
+    display: none !important;
+  }
+
+  /*
+   * Regras abaixo só ativam no modo cupom (classe no body).
+   * Assim, relatórios e outras telas continuam imprimindo normalmente.
+   */
+  body.print-cupom * {
     visibility: hidden;
   }
 
-  #cupom-print, #cupom-print * {
+  body.print-cupom #cupom-print,
+  body.print-cupom #cupom-print * {
     visibility: visible;
   }
 
-  #cupom-print {
+  body.print-cupom #cupom-print {
     position: absolute;
     left: 0;
     top: 0;
-    width: 80mm; /* Largura padrão de impressora térmica */
+    width: 80mm;
     margin: 0;
     padding: 0;
   }
 
-  /* Resetar cores para preto e branco */
-  * {
+  body.print-cupom * {
     color: #000 !important;
     background-color: #fff !important;
     border-color: #000 !important;
@@ -27,40 +35,41 @@
     text-shadow: none !important;
   }
 
-  /* Fonte monoespaçada (estilo impressora térmica) */
-  body, * {
+  body.print-cupom,
+  body.print-cupom * {
     font-family: 'Courier New', Courier, monospace !important;
     font-size: 12pt !important;
     line-height: 1.2 !important;
   }
 
-  /* Ocultar elementos de navegação */
-  button, .no-print, [class*="hover"], nav, header:not(#cupom-print header) {
+  body.print-cupom button,
+  body.print-cupom .no-print,
+  body.print-cupom [class*="hover"],
+  body.print-cupom nav,
+  body.print-cupom header:not(#cupom-print header) {
     display: none !important;
   }
 
-  /* Cabeçalho */
-  .print-header {
+  body.print-cupom .print-header {
     text-align: center;
     border-bottom: 1px dashed #000;
     padding-bottom: 10px;
     margin-bottom: 10px;
   }
 
-  .print-header h1 {
+  body.print-cupom .print-header h1 {
     font-size: 16pt !important;
     font-weight: bold !important;
     margin: 5px 0 !important;
     letter-spacing: 2px !important;
   }
 
-  .print-header p {
+  body.print-cupom .print-header p {
     font-size: 11pt !important;
     margin: 2px 0 !important;
   }
 
-  /* Informações */
-  .print-info {
+  body.print-cupom .print-info {
     margin: 10px 0;
     border-bottom: 1px dashed #000;
     padding-bottom: 10px;
@@ -77,44 +86,47 @@
     margin: 10px 0;
   }
 
-  .print-item {
+  body.print-cupom .print-item {
     margin: 5px 0;
   }
 
-  .print-item-header {
+  body.print-cupom .print-item-header {
     font-weight: bold;
     margin-bottom: 2px;
   }
 
-  .print-item-details {
+  body.print-cupom .print-item-hora {
+    font-family: 'Courier New', Courier, monospace;
+    margin-right: 6px;
+  }
+
+  body.print-cupom .print-item-details {
     display: flex;
     justify-content: space-between;
     font-size: 11pt !important;
   }
 
-  /* Separador */
-  .print-separator {
+  body.print-cupom .print-separator {
     border-top: 1px dashed #000;
     margin: 10px 0;
   }
 
-  .print-separator-double {
+  body.print-cupom .print-separator-double {
     border-top: 2px solid #000;
     margin: 10px 0;
   }
 
-  /* Totais */
-  .print-totals {
+  body.print-cupom .print-totals {
     margin: 10px 0;
   }
 
-  .print-total-row {
+  body.print-cupom .print-total-row {
     display: flex;
     justify-content: space-between;
     margin: 3px 0;
   }
 
-  .print-total-final {
+  body.print-cupom .print-total-final {
     font-size: 14pt !important;
     font-weight: bold !important;
     border-top: 2px solid #000;
@@ -122,8 +134,7 @@
     margin-top: 10px;
   }
 
-  /* Rodapé */
-  .print-footer {
+  body.print-cupom .print-footer {
     text-align: center;
     margin-top: 15px;
     border-top: 1px dashed #000;
@@ -131,15 +142,21 @@
     font-size: 10pt !important;
   }
 
-  /* Remover bordas arredondadas */
-  * {
+  body.print-cupom * {
     border-radius: 0 !important;
   }
 
-  /* Quebra de página */
   @page {
-    size: 80mm auto;
-    margin: 5mm;
+    margin: 15mm;
   }
+
+  body.print-cupom {
+    --cupom-print: 1;
+  }
+}
+
+@page cupom {
+  size: 80mm auto;
+  margin: 5mm;
 }
 

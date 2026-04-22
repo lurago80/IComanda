@@ -59,4 +59,15 @@ public class CriarItemVendaRequest
     /// ICMS
     /// </summary>
     public decimal Icms { get; set; }
+
+    /// <summary>
+    /// Observações do item
+    /// </summary>
+    public string? Observacao { get; set; }
+
+    /// <summary>
+    /// Timestamp registrado no frontend no momento em que o item foi adicionado ao carrinho.
+    /// Quando informado, é usado para preservar a hora real do lançamento em vez de usar DateTime.Now.
+    /// </summary>
+    public DateTime? AdicionadoEm { get; set; }
 }

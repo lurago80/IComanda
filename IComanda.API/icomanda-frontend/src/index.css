@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Classe recibo-aberto: usada para impressão em janela dedicada (uma página, formato cupom) */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @layer base {
@@ -23,6 +25,18 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     line-height: 1.6;
+  }
+  
+  /* Prevenir quebra de imagens e ícones */
+  img, svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Garantir que containers flex não quebrem */
+  .flex {
+    min-width: 0;
   }
   
   /* Melhorar acessibilidade */
@@ -66,7 +80,8 @@
   .card-modern {
     @apply bg-card border border-border rounded-3xl p-6 
            transition-all duration-300 hover:shadow-large 
-           hover:border-border-secondary hover:-translate-y-1;
+           hover:border-border-secondary hover:-translate-y-1
+           overflow-hidden max-w-full;
   }
   
   .input-modern {
@@ -134,5 +149,12 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Relatórios: esconder botões e filtros na impressão */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }

@@ -1,0 +1,1 @@
+N├úo foi poss├¡vel localizar um projeto para executar. Verifique se existe um projeto em C:\VS_Code\icomanda ou passe o caminho para o projeto usando --project.

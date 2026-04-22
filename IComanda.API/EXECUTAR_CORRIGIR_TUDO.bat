@@ -1,0 +1,3 @@
+@echo off
+echo Executando script de correcao via PowerShell...
+powershell -ExecutionPolicy Bypass -File "%~dp0CORRIGIR_TUDO.ps1"

@@ -42,7 +42,44 @@ public class GrupoService : IGrupoService
         {
             Id = g.Id,
             Descricao = g.Descricao,
-            QuantidadeProdutos = g.QuantidadeProdutos
+            QuantidadeProdutos = g.QuantidadeProdutos,
+            ImprimirDuasVias = g.ImprimirDuasVias
         });
+    }
+
+    public async Task<GrupoDto> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new ArgumentException("A descrição do grupo é obrigatória", nameof(descricao));
+        }
+
+        var id = await _grupoRepository.CriarGrupoAsync(descricao, imprimirDuasVias);
+        var grupo = await _grupoRepository.GetGrupoAsync(id);
+        
+        return _mapper.Map<GrupoDto>(grupo!);
+    }
+
+    public async Task<GrupoDto> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+        {
+            throw new ArgumentException("A descrição do grupo é obrigatória", nameof(descricao));
+        }
+
+        var atualizado = await _grupoRepository.AtualizarGrupoAsync(id, descricao, imprimirDuasVias);
+        
+        if (!atualizado)
+        {
+            throw new KeyNotFoundException($"Grupo com ID {id} não encontrado");
+        }
+
+        var grupo = await _grupoRepository.GetGrupoAsync(id);
+        return _mapper.Map<GrupoDto>(grupo!);
+    }
+
+    public async Task<bool> ExcluirGrupoAsync(int id)
+    {
+        return await _grupoRepository.ExcluirGrupoAsync(id);
     }
 }

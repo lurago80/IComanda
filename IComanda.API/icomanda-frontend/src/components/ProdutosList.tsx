@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, Package } from 'lucide-react';
-import React from 'react';
+import { ArrowLeft, Package, Search, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 import { produtosService } from '../services/api';
 import { Grupo } from '../types/api';
 import ProductCard from './product/ProductCard';
@@ -10,16 +11,52 @@ import { SkeletonProductCard } from './states/SkeletonCard';
 interface ProdutosListProps {
   grupo: Grupo;
   onVoltar: () => void;
+  onRequestTaxaEntrega?: (produto: import('../types/api').Produto) => void;
 }
 
 const ProdutosList: React.FC<ProdutosListProps> = ({ 
   grupo, 
-  onVoltar
+  onVoltar,
+  onRequestTaxaEntrega
 }) => {
-  const { data: produtos, isLoading, error } = useQuery({
-    queryKey: ['produtos', grupo.id],
-    queryFn: () => produtosService.getByGrupo(grupo.id),
+  const [searchQuery, setSearchQuery] = useState('');
+  const debouncedSearch = useDebounce(searchQuery, 300);
+
+  // Buscar produtos da categoria quando não há busca
+  const { data: produtos, isLoading: isLoadingCategoria, error: errorCategoria } = useQuery({
+    queryKey: ['produtos', 'grupo', grupo.id],
+    queryFn: async () => {
+      if (!grupo || !grupo.id) {
+        throw new Error('Grupo inválido');
+      }
+
+      try {
+        const resultado = await produtosService.getByGrupo(grupo.id);
+        return Array.isArray(resultado) ? resultado : [];
+      } catch (error: any) {
+        console.error('❌ [ProdutosList] Erro ao buscar produtos:', error?.message || error);
+        throw error;
+      }
+    },
+    enabled: !!grupo?.id && !debouncedSearch.trim(), // Só carrega quando grupo é válido e não há busca
+    staleTime: 30000, // Cache por 30 segundos
   });
+
+  // Buscar produtos via API quando há busca (busca em TODOS os produtos, sem filtro de grupo)
+  const { data: produtosBusca, isLoading: isLoadingBusca, error: errorBusca } = useQuery({
+    queryKey: ['produtos', 'busca', debouncedSearch],
+    queryFn: () => {
+      console.log('🔍 [ProdutosList] Buscando produtos com termo:', debouncedSearch);
+      return produtosService.buscar({ q: debouncedSearch, ativo: true });
+    },
+    enabled: debouncedSearch.trim().length >= 2, // Só busca se tiver pelo menos 2 caracteres
+  });
+
+  // Usar produtos da busca se houver busca, senão usar produtos da categoria
+  const produtosExibidos = debouncedSearch.trim() ? produtosBusca : produtos;
+  const isLoading = debouncedSearch.trim() ? isLoadingBusca : isLoadingCategoria;
+  const error = debouncedSearch.trim() ? errorBusca : errorCategoria;
+  const isBuscando = debouncedSearch.trim().length >= 2;
 
   if (isLoading) {
     return (
@@ -59,7 +96,7 @@ const ProdutosList: React.FC<ProdutosListProps> = ({
   return (
     <div className="max-w-md mx-auto px-6 py-8">
       {/* Header com design moderno */}
-      <div className="flex items-center space-x-6 mb-10">
+      <div className="flex items-center space-x-6 mb-6">
         <button
           onClick={onVoltar}
           className="w-12 h-12 bg-card border border-border rounded-2xl flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-card-hover hover:border-border-secondary transition-all duration-300 hover:scale-105 active:scale-95"
@@ -71,32 +108,89 @@ const ProdutosList: React.FC<ProdutosListProps> = ({
           <div className="flex items-center space-x-3">
             <div className="w-2 h-2 bg-primary rounded-full animate-pulse-soft"></div>
             <p className="text-text-secondary text-lg">
-              {produtos?.length || 0} {produtos?.length === 1 ? 'produto' : 'produtos'}
+              {isBuscando ? (
+                <>
+                  {produtosExibidos?.length || 0} {produtosExibidos?.length === 1 ? 'resultado' : 'resultados'}
+                  {searchQuery && <span className="text-text-muted"> para "{searchQuery}"</span>}
+                </>
+              ) : (
+                <>
+                  {produtosExibidos?.length || 0} {produtosExibidos?.length === 1 ? 'produto' : 'produtos'}
+                </>
+              )}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Lista de Produtos com animações */}
-      <div className="space-y-6">
-        {produtos?.map((produto, index) => (
-          <div 
-            key={produto.id}
-            className={`animate-fade-in-up animate-stagger-${(index % 3) + 1}`}
-          >
-            <ProductCard produto={produto} />
-          </div>
-        ))}
+      {/* Campo de Busca */}
+      <div className="mb-6">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar em todos os produtos (nome, código, código de barras)..."
+            className="w-full pl-12 pr-12 py-4 bg-background-secondary border border-border rounded-2xl
+                      focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50
+                      text-text-primary placeholder-text-muted transition-all text-base"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-8 h-8 flex items-center justify-center
+                        text-text-muted hover:text-text-primary hover:bg-background-tertiary rounded-xl transition-all"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {produtos?.length === 0 && (
+      {/* Lista de Produtos com animações */}
+      {produtosExibidos && Array.isArray(produtosExibidos) && produtosExibidos.length > 0 && (
+        <div className="space-y-6">
+          {produtosExibidos.map((produto, index) => {
+            if (!produto || !produto.id) {
+              console.warn(`⚠️ [ProdutosList] Produto inválido no índice ${index}:`, produto);
+              return null;
+            }
+            return (
+              <div 
+                key={produto.id ?? `prod-${index}`}
+                className={`animate-fade-in-up animate-stagger-${(index % 3) + 1}`}
+              >
+                <ProductCard produto={produto} onRequestTaxaEntrega={onRequestTaxaEntrega} />
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {(!produtosExibidos || !Array.isArray(produtosExibidos) || produtosExibidos.length === 0) && !isLoading && (
         <div className="animate-fade-in-up">
           <EmptyState
-            title="Nenhum produto encontrado"
-            description="Não há produtos disponíveis nesta categoria."
-            actionText="Voltar às categorias"
-            onAction={onVoltar}
+            title={isBuscando ? "Nenhum produto encontrado" : "Nenhum produto encontrado"}
+            description={
+              isBuscando
+                ? `Não encontramos produtos para "${searchQuery}" em todo o sistema. Tente com outros termos.`
+                : "Não há produtos disponíveis nesta categoria."
+            }
+            actionText={isBuscando ? "Limpar busca" : "Voltar às categorias"}
+            onAction={isBuscando ? () => setSearchQuery('') : onVoltar}
+            icon={<Search className="w-8 h-8 text-text-muted" />}
           />
+        </div>
+      )}
+
+      {isBuscando && searchQuery.length < 2 && (
+        <div className="animate-fade-in-up">
+          <div className="text-center py-8">
+            <p className="text-text-secondary">
+              Digite pelo menos 2 caracteres para buscar
+            </p>
+          </div>
         </div>
       )}
     </div>

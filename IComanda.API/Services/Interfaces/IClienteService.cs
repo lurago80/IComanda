@@ -53,4 +53,25 @@ public interface IClienteService
     /// <param name="request">Dados do cliente</param>
     /// <returns>Cliente cadastrado</returns>
     Task<ClienteDto> CadastroRapidoAsync(CadastroRapidoClienteRequest request);
+
+    /// <summary>
+    /// Cria um novo cliente completo
+    /// </summary>
+    /// <param name="request">Dados do cliente</param>
+    /// <returns>Cliente criado</returns>
+    Task<ClienteDto> CriarClienteAsync(CriarClienteRequest request);
+
+    /// <summary>
+    /// Atualiza um cliente existente
+    /// </summary>
+    /// <param name="id">ID do cliente</param>
+    /// <param name="request">Dados do cliente</param>
+    /// <returns>Cliente atualizado</returns>
+    Task<ClienteDto> AtualizarClienteAsync(int id, CriarClienteRequest request);
+
+    /// <summary>
+    /// Exclui um cliente pelo ID
+    /// </summary>
+    /// <param name="id">ID do cliente</param>
+    Task ExcluirClienteAsync(int id);
 }

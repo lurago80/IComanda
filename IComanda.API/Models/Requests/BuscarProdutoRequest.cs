@@ -11,9 +11,9 @@ public class BuscarProdutoRequest
     public string? Q { get; set; }
 
     /// <summary>
-    /// Filtrar apenas produtos ativos (padrão: true)
+    /// Filtrar apenas produtos ativos (null = todos, true = apenas ativos, false = apenas inativos)
     /// </summary>
-    public bool? Ativo { get; set; } = true;
+    public bool? Ativo { get; set; }
 
     /// <summary>
     /// Grupo de produto

@@ -106,7 +106,7 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
                 <div className="space-y-4">
                   {vendas?.map((venda, index) => (
                     <motion.div
-                      key={venda.nota}
+                      key={venda?.nota && String(venda.nota).trim() ? venda.nota : `venda-${index}`}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
@@ -137,6 +137,9 @@ const HistoryModal: React.FC<HistoryModalProps> = ({ isOpen, onClose }) => {
                           </p>
                           {venda.mesa && (
                             <p className="text-xs text-text-secondary">Mesa {venda.mesa}</p>
+                          )}
+                          {venda.nomeCliente && (
+                            <p className="text-xs font-medium text-primary mt-1">{venda.nomeCliente}</p>
                           )}
                         </div>
                       </div>

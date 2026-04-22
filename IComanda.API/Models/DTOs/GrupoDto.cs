@@ -8,4 +8,5 @@ public class GrupoDto
     public int Id { get; set; }
     public string Descricao { get; set; } = string.Empty;
     public int QuantidadeProdutos { get; set; }
+    public bool ImprimirDuasVias { get; set; } = false;
 }

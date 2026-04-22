@@ -10,7 +10,7 @@ interface AppHeaderProps {
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenConferencia, onOpenAbrirComanda }) => {
-  const { toggleCart, getTotalItems, getTotalPrice, comandaAtiva } = useCartStore()
+  const { toggleCart, getTotalItems, getTotalPrice, comandaAtiva, vendaEmEdicao, flowState, setCartOpen, isOpen } = useCartStore()
   const totalItems = getTotalItems()
   const totalPrice = getTotalPrice()
   const [nomeUsuario, setNomeUsuario] = useState<string>('')
@@ -29,22 +29,27 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenCo
 
   const handleLogout = () => {
     if (window.confirm('Deseja realmente sair do sistema?')) {
+      console.log('🚪 [Logout] Limpando dados de autenticação...');
+      localStorage.removeItem('jwt_token');
       localStorage.removeItem('usuario_logado');
+      console.log('🔄 [Logout] Redirecionando para login...');
       window.location.reload();
     }
   };
 
+  // Diminuir z-index do header quando drawer ou modais estiverem abertos
+  const headerZIndex = isOpen ? 'z-40' : 'z-50'
+  
   return (
-    <header className="sticky top-0 z-50 glass-effect border-b border-border/30">
+    <header className={`sticky top-0 ${headerZIndex} glass-effect border-b border-border/30`}>
       <div className="max-w-md mx-auto px-6 py-6">
         {/* Logo e Título */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-primary to-primary-700 rounded-3xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-2xl">📋</span>
+            <div className="h-20 rounded-3xl flex items-center justify-center overflow-hidden px-6 py-2">
+              <img src="/iComanda.jpg" alt="iComanda Logo" className="h-full w-auto object-contain" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-primary-700 bg-clip-text text-transparent">iComanda</h1>
               <p className="text-sm text-text-muted font-medium">In9ve Informática</p>
             </div>
           </div>
@@ -68,34 +73,91 @@ const AppHeader: React.FC<AppHeaderProps> = ({ onSearch, onOpenHistory, onOpenCo
           </div>
         </div>
 
-        {/* Comanda Ativa */}
-        {comandaAtiva && (
-          <div className="mb-4 p-4 bg-success/10 border border-success/30 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
-                <span className="text-sm font-semibold text-success">Comanda Ativa</span>
+        {/* Indicador de Estado */}
+        {flowState === 'edicao' && vendaEmEdicao ? (
+          <div className="mb-4 p-4 bg-warning/10 border-2 border-warning/50 rounded-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-warning rounded-full animate-pulse"></div>
+                <div>
+                  <span className="text-sm font-bold text-warning block">MODO DE EDIÇÃO</span>
+                  <span className="text-xs text-text-secondary">
+                    {vendaEmEdicao.mesa && `Mesa ${vendaEmEdicao.mesa}`}
+                    {vendaEmEdicao.comanda && `Comanda ${String(vendaEmEdicao.comanda).padStart(6, '0')}`}
+                  </span>
+                </div>
               </div>
-              <div className="text-sm font-bold text-text-primary">
-                Comanda #{comandaAtiva.numeroComanda}
-                {comandaAtiva.numeroMesa && ` | Mesa ${comandaAtiva.numeroMesa}`}
+              <div className="text-xs text-text-muted font-medium">
+                Nota: {vendaEmEdicao.nota}
+              </div>
+            </div>
+            <button
+              onClick={() => setCartOpen(true)}
+              className="w-full px-4 py-2 bg-warning text-warning-foreground rounded-xl text-xs font-semibold hover:bg-warning/90 transition-colors"
+            >
+              Revisar / Atualizar
+            </button>
+          </div>
+        ) : flowState === 'nova' && comandaAtiva ? (
+          <div className="mb-4 p-4 bg-success/10 border-2 border-success/50 rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                <div>
+                  <span className="text-sm font-bold text-success block">COMANDA ATIVA</span>
+                  <span className="text-xs text-text-secondary">
+                    Comanda #{comandaAtiva.numeroComanda}
+                    {comandaAtiva.numeroMesa && ` | Mesa ${comandaAtiva.numeroMesa}`}
+                  </span>
+                </div>
+              </div>
+              <button
+                onClick={() => setCartOpen(true)}
+                className="px-4 py-2 bg-success text-white rounded-xl text-xs font-semibold"
+              >
+                Revisar Pedido
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-4 p-4 bg-background-secondary border-2 border-border rounded-2xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 bg-text-muted rounded-full"></div>
+                <span className="text-sm font-semibold text-text-secondary">Nenhuma comanda aberta</span>
               </div>
             </div>
           </div>
         )}
 
         <div className="flex items-center justify-between mb-6">
-          {/* Botão Nova Comanda */}
-          {onOpenAbrirComanda && !comandaAtiva && (
-            <button
-              onClick={onOpenAbrirComanda}
-              className="px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-semibold
-                         hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95
-                         flex items-center space-x-2 shadow-medium"
-            >
-              <ClipboardList className="w-5 h-5" />
-              <span>Nova Comanda</span>
-            </button>
+          {/* Botões de Ação */}
+          {flowState === 'idle' && (
+            <div className="flex items-center space-x-2">
+              {onOpenAbrirComanda && (
+                <button
+                  onClick={onOpenAbrirComanda}
+                  className="px-6 py-3 bg-primary text-primary-foreground rounded-2xl font-semibold
+                             hover:bg-primary/90 transition-all duration-300 hover:scale-105 active:scale-95
+                             flex items-center space-x-2 shadow-medium"
+                >
+                  <ClipboardList className="w-5 h-5" />
+                  <span>Nova Comanda</span>
+                </button>
+              )}
+              {onOpenConferencia && (
+                <button
+                  onClick={onOpenConferencia}
+                  className="px-4 py-3 bg-background-secondary border border-border text-text-primary rounded-2xl font-semibold
+                             hover:bg-card-hover transition-all duration-300 hover:scale-105 active:scale-95
+                             flex items-center space-x-2"
+                  title="Buscar e editar comanda/mesa"
+                >
+                  <Receipt className="w-5 h-5" />
+                  <span>Buscar/Editar</span>
+                </button>
+              )}
+            </div>
           )}
           
           <div className="flex-1"></div>

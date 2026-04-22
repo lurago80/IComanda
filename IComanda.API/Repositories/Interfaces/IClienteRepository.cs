@@ -67,4 +67,25 @@ public interface IClienteRepository
     /// <param name="cliente">Dados do cliente</param>
     /// <returns>True se cadastrado com sucesso</returns>
     Task<bool> CriarClienteAsync(Cliente cliente);
+
+    /// <summary>
+    /// Cria um novo cliente completo
+    /// </summary>
+    /// <param name="cliente">Dados do cliente</param>
+    /// <returns>ID do cliente criado</returns>
+    Task<int> CriarClienteCompletoAsync(Cliente cliente);
+
+    /// <summary>
+    /// Atualiza um cliente existente
+    /// </summary>
+    /// <param name="cliente">Dados do cliente</param>
+    /// <returns>True se atualizado com sucesso</returns>
+    Task<bool> AtualizarClienteAsync(Cliente cliente);
+
+    /// <summary>
+    /// Exclui um cliente pelo ID
+    /// </summary>
+    /// <param name="id">ID do cliente a excluir</param>
+    /// <returns>True se excluído com sucesso</returns>
+    Task<bool> ExcluirClienteAsync(int id);
 }

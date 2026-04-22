@@ -42,5 +42,9 @@ public class Venda
     public int? Comanda { get; set; }
     public int? Mesa { get; set; }
     public int? NumeroPessoas { get; set; }
+    /// <summary>Nome do cliente para exibição quando não cadastrado (cliente = 0). Aparece nos cards de comandas e na impressão.</summary>
+    public string? NomeCliente { get; set; }
+    /// <summary>Justificativa de cancelamento/exclusão da comanda. Gravada no campo JUSTIFICATIVA da tabela VENDAS.</summary>
+    public string? Justificativa { get; set; }
     public List<ItemVenda> Itens { get; set; } = new();
 }

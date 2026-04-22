@@ -11,21 +11,21 @@ public class ProdutoMappingProfile : Profile
     {
         CreateMap<Produto, ProdutoDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.CodigoBarra, opt => opt.MapFrom(src => src.CodigoBarra))
-            .ForMember(dest => dest.CodigoInterno, opt => opt.MapFrom(src => src.CodigoInterno))
-            .ForMember(dest => dest.Descricao, opt => opt.MapFrom(src => src.Descricao))
-            .ForMember(dest => dest.Caracteristica, opt => opt.MapFrom(src => src.Caracteristica))
-            .ForMember(dest => dest.Quantidade, opt => opt.MapFrom(src => src.Quantidade))
-            .ForMember(dest => dest.PrecoVenda, opt => opt.MapFrom(src => src.PrecoVenda))
-            .ForMember(dest => dest.Atacado, opt => opt.MapFrom(src => src.Atacado))
-            .ForMember(dest => dest.UnMedida, opt => opt.MapFrom(src => src.UnMedida))
-            .ForMember(dest => dest.Ativo, opt => opt.MapFrom(src => src.Ativo))
-            .ForMember(dest => dest.Grupo, opt => opt.MapFrom(src => src.Grupo))
-            .ForMember(dest => dest.Pesavel, opt => opt.MapFrom(src => src.Pesavel))
-            .ForMember(dest => dest.Marca, opt => opt.MapFrom(src => src.Marca))
-            .ForMember(dest => dest.Categoria, opt => opt.MapFrom(src => src.Categoria))
-            .ForMember(dest => dest.Cor, opt => opt.MapFrom(src => src.Cor))
-            .ForMember(dest => dest.Tamanho, opt => opt.MapFrom(src => src.Tamanho));
+            .ForMember(dest => dest.CodigoBarra, opt => opt.MapFrom(src => src.CodigoBarra ?? string.Empty))
+            .ForMember(dest => dest.CodigoInterno, opt => opt.MapFrom(src => src.CodigoInterno ?? string.Empty))
+            .ForMember(dest => dest.Descricao, opt => opt.MapFrom(src => src.Descricao ?? string.Empty))
+            .ForMember(dest => dest.Caracteristica, opt => opt.MapFrom(src => src.Caracteristica ?? string.Empty))
+            .ForMember(dest => dest.Quantidade, opt => opt.MapFrom(src => src.Quantidade ?? 0m))
+            .ForMember(dest => dest.PrecoVenda, opt => opt.MapFrom(src => src.PrecoVenda ?? 0))
+            .ForMember(dest => dest.Atacado, opt => opt.MapFrom(src => src.Atacado ?? 0))
+            .ForMember(dest => dest.UnMedida, opt => opt.MapFrom(src => src.UnMedida ?? string.Empty))
+            .ForMember(dest => dest.Ativo, opt => opt.MapFrom(src => src.Ativo == 1))
+            .ForMember(dest => dest.Grupo, opt => opt.MapFrom(src => src.Grupo ?? 0))
+            .ForMember(dest => dest.Pesavel, opt => opt.MapFrom(src => src.Pesavel == 1))
+            .ForMember(dest => dest.Marca, opt => opt.MapFrom(src => src.Marca ?? string.Empty))
+            .ForMember(dest => dest.Categoria, opt => opt.MapFrom(src => src.Categoria ?? string.Empty))
+            .ForMember(dest => dest.Cor, opt => opt.MapFrom(src => src.Cor ?? string.Empty))
+            .ForMember(dest => dest.Tamanho, opt => opt.MapFrom(src => src.Tamanho ?? string.Empty));
 
         CreateMap<ItemCarrinho, ItemCarrinhoDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -52,7 +52,8 @@ public class ProdutoMappingProfile : Profile
         // Mapeamentos de Venda
         CreateMap<Venda, VendaDto>()
             .ForMember(dest => dest.Subtotal, opt => opt.MapFrom(src => src.TotProdutos));
-        CreateMap<ItemVenda, ItemVendaDto>();
+        CreateMap<ItemVenda, ItemVendaDto>()
+            .ForMember(dest => dest.Descricao, opt => opt.MapFrom(src => src.Descricao ?? string.Empty));
 
         // Mapeamentos de Request para Entity
         CreateMap<CriarVendaRequest, Venda>()
@@ -65,7 +66,7 @@ public class ProdutoMappingProfile : Profile
             .ForMember(dest => dest.Modelo, opt => opt.MapFrom(src => "D2"))
             .ForMember(dest => dest.Serie, opt => opt.MapFrom(src => "001"))
             .ForMember(dest => dest.Subserie, opt => opt.MapFrom(src => "01"))
-            .ForMember(dest => dest.Origem, opt => opt.MapFrom(src => "BA"))
+            .ForMember(dest => dest.Origem, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.Origem) ? "BA" : src.Origem.Trim().ToUpperInvariant()))
             .ForMember(dest => dest.Emissao, opt => opt.MapFrom(src => DateTime.Now))
             .ForMember(dest => dest.Hora, opt => opt.MapFrom(src => DateTime.Now.TimeOfDay))
             .ForMember(dest => dest.DataSaida, opt => opt.MapFrom(src => DateTime.Now))

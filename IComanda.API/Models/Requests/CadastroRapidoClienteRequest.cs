@@ -11,12 +11,12 @@ public class CadastroRapidoClienteRequest
     public string Nome { get; set; } = string.Empty;
 
     /// <summary>
-    /// CPF ou CNPJ do cliente (obrigatório, usado para verificar duplicidade)
+    /// CPF ou CNPJ do cliente (opcional, usado para verificar duplicidade quando informado)
     /// </summary>
     public string CpfCnpj { get; set; } = string.Empty;
 
     /// <summary>
-    /// Telefone do cliente (obrigatório, usado para verificar duplicidade)
+    /// Telefone do cliente (opcional, usado para verificar duplicidade quando informado)
     /// </summary>
     public string Telefone { get; set; } = string.Empty;
 
@@ -29,5 +29,46 @@ public class CadastroRapidoClienteRequest
     /// Nome fantasia/apelido (opcional)
     /// </summary>
     public string? Fantasia { get; set; }
+
+    /// <summary>
+    /// Endereço (logradouro) para delivery
+    /// </summary>
+    public string? Endereco1 { get; set; }
+
+    /// <summary>
+    /// Número do endereço
+    /// </summary>
+    public string? Numero1 { get; set; }
+
+    /// <summary>
+    /// Complemento do endereço
+    /// </summary>
+    public string? Complemento1 { get; set; }
+
+    /// <summary>
+    /// Bairro
+    /// </summary>
+    public string? Bairro1 { get; set; }
+
+    /// <summary>
+    /// Cidade
+    /// </summary>
+    public string? Cidade1 { get; set; }
+
+    /// <summary>
+    /// UF
+    /// </summary>
+    public string? Uf1 { get; set; }
+
+    /// <summary>
+    /// CEP
+    /// </summary>
+    public string? Cep1 { get; set; }
+
+    /// <summary>
+    /// Se true, cliente fica ativo no cadastro (visível na lista de clientes).
+    /// Se false, cliente é criado com Ativo=0 (só para esta venda/delivery).
+    /// </summary>
+    public bool GravarNoCadastro { get; set; } = true;
 }
 

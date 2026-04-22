@@ -1,0 +1,307 @@
+# ═══════════════════════════════════════════════════════════════════════
+#  LISTA DE ARQUIVOS PARA ENVIAR AO CLIENTE - iComanda v2.0
+# ═══════════════════════════════════════════════════════════════════════
+#  Data: 15/Fevereiro/2026
+#  Fase 2: BCrypt + RefreshToken Firebird + Fixes ESLint/401
+# ═══════════════════════════════════════════════════════════════════════
+
+# ┌───────────────────────────────────────────────────────────────────────┐
+# │ OPÇÃO MAIS SIMPLES: CRIAR ZIP AUTOMATICAMENTE                        │
+# └───────────────────────────────────────────────────────────────────────┘
+
+cd C:\VS_Code\icomanda\IComanda.API
+.\criar-pacote-instalacao.ps1
+
+# Resultado: IComanda-Instalacao.zip (40-70 MB)
+# Enviar: Apenas o ZIP
+
+
+# ┌───────────────────────────────────────────────────────────────────────┐
+# │ OPÇÃO ALTERNATIVA: COPIAR PASTA COMPLETA                             │
+# └───────────────────────────────────────────────────────────────────────┘
+
+# Enviar TODA a pasta: C:\VS_Code\icomanda\
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  📂 ESTRUTURA DE PASTAS E ARQUIVOS ESSENCIAIS
+# ═══════════════════════════════════════════════════════════════════════
+
+C:\VS_Code\icomanda\
+│
+├── 📁 IComanda.API\                              # ✅ OBRIGATÓRIO - Backend
+│   │
+│   ├── 📁 bin\Release\net8.0\publish\            # ✅ BINÁRIOS COMPILADOS
+│   │   ├── IComanda.API.exe                      # ✅ Executável principal  
+│   │   ├── IComanda.API.dll                      # ✅ DLL principal
+│   │   ├── FirebirdSql.Data.FirebirdClient.dll   # ✅ Driver Firebird
+│   │   ├── BCrypt.Net-Next.dll                   # ✅ Segurança senhas (Fase 2)
+│   │   ├── Dapper.dll                            # ✅ ORM
+│   │   ├── FluentValidation.dll                  # ✅ Validação
+│   │   ├── Microsoft.AspNetCore.*.dll            # ✅ ASP.NET Core
+│   │   ├── Microsoft.Extensions.*.dll            # ✅ Extensões
+│   │   ├── Swashbuckle.AspNetCore.*.dll          # ✅ Swagger
+│   │   ├── System.*.dll                          # ✅ Bibliotecas sistema
+│   │   └── [TODAS as outras DLLs]                # ✅ Dependências
+│   │
+│   ├── 📄 appsettings.json                       # ⚠️  CONFIGURAR CAMINHO BANCO!
+│   ├── 📄 appsettings.json.example               # ℹ️  Exemplo configuração
+│   ├── 📄 appsettings.Development.json           # 🔧 Config desenvolvimento
+│   │
+│   ├── 📄 Program.cs                             # ℹ️  Código principal (referência)
+│   ├── 📄 IComanda.API.csproj                    # ℹ️  Projeto (referência)
+│   │
+│   ├── 📁 Controllers\                           # ℹ️  Código-fonte (referência)
+│   ├── 📁 Services\                              # ℹ️  Código-fonte (referência)
+│   ├── 📁 Repositories\                          # ℹ️  Código-fonte (referência)
+│   ├── 📁 Models\                                # ℹ️  Código-fonte (referência)
+│   │
+│   ├── 📄 criar-tabela-refresh-token.sql         # ✅ SQL criar tabela tokens
+│   ├── 📄 executar-sql-refresh-token.ps1         # ✅ Script criar tabela
+│   ├── 📄 migrar-senhas-bcrypt.ps1               # 🔧 Migrar senhas (opcional)
+│   │
+│   ├── 📄 diagnosticar-jwt-401.ps1               # ✅ Diagnóstico erro 401
+│   ├── 📄 test-emitente.ps1                      # 🔧 Teste emitente
+│   ├── 📄 testar-whatsapp.ps1                    # 🔧 Teste WhatsApp
+│   │
+│   ├── 📄 INSTALAR.bat                           # ✅ Script instalação
+│   ├── 📄 iniciar-tudo.bat                       # ✅ Inicia backend+frontend
+│   ├── 📄 parar-tudo.bat                         # ✅ Para tudo
+│   ├── 📄 run.bat                                # 🔧 Inicia backend
+│   ├── 📄 start-dev.bat                          # 🔧 Modo desenvolvimento
+│   │
+│   ├── 📄 README.md                              # ℹ️  Documentação geral
+│   ├── 📄 README-PHASE2.md                       # ℹ️  Documentação Fase 2
+│   ├── 📄 GUIA_INSTALACAO.md                     # ✅ Guia instalação
+│   ├── 📄 O_QUE_ENVIAR_PARA_CLIENTE.md           # ℹ️  Este guia (antigo)
+│   └── 📄 INSTRUCOES_INSTALACAO_CLIENTE.md       # ℹ️  Instruções (antigo)
+│
+├── 📁 icomanda-frontend\                         # ✅ OBRIGATÓRIO - Frontend
+│   │
+│   ├── 📁 build\                                 # ✅ BUILD DE PRODUÇÃO
+│   │   ├── index.html                            # ✅ HTML principal
+│   │   ├── 📁 static\                            # ✅ Arquivos estáticos
+│   │   │   ├── 📁 css\                           # ✅ CSS compilado
+│   │   │   ├── 📁 js\                            # ✅ JavaScript compilado
+│   │   │   └── 📁 media\                         # ✅ Imagens/fontes
+│   │   ├── favicon.ico                           # ✅ Ícone
+│   │   ├── manifest.json                         # ✅ PWA manifest
+│   │   └── robots.txt                            # ✅ SEO
+│   │
+│   ├── 📁 src\                                   # ℹ️  Código-fonte (referência)
+│   │   ├── 📁 components\                        # ℹ️  Componentes React
+│   │   ├── 📁 pages\                             # ℹ️  Páginas
+│   │   ├── 📁 services\                          # ℹ️  Services API
+│   │   ├── 📁 utils\                             # ℹ️  Utilitários
+│   │   │   └── logger.ts                         # ✅ Logger profissional (Fase 1)
+│   │   ├── App.tsx                               # ℹ️  App principal
+│   │   └── index.tsx                             # ℹ️  Entry point
+│   │
+│   ├── 📁 public\                                # ℹ️  Arquivos públicos
+│   │
+│   ├── 📄 package.json                           # ✅ Dependências npm
+│   ├── 📄 package-lock.json                      # ✅ Lock dependências
+│   │
+│   ├── 📄 .env.local                             # ✅ Config ESLint (NOVO Fase 2!)
+│   ├── 📄 .eslintrc.json                         # ✅ Config ESLint (NOVO Fase 2!)
+│   ├── 📄 tsconfig.json                          # ℹ️  Config TypeScript
+│   ├── 📄 tailwind.config.js                     # ℹ️  Config Tailwind CSS
+│   │
+│   └── 📁 node_modules\                          # ⛔ NÃO ENVIAR! Reinstalar no cliente
+│
+├── 📁 icomanda-whatsapp-baileys\                 # 🔧 OPCIONAL - WhatsApp
+│   ├── 📄 server.js                              # 🔧 Servidor WhatsApp
+│   ├── 📄 package.json                           # 🔧 Dependências
+│   ├── 📄 README.md                              # 🔧 Documentação
+│   ├── 📄 limpar-sessao.ps1                      # 🔧 Limpar sessão
+│   └── 📁 node_modules\                          # ⛔ NÃO ENVIAR! Reinstalar no cliente
+│
+├── 📄 PACOTE_CLIENTE.md                          # ✅ GUIA COMPLETO (LEIA ISTO!)
+├── 📄 CORRECAO_ERRO_401.md                       # ✅ Como corrigir erro 401
+├── 📄 CORRECAO_ERRO_ESLINT.md                    # ✅ Como corrigir ESLint
+├── 📄 README.md                                  # ℹ️  Documentação projeto
+├── 📄 ROADMAP_FASES_1_2_3_4.md                   # ℹ️  Roadmap fases
+│
+├── 📄 iniciar-tudo.bat                           # ✅ Script iniciar tudo
+├── 📄 parar-tudo.bat                             # ✅ Script parar tudo
+├── 📄 start-dev.bat                              # 🔧 Modo desenvolvimento
+│
+└── 📄 corrigir-eslint-frontend.ps1               # ✅ Corrige ESLint (Fase 2)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  ⚙️ CONFIGURAÇÕES CRÍTICAS ANTES DE ENVIAR
+# ═══════════════════════════════════════════════════════════════════════
+
+# 1️⃣ EDITAR: IComanda.API\appsettings.json
+# ──────────────────────────────────────────────────────────────────────
+{
+  "ConnectionStrings": {
+    "Firebird": "Server=localhost;Database=C:\\iComanda\\Dados\\DADOSG5.FDB;User=SYSDBA;Password=masterkey;Port=3050;Charset=UTF8;"
+                                            # ↑↑↑ AJUSTAR CAMINHO DO BANCO! ↑↑↑
+  },
+  "Jwt": {
+    "SecretKey": "sua-chave-secreta-minimo-32-caracteres-aqui",
+    "ExpirationHours": 2,               # ← Token expira em 2 horas (Fase 1)
+    "RefreshExpirationDays": 7          # ← Refresh token 7 dias (Fase 1)
+  }
+}
+
+
+# 2️⃣ VERIFICAR: icomanda-frontend\.env.local
+# ──────────────────────────────────────────────────────────────────────
+DISABLE_ESLINT_PLUGIN=true              # ← Fix ESLint (Fase 2)
+TSC_COMPILE_ON_ERROR=true
+PORT=3000
+BROWSER=none
+REACT_APP_API_URL=http://localhost:65375
+
+
+# 3️⃣ VERIFICAR: icomanda-frontend\.eslintrc.json
+# ──────────────────────────────────────────────────────────────────────
+{
+  "extends": ["react-app"],
+  "rules": {
+    "no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": "warn"
+  }
+}
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  ⛔ ARQUIVOS/PASTAS QUE NÃO DEVEM SER ENVIADOS
+# ═══════════════════════════════════════════════════════════════════════
+
+❌ icomanda-frontend\node_modules\        # Muito grande! Reinstalar no cliente
+❌ icomanda-whatsapp-baileys\node_modules\  # Muito grande! Reinstalar no cliente
+❌ IComanda.API\bin\Debug\                # Versão desenvolvimento
+❌ IComanda.API\obj\                      # Temporários compilação
+❌ IComanda.API\.vs\                      # Visual Studio temp
+❌ .git\                                  # Controle versão
+❌ *.user                                 # Configurações usuário
+❌ *.suo                                  # Visual Studio cache
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  ✅ CHECKLIST ANTES DE ENVIAR
+# ═══════════════════════════════════════════════════════════════════════
+
+[ ] Backend compilado (dotnet publish -c Release)
+[ ] Frontend buildado (npm run build)
+[ ] appsettings.json com caminho do banco CORRETO
+[ ] .env.local criado no frontend
+[ ] .eslintrc.json criado no frontend
+[ ] package.json SEM eslintConfig duplicado
+[ ] Removidas pastas node_modules (serão reinstaladas)
+[ ] Removidas pastas bin\Debug, obj
+[ ] Scripts de diagnóstico incluídos
+[ ] SQL criar-tabela-refresh-token.sql incluído
+[ ] Documentação incluída (README, guias)
+[ ] Testado localmente (backend + frontend funcionando)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  📊 TAMANHO ESTIMADO DO PACOTE
+# ═══════════════════════════════════════════════════════════════════════
+
+Backend (bin\Release\net8.0\publish\):   ~30-50 MB
+Frontend (build\):                       ~5-10 MB
+Frontend (src + node_modules):           ~200-300 MB  ← NÃO ENVIAR node_modules!
+Documentação + Scripts:                  ~2-5 MB
+─────────────────────────────────────────────────────
+Total ZIP (SEM node_modules):            ~40-70 MB   ✅ ENVIAR ISTO
+Total Completo (COM node_modules):       ~250-400 MB ⛔ MUITO GRANDE!
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  🚀 PASSOS NO CLIENTE APÓS RECEBER ARQUIVOS
+# ═══════════════════════════════════════════════════════════════════════
+
+# 1. Instalar pré-requisitos
+   - .NET 8.0 Runtime: https://dotnet.microsoft.com/download/dotnet/8.0
+   - Node.js 18+ LTS: https://nodejs.org/
+   - Firebird 2.5: https://firebirdsql.org/
+
+# 2. Extrair ZIP ou copiar pasta para C:\iComanda\
+
+# 3. Configurar banco de dados
+   Editar: C:\iComanda\IComanda.API\appsettings.json
+   Ajustar: Database=C:\\CAMINHO\\REAL\\DO\\BANCO\\DADOSG5.FDB
+
+# 4. Criar tabela REFRESH_TOKEN
+   cd C:\iComanda\IComanda.API
+   .\executar-sql-refresh-token.ps1
+
+# 5. Instalar dependências frontend
+   cd C:\iComanda\icomanda-frontend
+   npm install
+
+# 6. Iniciar aplicação
+   cd C:\iComanda
+   .\iniciar-tudo.bat
+
+# 7. Acessar sistema
+   Frontend: http://localhost:3000
+   API: http://localhost:65375
+   Swagger: http://localhost:65375/swagger
+   Login: admin / 123456
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  🆘 PROBLEMAS COMUNS E SOLUÇÕES
+# ═══════════════════════════════════════════════════════════════════════
+
+# ❌ Erro 401 Unauthorized
+.\diagnosticar-jwt-401.ps1              # Diagnóstico completo
+# Navegador F12 → Console → localStorage.clear() → Fazer login novamente
+# Ver: CORRECAO_ERRO_401.md
+
+# ❌ ESLint Plugin 'react' was conflicted
+.\corrigir-eslint-frontend.ps1          # Corrige automaticamente
+# Ver: CORRECAO_ERRO_ESLINT.md
+
+# ❌ Firebird - cannot open database
+# Verificar caminho do banco em appsettings.json
+# Verificar se Firebird está rodando: netstat -ano | Select-String "3050"
+
+# ❌ Port 65375 already in use
+.\parar-tudo.bat                        # Para tudo
+.\iniciar-tudo.bat                      # Reinicia
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  📚 DOCUMENTAÇÃO DE REFERÊNCIA
+# ═══════════════════════════════════════════════════════════════════════
+
+PACOTE_CLIENTE.md                       # ← ESTE ARQUIVO (guia completo)
+CORRECAO_ERRO_401.md                    # Como corrigir 401 Unauthorized
+CORRECAO_ERRO_ESLINT.md                 # Como corrigir ESLint frontend
+IComanda.API\README-PHASE2.md           # Fase 2 completa (BCrypt + RefreshToken)
+IComanda.API\GUIA_INSTALACAO.md         # Guia instalação detalhado
+README.md                               # Documentação geral projeto
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  🎯 RESUMO EXECUTIVO
+# ═══════════════════════════════════════════════════════════════════════
+
+ENVIAR:       ZIP criado por criar-pacote-instalacao.ps1
+              OU pasta completa C:\VS_Code\icomanda\
+
+TAMANHO:      40-70 MB (sem node_modules)
+
+CRÍTICO:      1. appsettings.json - ajustar caminho banco
+              2. executar-sql-refresh-token.ps1 no cliente
+              3. npm install no frontend
+              4. iniciar-tudo.bat
+
+PRIMEIRO      1. .\executar-sql-refresh-token.ps1
+TESTE:        2. cd icomanda-frontend ; npm install
+              3. cd .. ; .\iniciar-tudo.bat
+              4. http://localhost:3000 (admin/123456)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+#  Gerado em: 15/Fevereiro/2026
+#  Versão: iComanda v2.0 - Fase 2 (BCrypt + RefreshToken Firebird)
+# ═══════════════════════════════════════════════════════════════════════

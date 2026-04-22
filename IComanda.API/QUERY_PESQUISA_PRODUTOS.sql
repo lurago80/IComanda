@@ -1,0 +1,247 @@
+-- ============================================
+-- QUERY DE PESQUISA DE PRODUTOS
+-- ============================================
+-- Esta é a query SQL que o sistema usa para buscar produtos
+-- ============================================
+
+-- QUERY BASE (sem filtros)
+SELECT FIRST 50 SKIP 0
+    p3.ID, 
+    p1.CODIGOBARRA, 
+    p3.CODIGOINTERNO, 
+    p3.DESCRICAO, 
+    p3.CARACTERISTICA,
+    p2.QUANTIDADE, 
+    p2.QUANTIDADEMINIMA, 
+    p2.LOCALIZACAO,
+    p4.PRECOCUSTO, 
+    p4.PRECOVENDA, 
+    p4.ATACADO, 
+    p4.PRECO3,
+    p3.UN_MEDIDA, 
+    p3.ATIVO, 
+    p3.GRUPO, 
+    p1.PESAVEL, 
+    p3.MARCA,
+    p3.CATEGORIA, 
+    p3.COR, 
+    p3.TAMANHO, 
+    p3.DATAINCLUSAO,
+    p2.DATAULTIMAVENDA, 
+    p2.DATAULTIMACOMPRA
+FROM PRODUTOESERVICO p3
+LEFT JOIN PRODUTO p1 ON p1.ID = p3.ID
+LEFT JOIN PRODUTOEMPRESA p2 ON p2.ID = p3.ID
+LEFT JOIN PRODUTOESERVICOEMPRESA p4 ON p4.ID = p3.ID
+WHERE 1=1
+ORDER BY p3.DESCRICAO;
+
+-- ============================================
+-- COM TERMO DE BUSCA
+-- ============================================
+-- Exemplo: buscar por "coca"
+SELECT FIRST 50 SKIP 0
+    p3.ID, 
+    p1.CODIGOBARRA, 
+    p3.CODIGOINTERNO, 
+    p3.DESCRICAO, 
+    p3.CARACTERISTICA,
+    p2.QUANTIDADE, 
+    p2.QUANTIDADEMINIMA, 
+    p2.LOCALIZACAO,
+    p4.PRECOCUSTO, 
+    p4.PRECOVENDA, 
+    p4.ATACADO, 
+    p4.PRECO3,
+    p3.UN_MEDIDA, 
+    p3.ATIVO, 
+    p3.GRUPO, 
+    p1.PESAVEL, 
+    p3.MARCA,
+    p3.CATEGORIA, 
+    p3.COR, 
+    p3.TAMANHO, 
+    p3.DATAINCLUSAO,
+    p2.DATAULTIMAVENDA, 
+    p2.DATAULTIMACOMPRA
+FROM PRODUTOESERVICO p3
+LEFT JOIN PRODUTO p1 ON p1.ID = p3.ID
+LEFT JOIN PRODUTOEMPRESA p2 ON p2.ID = p3.ID
+LEFT JOIN PRODUTOESERVICOEMPRESA p4 ON p4.ID = p3.ID
+WHERE 1=1
+AND (
+    (p1.CODIGOBARRA IS NOT NULL AND p1.CODIGOBARRA = 'coca') OR
+    (p3.DESCRICAO IS NOT NULL AND UPPER(p3.DESCRICAO) CONTAINING UPPER('coca')) OR
+    (p3.CARACTERISTICA IS NOT NULL AND UPPER(p3.CARACTERISTICA) CONTAINING UPPER('coca')) OR
+    (p3.CODIGOINTERNO IS NOT NULL AND p3.CODIGOINTERNO = 'coca') OR
+    p3.ID = 0
+)
+ORDER BY p3.DESCRICAO;
+
+-- ============================================
+-- COM FILTRO DE ATIVO
+-- ============================================
+-- Apenas produtos ativos (ATIVO = 1 ou NULL)
+SELECT FIRST 50 SKIP 0
+    p3.ID, 
+    p1.CODIGOBARRA, 
+    p3.CODIGOINTERNO, 
+    p3.DESCRICAO, 
+    p3.CARACTERISTICA,
+    p2.QUANTIDADE, 
+    p2.QUANTIDADEMINIMA, 
+    p2.LOCALIZACAO,
+    p4.PRECOCUSTO, 
+    p4.PRECOVENDA, 
+    p4.ATACADO, 
+    p4.PRECO3,
+    p3.UN_MEDIDA, 
+    p3.ATIVO, 
+    p3.GRUPO, 
+    p1.PESAVEL, 
+    p3.MARCA,
+    p3.CATEGORIA, 
+    p3.COR, 
+    p3.TAMANHO, 
+    p3.DATAINCLUSAO,
+    p2.DATAULTIMAVENDA, 
+    p2.DATAULTIMACOMPRA
+FROM PRODUTOESERVICO p3
+LEFT JOIN PRODUTO p1 ON p1.ID = p3.ID
+LEFT JOIN PRODUTOEMPRESA p2 ON p2.ID = p3.ID
+LEFT JOIN PRODUTOESERVICOEMPRESA p4 ON p4.ID = p3.ID
+WHERE 1=1
+AND (p3.ATIVO = 1 OR p3.ATIVO IS NULL)
+ORDER BY p3.DESCRICAO;
+
+-- ============================================
+-- COM FILTRO DE GRUPO
+-- ============================================
+-- Exemplo: grupo 1
+SELECT FIRST 50 SKIP 0
+    p3.ID, 
+    p1.CODIGOBARRA, 
+    p3.CODIGOINTERNO, 
+    p3.DESCRICAO, 
+    p3.CARACTERISTICA,
+    p2.QUANTIDADE, 
+    p2.QUANTIDADEMINIMA, 
+    p2.LOCALIZACAO,
+    p4.PRECOCUSTO, 
+    p4.PRECOVENDA, 
+    p4.ATACADO, 
+    p4.PRECO3,
+    p3.UN_MEDIDA, 
+    p3.ATIVO, 
+    p3.GRUPO, 
+    p1.PESAVEL, 
+    p3.MARCA,
+    p3.CATEGORIA, 
+    p3.COR, 
+    p3.TAMANHO, 
+    p3.DATAINCLUSAO,
+    p2.DATAULTIMAVENDA, 
+    p2.DATAULTIMACOMPRA
+FROM PRODUTOESERVICO p3
+LEFT JOIN PRODUTO p1 ON p1.ID = p3.ID
+LEFT JOIN PRODUTOEMPRESA p2 ON p2.ID = p3.ID
+LEFT JOIN PRODUTOESERVICOEMPRESA p4 ON p4.ID = p3.ID
+WHERE 1=1
+AND p3.GRUPO = 1
+ORDER BY p3.DESCRICAO;
+
+-- ============================================
+-- QUERY COMPLETA COM TODOS OS FILTROS
+-- ============================================
+-- Exemplo: buscar "coca" no grupo 1, apenas ativos
+SELECT FIRST 50 SKIP 0
+    p3.ID, 
+    p1.CODIGOBARRA, 
+    p3.CODIGOINTERNO, 
+    p3.DESCRICAO, 
+    p3.CARACTERISTICA,
+    p2.QUANTIDADE, 
+    p2.QUANTIDADEMINIMA, 
+    p2.LOCALIZACAO,
+    p4.PRECOCUSTO, 
+    p4.PRECOVENDA, 
+    p4.ATACADO, 
+    p4.PRECO3,
+    p3.UN_MEDIDA, 
+    p3.ATIVO, 
+    p3.GRUPO, 
+    p1.PESAVEL, 
+    p3.MARCA,
+    p3.CATEGORIA, 
+    p3.COR, 
+    p3.TAMANHO, 
+    p3.DATAINCLUSAO,
+    p2.DATAULTIMAVENDA, 
+    p2.DATAULTIMACOMPRA
+FROM PRODUTOESERVICO p3
+LEFT JOIN PRODUTO p1 ON p1.ID = p3.ID
+LEFT JOIN PRODUTOEMPRESA p2 ON p2.ID = p3.ID
+LEFT JOIN PRODUTOESERVICOEMPRESA p4 ON p4.ID = p3.ID
+WHERE 1=1
+AND (
+    (p1.CODIGOBARRA IS NOT NULL AND p1.CODIGOBARRA = 'coca') OR
+    (p3.DESCRICAO IS NOT NULL AND UPPER(p3.DESCRICAO) CONTAINING UPPER('coca')) OR
+    (p3.CARACTERISTICA IS NOT NULL AND UPPER(p3.CARACTERISTICA) CONTAINING UPPER('coca')) OR
+    (p3.CODIGOINTERNO IS NOT NULL AND p3.CODIGOINTERNO = 'coca') OR
+    p3.ID = 0
+)
+AND (p3.ATIVO = 1 OR p3.ATIVO IS NULL)
+AND p3.GRUPO = 1
+ORDER BY p3.DESCRICAO;
+
+-- ============================================
+-- QUERY SIMPLIFICADA PARA TESTE
+-- ============================================
+-- Use esta para testar se há produtos na tabela
+SELECT COUNT(*) AS TOTAL_PRODUTOS
+FROM PRODUTOESERVICO;
+
+-- Verificar produtos ativos
+SELECT COUNT(*) AS PRODUTOS_ATIVOS
+FROM PRODUTOESERVICO
+WHERE ATIVO = 1 OR ATIVO IS NULL;
+
+-- Verificar produtos com descrição
+SELECT COUNT(*) AS PRODUTOS_COM_DESCRICAO
+FROM PRODUTOESERVICO
+WHERE DESCRICAO IS NOT NULL;
+
+-- Ver alguns produtos de exemplo
+SELECT FIRST 10
+    ID,
+    DESCRICAO,
+    CODIGOINTERNO,
+    ATIVO,
+    GRUPO
+FROM PRODUTOESERVICO
+ORDER BY DESCRICAO;
+
+-- ============================================
+-- DIAGNÓSTICO
+-- ============================================
+-- Execute estas queries para diagnosticar problemas:
+
+-- 1. Verificar se há produtos
+SELECT COUNT(*) AS TOTAL FROM PRODUTOESERVICO;
+
+-- 2. Verificar produtos ativos
+SELECT COUNT(*) AS ATIVOS FROM PRODUTOESERVICO WHERE ATIVO = 1 OR ATIVO IS NULL;
+
+-- 3. Verificar produtos inativos
+SELECT COUNT(*) AS INATIVOS FROM PRODUTOESERVICO WHERE ATIVO = 0;
+
+-- 4. Verificar produtos sem grupo
+SELECT COUNT(*) AS SEM_GRUPO FROM PRODUTOESERVICO WHERE GRUPO IS NULL OR GRUPO = 0;
+
+-- 5. Verificar produtos com descrição vazia
+SELECT COUNT(*) AS SEM_DESCRICAO FROM PRODUTOESERVICO WHERE DESCRICAO IS NULL OR TRIM(DESCRICAO) = '';
+
+-- 6. Verificar estrutura das tabelas relacionadas
+SELECT COUNT(*) AS PRODUTO FROM PRODUTO;
+SELECT COUNT(*) AS PRODUTOEMPRESA FROM PRODUTOEMPRESA;
+SELECT COUNT(*) AS PRODUTOESERVICOEMPRESA FROM PRODUTOESERVICOEMPRESA;

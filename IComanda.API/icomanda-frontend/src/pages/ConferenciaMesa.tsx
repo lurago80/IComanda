@@ -3,7 +3,6 @@ import { ArrowLeft, Edit, Printer, Receipt, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { conferenciaService, type ConferenciaMesa } from '../services/conferenciaService';
 import { useCartStore } from '../store/cartStore';
-import '../styles/print.css';
 
 interface ConferenciaMesaPageProps {
   onClose: () => void;
@@ -16,6 +15,7 @@ const ConferenciaMesaPage: React.FC<ConferenciaMesaPageProps> = ({ onClose }) =>
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
   const carregarPedidoParaEdicao = useCartStore((state) => state.carregarPedidoParaEdicao);
+  const { flowState, comandaAtiva, vendaEmEdicao, items: cartItems, fecharComanda, clearCart, finalizarEdicao } = useCartStore();
 
   const handleBuscar = async () => {
     if (!numero || numero.trim() === '') {
@@ -66,15 +66,53 @@ const ConferenciaMesaPage: React.FC<ConferenciaMesaPageProps> = ({ onClose }) =>
   };
 
   const handleImprimir = () => {
+    const limparModoCupom = () => {
+      document.body.classList.remove('print-cupom');
+      window.removeEventListener('afterprint', limparModoCupom);
+    };
+
+    document.body.classList.add('print-cupom');
+    window.addEventListener('afterprint', limparModoCupom, { once: true });
     window.print();
+    setTimeout(limparModoCupom, 2000);
   };
 
   const handleEditar = () => {
     if (!conferencia) return;
 
+    // Verificar se há pedido em andamento que seria sobrescrito
+    const temComandaNova = flowState === 'nova' && comandaAtiva;
+    const temEdicaoAtiva = flowState === 'edicao' && vendaEmEdicao;
+
+    if (temComandaNova || temEdicaoAtiva) {
+      let mensagem = '';
+      if (temComandaNova) {
+        const numComanda = comandaAtiva!.numeroComanda;
+        const numItens = cartItems.length;
+        mensagem = numItens > 0
+          ? `Você está lançando itens na Comanda #${numComanda} (${numItens} item${numItens !== 1 ? 's' : ''} no carrinho).\n\nSe importar esta comanda agora, todos esses itens serão DESCARTADOS.\n\nDeseja mesmo continuar?`
+          : `Você tem a Comanda #${numComanda} aberta.\n\nImportar esta comanda irá descartá-la.\n\nDeseja continuar?`;
+      } else {
+        const numComanda = vendaEmEdicao!.comanda;
+        const notaAtual = vendaEmEdicao!.nota;
+        mensagem = `Você está editando a Comanda #${numComanda ?? ''} (Pedido ${notaAtual}).\n\nImportar esta comanda irá descartar as alterações não salvas.\n\nDeseja continuar?`;
+      }
+
+      const confirmado = window.confirm(mensagem);
+      if (!confirmado) return;
+
+      if (temComandaNova) {
+        fecharComanda();
+        clearCart();
+      } else {
+        finalizarEdicao();
+        clearCart();
+      }
+    }
+
     // Carregar os itens da conferência no carrinho
     const vendaInfo: { nota: string; mesa?: number; comanda?: number } = {
-      nota: String(conferencia.comanda || conferencia.mesa || ''),
+      nota: conferencia.nota, // Usar a nota real da venda
       ...(conferencia.mesa && { mesa: conferencia.mesa }),
       ...(conferencia.comanda && { comanda: conferencia.comanda })
     };
@@ -179,9 +217,10 @@ const ConferenciaMesaPage: React.FC<ConferenciaMesaPageProps> = ({ onClose }) =>
             >
               {/* Cabeçalho do Cupom */}
               <div className="bg-primary p-6 text-primary-foreground text-center">
-                <div className="text-4xl mb-2">📋</div>
-                <h2 className="text-2xl font-bold">PADARIA ICOMANDA</h2>
-                <p className="text-primary-foreground/80 text-sm mt-1">Conferência de Conta</p>
+                <div className="h-24 mx-auto mb-2 flex items-center justify-center px-6 py-3 rounded-xl inline-flex">
+                  <img src="/iComanda.jpg" alt="iComanda Logo" className="h-full w-auto object-contain" />
+                </div>
+                <p className="text-primary-foreground/80 text-sm mt-3">Conferência de Conta</p>
               </div>
 
               {/* Informações */}
@@ -215,18 +254,33 @@ const ConferenciaMesaPage: React.FC<ConferenciaMesaPageProps> = ({ onClose }) =>
               {/* Itens */}
               <div className="p-6">
                 <h3 className="text-lg font-bold text-text-primary mb-4">Itens Consumidos</h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
+                  {/* Cabeçalho: Hora | Qtd | Descrição | Preço unit. | Total */}
+                  <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2 py-1 text-xs font-semibold text-text-secondary border-b border-border">
+                    <span className="w-14">Hora</span>
+                    <span>Descrição</span>
+                    <span className="text-right">Unit.</span>
+                    <span className="text-right w-20">Total</span>
+                  </div>
                   {conferencia.itens.map((item, index) => (
-                    <div key={index} className="flex justify-between items-start py-2 border-b border-border last:border-0">
-                      <div className="flex-1">
-                        <p className="font-medium text-text-primary">{item.descricao}</p>
-                        <p className="text-sm text-text-secondary">
-                          {item.qtd} x R$ {formatarPreco(item.precoUnitario)}
+                    <div key={index} className="grid grid-cols-[auto_1fr_auto_auto] gap-2 items-baseline py-2 border-b border-border last:border-0">
+                      <span className="text-sm font-mono text-text-secondary w-14 tabular-nums">
+                        {item.horaLancamento ?? '--:--:--'}
+                      </span>
+                      <div>
+                        <p className="font-medium text-text-primary">
+                          {Number(item.qtd) === Math.floor(Number(item.qtd)) ? String(Math.floor(Number(item.qtd))).padStart(2, '0') : item.qtd} {item.descricao}
                         </p>
+                        {item.observacao ? (
+                          <p className="text-xs text-text-secondary">{item.observacao}</p>
+                        ) : null}
                       </div>
-                      <div className="font-bold text-text-primary">
+                      <span className="text-sm text-text-secondary text-right">
+                        R$ {formatarPreco(item.precoUnitario)}
+                      </span>
+                      <span className="font-bold text-text-primary text-right w-20">
                         R$ {formatarPreco(item.total)}
-                      </div>
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -290,7 +344,7 @@ const ConferenciaMesaPage: React.FC<ConferenciaMesaPageProps> = ({ onClose }) =>
           <div id="cupom-print" className="hidden print:block">
             {/* Cabeçalho */}
             <div className="print-header">
-              <h1>PADARIA ICOMANDA</h1>
+              <h1>ICOMANDA</h1>
               <p>CONFERENCIA DE CONTA</p>
               <p>{formatarData(conferencia.dataHora)}</p>
             </div>
@@ -324,13 +378,16 @@ const ConferenciaMesaPage: React.FC<ConferenciaMesaPageProps> = ({ onClose }) =>
             {/* Separador */}
             <div className="print-separator"></div>
 
-            {/* Itens */}
+            {/* Itens (Hora | Qtd Descrição | Unit. | Total) */}
             <div className="print-items">
               {conferencia.itens.map((item, index) => (
                 <div key={index} className="print-item">
-                  <div className="print-item-header">{item.descricao}</div>
+                  <div className="print-item-header">
+                    <span className="print-item-hora">{item.horaLancamento ?? '--:--:--'}</span>
+                    <span>{Number(item.qtd) === Math.floor(Number(item.qtd)) ? String(Math.floor(Number(item.qtd))).padStart(2, '0') : item.qtd} {item.descricao}</span>
+                  </div>
                   <div className="print-item-details">
-                    <span>{item.qtd} x R$ {formatarPreco(item.precoUnitario)}</span>
+                    <span>R$ {formatarPreco(item.precoUnitario)}</span>
                     <span>R$ {formatarPreco(item.total)}</span>
                   </div>
                 </div>

@@ -25,6 +25,7 @@ public class ItemVendaTemporario
     public decimal Acrescimo { get; set; }
     public decimal Total { get; set; }
     public string? Serial { get; set; }
+    public string? Observacao { get; set; } // Usando campo Serial para observações temporariamente
     public int Tipo { get; set; } = 1; // Tipo 1 = item de venda normal
 }
 

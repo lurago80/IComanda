@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IComanda.API.Models.DTOs;
 using IComanda.API.Models.Requests;
@@ -11,6 +12,7 @@ namespace IComanda.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class ClientesController : ControllerBase
 {
     private readonly IClienteService _clienteService;
@@ -235,23 +237,17 @@ public class ClientesController : ControllerBase
     {
         try
         {
-            // Validações básicas
+            // Validação básica: apenas Nome é obrigatório
             if (string.IsNullOrWhiteSpace(request.Nome))
             {
                 return BadRequest("Nome é obrigatório");
             }
 
-            if (string.IsNullOrWhiteSpace(request.CpfCnpj))
-            {
-                return BadRequest("CPF/CNPJ é obrigatório");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.Telefone))
-            {
-                return BadRequest("Telefone é obrigatório");
-            }
-
-            _logger.LogInformation("Cadastrando cliente rápido: {Nome}", request.Nome);
+            // CPF/CNPJ e Telefone são OPCIONAIS - permitir cadastro apenas com nome
+            _logger.LogInformation("Cadastrando cliente rápido: Nome={Nome}, CPF/CNPJ={CpfCnpj}, Telefone={Telefone}", 
+                request.Nome, 
+                string.IsNullOrWhiteSpace(request.CpfCnpj) ? "(não informado)" : request.CpfCnpj,
+                string.IsNullOrWhiteSpace(request.Telefone) ? "(não informado)" : request.Telefone);
 
             var cliente = await _clienteService.CadastroRapidoAsync(request);
 
@@ -267,7 +263,129 @@ public class ClientesController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao cadastrar cliente rápido");
+            // Propagar a mensagem real para o frontend poder exibir o motivo correto
+            var mensagemReal = ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, mensagemReal);
+        }
+    }
+
+    /// <summary>
+    /// Cria um novo cliente completo
+    /// </summary>
+    /// <param name="request">Dados do cliente</param>
+    /// <returns>Cliente criado</returns>
+    /// <response code="201">Cliente criado com sucesso</response>
+    /// <response code="400">Dados inválidos</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpPost]
+    [ProducesResponseType(typeof(ClienteDto), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ClienteDto>> CriarCliente([FromBody] CriarClienteRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Nome))
+            {
+                return BadRequest("Nome é obrigatório");
+            }
+
+            _logger.LogInformation("Criando cliente: {Nome}", request.Nome);
+
+            var cliente = await _clienteService.CriarClienteAsync(request);
+
+            _logger.LogInformation("Cliente criado: {Id} - {Nome}", cliente.Id, cliente.Nome);
+
+            return CreatedAtAction(nameof(GetCliente), new { id = cliente.Id }, cliente);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Erro de validação ao criar cliente");
+            return BadRequest(ex.Message);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Erro de validação ao criar cliente");
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao criar cliente");
             return StatusCode(500, "Erro interno do servidor");
+        }
+    }
+
+    /// <summary>
+    /// Atualiza um cliente existente
+    /// </summary>
+    /// <param name="id">ID do cliente</param>
+    /// <param name="request">Dados do cliente</param>
+    /// <returns>Cliente atualizado</returns>
+    /// <response code="200">Cliente atualizado com sucesso</response>
+    /// <response code="400">Dados inválidos</response>
+    /// <response code="404">Cliente não encontrado</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(ClienteDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<ClienteDto>> AtualizarCliente(int id, [FromBody] CriarClienteRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Nome))
+            {
+                return BadRequest("Nome é obrigatório");
+            }
+
+            _logger.LogInformation("Atualizando cliente: {Id}", id);
+
+            var cliente = await _clienteService.AtualizarClienteAsync(id, request);
+
+            _logger.LogInformation("Cliente atualizado: {Id} - {Nome}", cliente.Id, cliente.Nome);
+
+            return Ok(cliente);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Erro ao atualizar cliente: {Id}", id);
+            if (ex.Message.Contains("não encontrado"))
+            {
+                return NotFound(ex.Message);
+            }
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao atualizar cliente: {Id}", id);
+            return StatusCode(500, "Erro interno do servidor");
+        }
+    }
+
+    [HttpDelete("{id}")]
+    [ProducesResponseType(204)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> ExcluirCliente(int id)
+    {
+        try
+        {
+            await _clienteService.ExcluirClienteAsync(id);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Operação inválida ao excluir cliente {Id}", id);
+            if (ex.Message.Contains("não encontrado"))
+                return NotFound(new { mensagem = ex.Message });
+            return BadRequest(new { mensagem = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao excluir cliente {Id}", id);
+            return StatusCode(500, new { mensagem = "Erro interno do servidor" });
         }
     }
 }

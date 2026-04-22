@@ -37,5 +37,14 @@ public class VendaDto
     public int? Comanda { get; set; }
     public int? Mesa { get; set; }
     public int? NumeroPessoas { get; set; }
+    public string? NomeCliente { get; set; }
+    public string? TelefoneCliente { get; set; }
+    /// <summary>Endereço completo de entrega (para reimpressão de recibo delivery).</summary>
+    public string? EnderecoEntrega { get; set; }
+    /// <summary>Ponto de referência do cliente (COMPL1), para reimpressão delivery.</summary>
+    public string? PontoReferencia { get; set; }
+    /// <summary>Nome fantasia (ou razão social) do estabelecimento — para mensagem WhatsApp.</summary>
+    public string? NomeEstabelecimento { get; set; }
     public List<ItemVendaDto> Itens { get; set; } = new();
+    public ContasAbertoDto? ContasAberto { get; set; }
 }

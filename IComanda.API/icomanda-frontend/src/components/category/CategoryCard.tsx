@@ -52,37 +52,32 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ grupo, onClick }) => {
       className="card-modern cursor-pointer group animate-fade-in-up"
       onClick={onClick}
     >
-      <div className="flex items-center space-x-6">
-        {/* Ícone com gradiente e animação */}
-        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center shadow-large group-hover:shadow-glow transition-all duration-500 ${getColorForGrupo(grupo.id)}`}>
-          <div className="group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">
-            {getIconForGrupo(grupo.descricao)}
-          </div>
+      <div className="flex items-center gap-3">
+        {/* Ícone */}
+        <div className={`w-12 h-12 flex-shrink-0 rounded-2xl flex items-center justify-center transition-all duration-500 ${getColorForGrupo(grupo.id)}`}>
+          {getIconForGrupo(grupo.descricao)}
         </div>
 
         {/* Informações */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-text-primary text-xl truncate group-hover:text-gradient transition-all duration-300 mb-2">
+        <div className="flex-1 overflow-hidden">
+          <h3 className="font-bold text-text-primary text-sm leading-snug mb-1 line-clamp-2">
             {grupo.descricao || 'Categoria'}
           </h3>
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-primary rounded-full animate-pulse-soft"></div>
-              <span className="text-sm text-text-secondary font-medium">
-                {grupo.quantidadeProdutos} {grupo.quantidadeProdutos === 1 ? 'produto' : 'produtos'}
-              </span>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-text-secondary font-medium">
+              {grupo.quantidadeProdutos} {grupo.quantidadeProdutos === 1 ? 'produto' : 'produtos'}
+            </span>
             {grupo.quantidadeProdutos > 0 && (
-              <div className="px-3 py-1 bg-primary/10 border border-primary/20 rounded-full">
-                <span className="text-xs text-primary font-semibold">Disponível</span>
-              </div>
+              <span className="text-xs text-primary font-semibold bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5 leading-none">
+                Disponível
+              </span>
             )}
           </div>
         </div>
 
-        {/* Seta com animação melhorada */}
-        <div className="w-12 h-12 bg-card-secondary border border-border rounded-2xl flex items-center justify-center text-text-secondary group-hover:text-primary group-hover:bg-primary/10 group-hover:border-primary/30 transition-all duration-300 group-hover:translate-x-1 group-hover:scale-105">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Seta */}
+        <div className="w-8 h-8 flex-shrink-0 bg-card-secondary border border-border rounded-xl flex items-center justify-center text-text-secondary group-hover:text-primary group-hover:bg-primary/10 group-hover:border-primary/30 transition-all duration-300">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
           </svg>
         </div>

@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IComanda.API.Models.DTOs;
+using IComanda.API.Models.Requests;
 using IComanda.API.Services.Interfaces;
 
 namespace IComanda.API.Controllers;
@@ -10,6 +12,7 @@ namespace IComanda.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class GruposController : ControllerBase
 {
     private readonly IGrupoService _grupoService;
@@ -36,18 +39,29 @@ public class GruposController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Buscando todos os grupos");
+            _logger.LogInformation("🔍 [GruposController] Buscando todos os grupos");
 
             var grupos = await _grupoService.GetAllGruposAsync();
+            var gruposList = grupos.ToList();
 
-            _logger.LogInformation("Encontrados {Count} grupos", grupos.Count());
+            _logger.LogInformation("✅ [GruposController] Encontrados {Count} grupos", gruposList.Count);
+            
+            if (gruposList.Count > 0)
+            {
+                _logger.LogInformation("📦 [GruposController] Primeiros grupos: {Grupos}", 
+                    string.Join(", ", gruposList.Take(5).Select(g => $"{g.Id}:{g.Descricao}")));
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [GruposController] Nenhum grupo encontrado na tabela GRUPO");
+            }
 
-            return Ok(grupos);
+            return Ok(gruposList);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao buscar grupos");
-            return StatusCode(500, "Erro interno do servidor");
+            _logger.LogError(ex, "❌ [GruposController] Erro ao buscar grupos. Erro: {Message}", ex.Message);
+            return StatusCode(500, new { error = $"Erro ao buscar grupos: {ex.Message}" });
         }
     }
 
@@ -92,52 +106,30 @@ public class GruposController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Buscando todos os grupos com quantidade de produtos");
+            _logger.LogInformation("🔍 [GruposController] Buscando todos os grupos com quantidade de produtos");
 
-            // Usar o endpoint básico que funciona
-            var grupos = await _grupoService.GetAllGruposAsync();
+            // Usar o método do repositório que já faz o JOIN
+            var grupos = await _grupoService.GetGruposComQuantidadeTodosAsync();
+            var gruposList = grupos.ToList();
 
-            // Para cada grupo, buscar a quantidade de produtos
-            var gruposComQuantidade = new List<GrupoDto>();
-
-            foreach (var grupo in grupos)
+            _logger.LogInformation("✅ [GruposController] Encontrados {Count} grupos com quantidade", gruposList.Count);
+            
+            if (gruposList.Count > 0)
             {
-                try
-                {
-                    // Buscar produtos do grupo
-                    var produtos = await _produtoService.BuscarProdutosAsync(new Models.Requests.BuscarProdutoRequest
-                    {
-                        Grupo = grupo.Id,
-                        Ativo = true
-                    });
-
-                    gruposComQuantidade.Add(new GrupoDto
-                    {
-                        Id = grupo.Id,
-                        Descricao = grupo.Descricao,
-                        QuantidadeProdutos = produtos.Count()
-                    });
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "Erro ao buscar produtos do grupo {GrupoId}, usando quantidade 0", grupo.Id);
-                    gruposComQuantidade.Add(new GrupoDto
-                    {
-                        Id = grupo.Id,
-                        Descricao = grupo.Descricao,
-                        QuantidadeProdutos = 0
-                    });
-                }
+                _logger.LogInformation("📦 [GruposController] Primeiros grupos: {Grupos}", 
+                    string.Join(", ", gruposList.Take(5).Select(g => $"{g.Id}:{g.Descricao} ({g.QuantidadeProdutos} produtos)")));
+            }
+            else
+            {
+                _logger.LogWarning("⚠️ [GruposController] Nenhum grupo encontrado");
             }
 
-            _logger.LogInformation("Encontrados {Count} grupos", gruposComQuantidade.Count());
-
-            return Ok(gruposComQuantidade);
+            return Ok(gruposList);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao buscar todos os grupos com quantidade");
-            return StatusCode(500, "Erro interno do servidor");
+            _logger.LogError(ex, "❌ [GruposController] Erro ao buscar todos os grupos com quantidade. Erro: {Message}", ex.Message);
+            return StatusCode(500, new { error = $"Erro ao buscar grupos: {ex.Message}" });
         }
     }
 
@@ -174,6 +166,130 @@ public class GruposController : ControllerBase
         {
             _logger.LogError(ex, "Erro ao buscar grupo com ID: {Id}", id);
             return StatusCode(500, "Erro interno do servidor");
+        }
+    }
+
+    /// <summary>
+    /// Cria um novo grupo
+    /// </summary>
+    /// <param name="request">Dados do grupo a ser criado</param>
+    /// <returns>Grupo criado</returns>
+    /// <response code="201">Grupo criado com sucesso</response>
+    /// <response code="400">Dados inválidos</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpPost]
+    [ProducesResponseType(typeof(GrupoDto), 201)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<GrupoDto>> CriarGrupo([FromBody] CriarGrupoRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Descricao))
+            {
+                return BadRequest(new { error = "A descrição do grupo é obrigatória" });
+            }
+
+            _logger.LogInformation("🔍 [GruposController] Criando grupo - Descricao: {Descricao}", request.Descricao);
+
+            var grupo = await _grupoService.CriarGrupoAsync(request.Descricao, request.ImprimirDuasVias);
+
+            _logger.LogInformation("✅ [GruposController] Grupo criado com sucesso - ID: {Id}", grupo.Id);
+
+            return CreatedAtAction(nameof(GetGrupo), new { id = grupo.Id }, grupo);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [GruposController] Erro ao criar grupo. Mensagem: {Message}", ex.Message);
+            return StatusCode(500, new { error = $"Erro ao criar grupo: {ex.Message}" });
+        }
+    }
+
+    /// <summary>
+    /// Atualiza um grupo existente
+    /// </summary>
+    /// <param name="id">ID do grupo</param>
+    /// <param name="request">Dados do grupo a ser atualizado</param>
+    /// <returns>Grupo atualizado</returns>
+    /// <response code="200">Grupo atualizado com sucesso</response>
+    /// <response code="400">Dados inválidos</response>
+    /// <response code="404">Grupo não encontrado</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpPut("{id}")]
+    [ProducesResponseType(typeof(GrupoDto), 200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult<GrupoDto>> AtualizarGrupo(int id, [FromBody] AtualizarGrupoRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.Descricao))
+            {
+                return BadRequest(new { error = "A descrição do grupo é obrigatória" });
+            }
+
+            _logger.LogInformation("🔍 [GruposController] Atualizando grupo - ID: {Id}, Descricao: {Descricao}", id, request.Descricao);
+
+            var grupo = await _grupoService.AtualizarGrupoAsync(id, request.Descricao, request.ImprimirDuasVias);
+
+            _logger.LogInformation("✅ [GruposController] Grupo atualizado com sucesso - ID: {Id}", id);
+
+            return Ok(grupo);
+        }
+        catch (KeyNotFoundException)
+        {
+            _logger.LogWarning("⚠️ [GruposController] Grupo com ID {Id} não encontrado", id);
+            return NotFound(new { error = $"Grupo com ID {id} não encontrado" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [GruposController] Erro ao atualizar grupo. Mensagem: {Message}", ex.Message);
+            return StatusCode(500, new { error = $"Erro ao atualizar grupo: {ex.Message}" });
+        }
+    }
+
+    /// <summary>
+    /// Exclui um grupo
+    /// </summary>
+    /// <param name="id">ID do grupo</param>
+    /// <returns>Resultado da exclusão</returns>
+    /// <response code="200">Grupo excluído com sucesso</response>
+    /// <response code="400">Não é possível excluir o grupo (há produtos associados)</response>
+    /// <response code="404">Grupo não encontrado</response>
+    /// <response code="500">Erro interno do servidor</response>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(400)]
+    [ProducesResponseType(404)]
+    [ProducesResponseType(500)]
+    public async Task<ActionResult> ExcluirGrupo(int id)
+    {
+        try
+        {
+            _logger.LogInformation("🔍 [GruposController] Excluindo grupo - ID: {Id}", id);
+
+            var excluido = await _grupoService.ExcluirGrupoAsync(id);
+
+            if (!excluido)
+            {
+                _logger.LogWarning("⚠️ [GruposController] Grupo com ID {Id} não encontrado", id);
+                return NotFound(new { error = $"Grupo com ID {id} não encontrado" });
+            }
+
+            _logger.LogInformation("✅ [GruposController] Grupo excluído com sucesso - ID: {Id}", id);
+
+            return Ok(new { message = "Grupo excluído com sucesso" });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning("⚠️ [GruposController] Não é possível excluir grupo {Id}: {Message}", id, ex.Message);
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "❌ [GruposController] Erro ao excluir grupo. Mensagem: {Message}", ex.Message);
+            return StatusCode(500, new { error = $"Erro ao excluir grupo: {ex.Message}" });
         }
     }
 }

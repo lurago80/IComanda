@@ -79,5 +79,17 @@ public class UsuarioRepository : IUsuarioRepository
 
         return await connection.QueryAsync<Usuario>(sql);
     }
+
+    public async Task AtualizarSenhaAsync(int usuarioId, string novaSenhaHash)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        
+        const string sql = @"
+            UPDATE USUARIO 
+            SET SENHA = @NovaSenhaHash
+            WHERE ID = @UsuarioId";
+
+        await connection.ExecuteAsync(sql, new { UsuarioId = usuarioId, NovaSenhaHash = novaSenhaHash });
+    }
 }
 

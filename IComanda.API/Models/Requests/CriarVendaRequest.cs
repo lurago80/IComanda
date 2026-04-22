@@ -26,6 +26,11 @@ public class CriarVendaRequest
     public string FormasPgto { get; set; } = string.Empty;
 
     /// <summary>
+    /// Indica se o delivery já foi pago (pagamento antecipado via PIX, cartão online, etc.)
+    /// </summary>
+    public bool JaPagoDelivery { get; set; } = false;
+
+    /// <summary>
     /// Total dos produtos
     /// </summary>
     public decimal TotProdutos { get; set; }
@@ -104,6 +109,11 @@ public class CriarVendaRequest
     /// Número de pessoas
     /// </summary>
     public int? NumeroPessoas { get; set; }
+
+    /// <summary>
+    /// Origem da venda: BA = balcão/comanda, DL = delivery. Se não informado, usa BA.
+    /// </summary>
+    public string? Origem { get; set; }
 
     /// <summary>
     /// Itens da venda

@@ -65,6 +65,9 @@ public class Cliente
     public string? Site { get; set; }
     public short Bloqueado { get; set; }
     public int IdRota { get; set; }
+    public decimal? ValorAluguel { get; set; }
+    public DateTime? VencAluguel { get; set; }
+    public decimal? Comissao { get; set; }
 
     // Propriedades calculadas para facilitar o uso
     public bool IsAtivo => Ativo == 1;

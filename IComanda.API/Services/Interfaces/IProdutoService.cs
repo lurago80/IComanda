@@ -11,4 +11,11 @@ public interface IProdutoService
     Task<ProdutoDto?> GetProdutoPorCodigoBarraAsync(string codigoBarra);
     Task<ProdutoDto?> GetProdutoPorCodigoInternoAsync(string codigoInterno);
     Task<(IEnumerable<ProdutoDto> Produtos, int Total)> BuscarProdutosComPaginacaoAsync(BuscarProdutoRequest request);
+    
+    // Métodos CRUD completos
+    Task<ProdutoCompletoDto?> GetProdutoCompletoAsync(int id);
+    Task<IEnumerable<ProdutoCompletoDto>> BuscarProdutosCompletosAsync(string? termo, bool? ativo = null, int pagina = 1, int itensPorPagina = 50);
+    Task<int> CriarProdutoAsync(CriarProdutoRequest request);
+    Task<bool> AtualizarProdutoAsync(int id, AtualizarProdutoRequest request);
+    Task<bool> ExcluirProdutoAsync(int id);
 }
