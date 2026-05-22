@@ -111,11 +111,11 @@ function App() {
       setIsLoggedIn(false);
       return;
     }
-    // Atualiza role/permissões do banco ANTES de mostrar o menu,
-    // para que botões restritos a Gerente apareçam corretamente na primeira renderização.
+    // Busca role atualizado do banco antes de mostrar o menu.
+    // Excluído do interceptor de 401 (ver api.ts) para não disparar session:expired.
     api.get('/auth/me')
       .then(res => {
-        const existing = JSON.parse(raw);
+        const existing = JSON.parse(localStorage.getItem('usuario_logado') || raw);
         localStorage.setItem('usuario_logado', JSON.stringify({
           ...existing,
           role: res.data.role,
@@ -123,11 +123,15 @@ function App() {
           podeVerTotal: res.data.podeVerTotal,
           podeCancelar: res.data.podeCancelar,
         }));
-      })
-      .catch(() => {}) // mantém dados existentes se API falhar
-      .finally(() => {
         if (process.env.NODE_ENV !== 'production') {
-          console.log('✅ [App] Usuário autenticado');
+          console.log('✅ [App] Usuário autenticado — role:', res.data.role);
+        }
+        setIsLoggedIn(true);
+      })
+      .catch(() => {
+        // Falha no /auth/me (token expirado, API offline): usa dados existentes do localStorage.
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('⚠️ [App] /auth/me falhou — usando role do localStorage');
         }
         setIsLoggedIn(true);
       });

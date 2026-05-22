@@ -54,8 +54,9 @@ api.interceptors.response.use(
       const isLoginRoute = url.includes('/auth/login');
       const isRefreshRoute = url.includes('/auth/refresh');
       const isBusinessRoute = url.includes('excluir-comanda');
+      const isMeRoute = url.includes('/auth/me'); // não disparar session:expired no startup
 
-      if (!isLoginRoute && !isRefreshRoute && !isBusinessRoute) {
+      if (!isLoginRoute && !isRefreshRoute && !isBusinessRoute && !isMeRoute) {
         const refreshToken = localStorage.getItem('refresh_token');
 
         if (refreshToken) {
