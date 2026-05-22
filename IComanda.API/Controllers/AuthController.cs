@@ -332,25 +332,33 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Retorna o perfil do usuário autenticado (role + permissões)
+    /// Retorna o perfil atualizado do usuário autenticado, consultando o banco de dados.
+    /// Garante que mudanças de permissão reflitam sem necessidade de novo login.
     /// </summary>
     [HttpGet("me")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public IActionResult Me()
+    public async Task<IActionResult> Me()
     {
-        var userId = User.FindFirst("UserId")?.Value;
-        var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
-        var role = User.FindFirst("Role")?.Value;
-        var permissions = User.FindAll("Permission").Select(c => c.Value).ToList();
+        var userIdStr = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        if (!int.TryParse(userIdStr, out var userId))
+            return Unauthorized(new { error = "Token inválido" });
+
+        var usuario = await _usuarioRepository.BuscarPorIdAsync(userId);
+        if (usuario == null)
+            return Unauthorized(new { error = "Usuário não encontrado" });
+
+        var role = DetermineUserRole(usuario);
 
         return Ok(new
         {
-            userId = userId != null ? int.Parse(userId) : 0,
-            username,
-            role,
-            permissions
+            id = usuario.Id,
+            nome = usuario.Nome,
+            role = role.ToString(),
+            podeVisualizar = usuario.Visualizar?.Equals("1", StringComparison.OrdinalIgnoreCase) ?? false,
+            podeVerTotal = usuario.Total?.Equals("1", StringComparison.OrdinalIgnoreCase) ?? false,
+            podeCancelar = usuario.Cancelar?.Equals("1", StringComparison.OrdinalIgnoreCase) ?? false
         });
     }
 

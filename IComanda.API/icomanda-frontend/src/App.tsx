@@ -91,6 +91,7 @@ function App() {
   const [produtoEditando, setProdutoEditando] = useState<ProdutoCompleto | null>(null);
   const [notaCaixaRapido, setNotaCaixaRapido] = useState<string | null>(null);
   const { toasts, removeToast, showError, showSuccess } = useToast();
+  const [, setCurrentUserVersion] = useState(0);
   const currentUser = useCurrentUser();
   const { setComandaAtiva, comandaAtiva, flowState, setFlowState, carregarPedidoParaEdicao, setCaixaRapidoMode, setDeliveryMode, setDeliveryClientePreSelecionado, clearCart, finalizarEdicao, fecharComanda, addItem, setCartOpen, items: cartItems, vendaEmEdicao } = useCartStore();
   const [showTaxaEntregaModal, setShowTaxaEntregaModal] = useState(false);
@@ -118,6 +119,27 @@ function App() {
     
     setIsLoggedIn(estaLogado);
   }, []);
+
+  // Sincroniza role/permissões do usuário com o banco sempre que logar
+  // Garante que mudanças de permissão reflitam sem precisar de logout/login manual
+  useEffect(() => {
+    if (!isLoggedIn) return;
+    api.get('/auth/me')
+      .then(res => {
+        const raw = localStorage.getItem('usuario_logado');
+        if (!raw) return;
+        const existing = JSON.parse(raw);
+        localStorage.setItem('usuario_logado', JSON.stringify({
+          ...existing,
+          role: res.data.role,
+          podeVisualizar: res.data.podeVisualizar,
+          podeVerTotal: res.data.podeVerTotal,
+          podeCancelar: res.data.podeCancelar,
+        }));
+        setCurrentUserVersion(v => v + 1); // força re-render para ler localStorage atualizado
+      })
+      .catch(() => {}); // mantém dados existentes em caso de erro
+  }, [isLoggedIn]);
 
   // Ouve o evento de sessão expirada emitido pelo interceptor de API
   useEffect(() => {
