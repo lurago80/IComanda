@@ -55,7 +55,7 @@ import FormasPagamentoPage from './pages/FormasPagamentoPage';
 import { useCurrentUser, isGerente, isCaixa } from './hooks/useCurrentUser';
 import { useCartStore } from './store/cartStore';
 import { Cliente, Grupo, Produto, ProdutoCompleto, Venda } from './types/api';
-import { vendasService, configuracoesService, gruposService } from './services/api';
+import api, { vendasService, configuracoesService, gruposService } from './services/api';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,28 +106,15 @@ function App() {
   const [idVendedorDash, setIdVendedorDash] = useState<number>(0);
 
   useEffect(() => {
-    const usuario = localStorage.getItem('usuario_logado');
-    const estaLogado = !!usuario;
-    
-    if (process.env.NODE_ENV !== 'production') {
-      if (estaLogado) {
-        console.log('✅ [App] Usuário autenticado');
-      } else {
-        console.log('⚠️ [App] Usuário não autenticado - Redirecionando para login');
-      }
+    const raw = localStorage.getItem('usuario_logado');
+    if (!raw) {
+      setIsLoggedIn(false);
+      return;
     }
-    
-    setIsLoggedIn(estaLogado);
-  }, []);
-
-  // Sincroniza role/permissões do usuário com o banco sempre que logar
-  // Garante que mudanças de permissão reflitam sem precisar de logout/login manual
-  useEffect(() => {
-    if (!isLoggedIn) return;
+    // Atualiza role/permissões do banco ANTES de mostrar o menu,
+    // para que botões restritos a Gerente apareçam corretamente na primeira renderização.
     api.get('/auth/me')
       .then(res => {
-        const raw = localStorage.getItem('usuario_logado');
-        if (!raw) return;
         const existing = JSON.parse(raw);
         localStorage.setItem('usuario_logado', JSON.stringify({
           ...existing,
@@ -136,10 +123,15 @@ function App() {
           podeVerTotal: res.data.podeVerTotal,
           podeCancelar: res.data.podeCancelar,
         }));
-        setCurrentUserVersion(v => v + 1); // força re-render para ler localStorage atualizado
       })
-      .catch(() => {}); // mantém dados existentes em caso de erro
-  }, [isLoggedIn]);
+      .catch(() => {}) // mantém dados existentes se API falhar
+      .finally(() => {
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('✅ [App] Usuário autenticado');
+        }
+        setIsLoggedIn(true);
+      });
+  }, []);
 
   // Ouve o evento de sessão expirada emitido pelo interceptor de API
   useEffect(() => {
