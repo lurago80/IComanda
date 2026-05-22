@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BarChart3, ArrowLeft, FileText, TrendingUp, User, Calendar, Download, Printer, Search, Wallet, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { BarChart3, ArrowLeft, FileText, TrendingUp, User, Calendar, Download, Printer, Search, Wallet, ArrowDownCircle, ArrowUpCircle, LayoutDashboard, Clock, CalendarDays } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { relatoriosService, clientesService } from '../services/api';
 import { useToast } from '../hooks/useToast';
@@ -13,7 +13,7 @@ interface RelatoriosPageProps {
   onReimpressaoRecibos?: () => void;
 }
 
-type TipoRelatorio = 'vendas' | 'produtos' | 'cliente' | 'caixa';
+type TipoRelatorio = 'vendas' | 'produtos' | 'cliente' | 'caixa' | 'dashboard';
 
 const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRecebimentos, onRelatorioPeriodo, onReimpressaoRecibos }) => {
   const [tipoRelatorio, setTipoRelatorio] = useState<TipoRelatorio>('vendas');
@@ -33,6 +33,7 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
   const [filtroOrigemProdutos, setFiltroOrigemProdutos] = useState<string>('');
   const [dadosCliente, setDadosCliente] = useState<any>(null);
   const [dadosCaixaConsolidado, setDadosCaixaConsolidado] = useState<any>(null);
+  const [dadosDashboard, setDadosDashboard] = useState<any>(null);
   const [codigoCliente, setCodigoCliente] = useState<string>('');
   const [nomeClienteSelecionado, setNomeClienteSelecionado] = useState<string>('');
   const [showClienteSearch, setShowClienteSearch] = useState(false);
@@ -53,7 +54,8 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
     (tipoRelatorio === 'vendas' && dadosVendas.length > 0) ||
     (tipoRelatorio === 'produtos' && dadosProdutos.length > 0) ||
     (tipoRelatorio === 'cliente' && dadosCliente != null) ||
-    (tipoRelatorio === 'caixa' && dadosCaixaConsolidado != null);
+    (tipoRelatorio === 'caixa' && dadosCaixaConsolidado != null) ||
+    (tipoRelatorio === 'dashboard' && dadosDashboard != null);
 
   const handleImprimir = () => {
     window.print();
@@ -282,6 +284,22 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
     setShowClienteSearch(false);
   };
 
+  const buscarDashboard = async () => {
+    try {
+      setLoading(true);
+      const dados = await relatoriosService.getDashboard(dataInicio, dataFim);
+      setDadosDashboard(dados);
+      if (!dados?.totalVendas && !dados?.TotalVendas) {
+        showSuccess('Info', 'Nenhuma venda encontrada no período');
+      }
+    } catch (error: any) {
+      showError('Erro', error.response?.data?.mensagem || 'Não foi possível carregar o dashboard');
+      setDadosDashboard(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const buscarRelatorioCaixaConsolidado = async () => {
     try {
       setLoading(true);
@@ -307,6 +325,8 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
       buscarRelatorioCliente();
     } else if (tipoRelatorio === 'caixa') {
       buscarRelatorioCaixaConsolidado();
+    } else if (tipoRelatorio === 'dashboard') {
+      buscarDashboard();
     }
   };
 
@@ -334,6 +354,7 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
                 setDadosVendas([]);
                 setDadosProdutos([]);
                 setDadosCliente(null);
+                setDadosDashboard(null);
               }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 tipoRelatorio === 'vendas'
@@ -353,6 +374,7 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
                 setDadosProdutos([]);
                 setDadosCliente(null);
                 setDadosCaixaConsolidado(null);
+                setDadosDashboard(null);
               }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 tipoRelatorio === 'produtos'
@@ -372,6 +394,7 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
                 setDadosProdutos([]);
                 setDadosCliente(null);
                 setDadosCaixaConsolidado(null);
+                setDadosDashboard(null);
               }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 tipoRelatorio === 'cliente'
@@ -391,6 +414,7 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
                 setDadosProdutos([]);
                 setDadosCliente(null);
                 setDadosCaixaConsolidado(null);
+                setDadosDashboard(null);
               }}
               className={`p-4 rounded-lg border-2 transition-all ${
                 tipoRelatorio === 'caixa'
@@ -401,6 +425,26 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
               <Wallet className="w-6 h-6 mb-2 text-primary" />
               <p className="font-semibold">Caixa Consolidado</p>
               <p className="text-sm text-text-secondary">Aberturas, vendas, recebimentos e saídas por período</p>
+            </button>
+
+            <button
+              onClick={() => {
+                setTipoRelatorio('dashboard');
+                setDadosVendas([]);
+                setDadosProdutos([]);
+                setDadosCliente(null);
+                setDadosCaixaConsolidado(null);
+                setDadosDashboard(null);
+              }}
+              className={`p-4 rounded-lg border-2 transition-all ${
+                tipoRelatorio === 'dashboard'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-border hover:border-primary/50'
+              }`}
+            >
+              <LayoutDashboard className="w-6 h-6 mb-2 text-primary" />
+              <p className="font-semibold">Dashboard Analítico</p>
+              <p className="text-sm text-text-secondary">Ticket médio, horários de pico e dias mais movimentados</p>
             </button>
 
             {onRelatorioRecebimentos && (
@@ -979,6 +1023,159 @@ const RelatoriosPage: React.FC<RelatoriosPageProps> = ({ onClose, onRelatorioRec
             {tipoRelatorio === 'cliente' && !dadosCliente && !loading && (
               <div className="bg-card rounded-lg p-12 text-center shadow-lg">
                 <p className="text-text-secondary">Escolha um cliente (botão &quot;Escolher cliente&quot;) ou informe o código, defina o período e clique em &quot;Buscar&quot; para gerar o relatório.</p>
+              </div>
+            )}
+
+            {/* Dashboard Analítico */}
+            {tipoRelatorio === 'dashboard' && dadosDashboard && (() => {
+              const totalVendas = dadosDashboard.totalVendas ?? dadosDashboard.TotalVendas ?? 0;
+              const valorTotal = dadosDashboard.valorTotal ?? dadosDashboard.ValorTotal ?? 0;
+              const ticketMedio = dadosDashboard.ticketMedio ?? dadosDashboard.TicketMedio ?? 0;
+              const porHora: any[] = dadosDashboard.vendasPorHora ?? dadosDashboard.VendasPorHora ?? [];
+              const porSemana: any[] = dadosDashboard.vendasPorDiaSemana ?? dadosDashboard.VendasPorDiaSemana ?? [];
+              const porDia: any[] = dadosDashboard.ticketPorDia ?? dadosDashboard.TicketPorDia ?? [];
+              const maxHoraQtd = Math.max(1, ...porHora.map((h: any) => h.quantidade ?? h.Quantidade ?? 0));
+              const maxSemanaQtd = Math.max(1, ...porSemana.map((d: any) => d.quantidade ?? d.Quantidade ?? 0));
+              return (
+                <div className="space-y-6">
+                  {/* Cards resumo */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
+                      <p className="text-sm text-text-secondary mb-1">Total de Vendas</p>
+                      <p className="text-3xl font-bold text-primary">{totalVendas}</p>
+                      <p className="text-xs text-text-secondary mt-1">no período</p>
+                    </div>
+                    <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
+                      <p className="text-sm text-text-secondary mb-1">Faturamento Total</p>
+                      <p className="text-3xl font-bold text-green-600">{formatarMoeda(valorTotal)}</p>
+                      <p className="text-xs text-text-secondary mt-1">vendas efetivadas</p>
+                    </div>
+                    <div className="bg-card rounded-xl p-5 shadow-lg border border-blue-200">
+                      <p className="text-sm text-text-secondary mb-1">Ticket Médio</p>
+                      <p className="text-3xl font-bold text-blue-600">{formatarMoeda(ticketMedio)}</p>
+                      <p className="text-xs text-text-secondary mt-1">por venda</p>
+                    </div>
+                  </div>
+
+                  {/* Horários de pico */}
+                  {porHora.length > 0 && (
+                    <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
+                      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-orange-500" />
+                        Horários de Pico
+                      </h3>
+                      <div className="space-y-2">
+                        {porHora.map((h: any) => {
+                          const hora = h.hora ?? h.Hora ?? 0;
+                          const qtd = h.quantidade ?? h.Quantidade ?? 0;
+                          const val = h.valorTotal ?? h.ValorTotal ?? 0;
+                          const pct = (qtd / maxHoraQtd) * 100;
+                          return (
+                            <div key={hora} className="flex items-center gap-3">
+                              <span className="text-sm font-mono w-12 text-right text-text-secondary">
+                                {String(hora).padStart(2, '0')}:00
+                              </span>
+                              <div className="flex-1 bg-gray-100 rounded-full h-5 relative">
+                                <div
+                                  className="h-5 rounded-full bg-gradient-to-r from-orange-400 to-orange-600 transition-all"
+                                  style={{ width: `${pct}%` }}
+                                />
+                                <span className="absolute inset-0 flex items-center px-2 text-xs font-semibold text-white mix-blend-difference">
+                                  {qtd} venda{qtd !== 1 ? 's' : ''}
+                                </span>
+                              </div>
+                              <span className="text-sm font-semibold w-24 text-right text-green-700">
+                                {formatarMoeda(val)}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Dias da semana */}
+                  {porSemana.length > 0 && (
+                    <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
+                      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                        <CalendarDays className="w-5 h-5 text-indigo-500" />
+                        Vendas por Dia da Semana
+                      </h3>
+                      <div className="grid grid-cols-7 gap-2">
+                        {porSemana.map((d: any) => {
+                          const nome = d.nomeDia ?? d.NomeDia ?? '';
+                          const qtd = d.quantidade ?? d.Quantidade ?? 0;
+                          const val = d.valorTotal ?? d.ValorTotal ?? 0;
+                          const pct = Math.round((qtd / maxSemanaQtd) * 100);
+                          return (
+                            <div key={nome} className="flex flex-col items-center gap-1">
+                              <span className="text-xs font-bold text-text-secondary">{nome}</span>
+                              <div className="w-full bg-gray-100 rounded-lg overflow-hidden" style={{ height: '80px' }}>
+                                <div
+                                  className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-lg transition-all mt-auto"
+                                  style={{ height: `${pct}%`, marginTop: `${100 - pct}%` }}
+                                />
+                              </div>
+                              <span className="text-xs font-semibold">{qtd}</span>
+                              <span className="text-xs text-green-600">{formatarMoeda(val)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Ticket médio por dia */}
+                  {porDia.length > 1 && (
+                    <div className="bg-card rounded-xl p-5 shadow-lg border border-border">
+                      <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5 text-green-500" />
+                        Ticket Médio por Dia
+                      </h3>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left p-2">Data</th>
+                              <th className="text-right p-2">Vendas</th>
+                              <th className="text-right p-2">Faturamento</th>
+                              <th className="text-right p-2">Ticket Médio</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {porDia.map((d: any, i: number) => {
+                              const tm = d.ticketMedio ?? d.TicketMedio ?? 0;
+                              const qtd = d.quantidade ?? d.Quantidade ?? 0;
+                              const val = d.valorTotal ?? d.ValorTotal ?? 0;
+                              return (
+                                <tr key={i} className="border-b hover:bg-gray-50">
+                                  <td className="p-2">{formatarData(d.data ?? d.Data)}</td>
+                                  <td className="p-2 text-right">{qtd}</td>
+                                  <td className="p-2 text-right font-semibold">{formatarMoeda(val)}</td>
+                                  <td className="p-2 text-right text-blue-600 font-bold">{formatarMoeda(tm)}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                          <tfoot>
+                            <tr className="border-t-2 font-bold bg-gray-50">
+                              <td className="p-2">Total</td>
+                              <td className="p-2 text-right">{totalVendas}</td>
+                              <td className="p-2 text-right text-primary">{formatarMoeda(valorTotal)}</td>
+                              <td className="p-2 text-right text-blue-600">{formatarMoeda(ticketMedio)}</td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {tipoRelatorio === 'dashboard' && !dadosDashboard && !loading && (
+              <div className="bg-card rounded-lg p-12 text-center shadow-lg">
+                <p className="text-text-secondary">Defina o período e clique em &quot;Buscar&quot; para gerar o dashboard analítico.</p>
               </div>
             )}
 

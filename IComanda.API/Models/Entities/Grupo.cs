@@ -9,4 +9,6 @@ public class Grupo
     public string Descricao { get; set; } = string.Empty;
     public int QuantidadeProdutos { get; set; }
     public bool ImprimirDuasVias { get; set; } = false;
+    /// <summary>NORMAL = lista simples, PIZZA = montagem de pizza com sabores e bordas</summary>
+    public string Tipo { get; set; } = "NORMAL";
 }

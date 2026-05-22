@@ -39,12 +39,20 @@ import GruposPage from './pages/GruposPage';
 import TaxasEntregaPage from './pages/TaxasEntregaPage';
 import DeliveryPage from './pages/DeliveryPage';
 import ConfiguracoesPage from './pages/ConfiguracoesPage';
+import KdsPage from './pages/KdsPage';
+import QrCodeMesasPage from './pages/QrCodeMesasPage';
+import GerenciarPizzaPage from './pages/GerenciarPizzaPage';
 import ForcaVendasPage from './pages/ForcaVendasPage';
 import CadastroVendedoresPage from './pages/CadastroVendedoresPage';
 import RankingVendedoresPage from './pages/RankingVendedoresPage';
 import NovoPedidoFVPage from './pages/NovoPedidoFVPage';
 import DashboardVendedorPage from './pages/DashboardVendedorPage';
 import RotaVisitasPage from './pages/RotaVisitasPage';
+import DashboardPage from './pages/DashboardPage';
+import RelCancelamentosPage from './pages/RelCancelamentosPage';
+import UsuariosPage from './pages/UsuariosPage';
+import FormasPagamentoPage from './pages/FormasPagamentoPage';
+import { useCurrentUser, isGerente, isCaixa } from './hooks/useCurrentUser';
 import { useCartStore } from './store/cartStore';
 import { Cliente, Grupo, Produto, ProdutoCompleto, Venda } from './types/api';
 import { vendasService, configuracoesService, gruposService } from './services/api';
@@ -59,7 +67,7 @@ const queryClient = new QueryClient({
   },
 });
 
-type View = 'menu' | 'produtos' | 'conferencia' | 'pesquisa' | 'grid-comandas' | 'caixas' | 'relatorios' | 'relatorio-periodo' | 'mesas' | 'contas-receber' | 'historico' | 'notificacoes' | 'recebimento' | 'relatorio-recebimentos' | 'reimpressao-recibos' | 'receber-contas-receber' | 'clientes' | 'cadastro-cliente' | 'produtos-cadastro' | 'cadastro-produto' | 'grupos' | 'taxas-entrega' | 'delivery-abertos' | 'delivery-novo' | 'configuracoes' | 'fv-home' | 'fv-novo-pedido' | 'fv-dashboard-vendedor' | 'fv-rotas' | 'fv-cadastro-vendedores' | 'fv-ranking';
+type View = 'menu' | 'produtos' | 'conferencia' | 'pesquisa' | 'grid-comandas' | 'caixas' | 'relatorios' | 'relatorio-periodo' | 'mesas' | 'contas-receber' | 'historico' | 'notificacoes' | 'recebimento' | 'relatorio-recebimentos' | 'reimpressao-recibos' | 'receber-contas-receber' | 'clientes' | 'cadastro-cliente' | 'produtos-cadastro' | 'cadastro-produto' | 'grupos' | 'taxas-entrega' | 'delivery-abertos' | 'delivery-novo' | 'configuracoes' | 'fv-home' | 'fv-novo-pedido' | 'fv-dashboard-vendedor' | 'fv-rotas' | 'fv-cadastro-vendedores' | 'fv-ranking' | 'kds' | 'qrcode-mesas' | 'gerenciar-pizza' | 'dashboard' | 'usuarios' | 'rel-cancelamentos' | 'formas-pagamento';
 
 function App() {
   const [view, setView] = useState<View>('menu');
@@ -83,6 +91,7 @@ function App() {
   const [produtoEditando, setProdutoEditando] = useState<ProdutoCompleto | null>(null);
   const [notaCaixaRapido, setNotaCaixaRapido] = useState<string | null>(null);
   const { toasts, removeToast, showError, showSuccess } = useToast();
+  const currentUser = useCurrentUser();
   const { setComandaAtiva, comandaAtiva, flowState, setFlowState, carregarPedidoParaEdicao, setCaixaRapidoMode, setDeliveryMode, setDeliveryClientePreSelecionado, clearCart, finalizarEdicao, fecharComanda, addItem, setCartOpen, items: cartItems, vendaEmEdicao } = useCartStore();
   const [showTaxaEntregaModal, setShowTaxaEntregaModal] = useState(false);
   const [produtoTaxaEntrega, setProdutoTaxaEntrega] = useState<Produto | null>(null);
@@ -90,6 +99,8 @@ function App() {
   const [usarForcaVendas, setUsarForcaVendas] = useState(true);
   const [usarComanda, setUsarComanda] = useState(true);
   const [habilitarImprimirDuasVias, setHabilitarImprimirDuasVias] = useState(false);
+  const [usarCozinha, setUsarCozinha] = useState(true);
+  const [usarCardapio, setUsarCardapio] = useState(true);
   const [gruposParaImpressao, setGruposParaImpressao] = useState<Grupo[]>([]);
   const [idVendedorDash, setIdVendedorDash] = useState<number>(0);
 
@@ -160,6 +171,8 @@ function App() {
         setUsarForcaVendas(cfg.usarForcaVendas ?? true);
         setUsarComanda(cfg.usarComanda ?? true);
         setHabilitarImprimirDuasVias(cfg.habilitarImprimirDuasVias ?? false);
+        setUsarCozinha(cfg.usarCozinha ?? true);
+        setUsarCardapio(cfg.usarCardapio ?? true);
       })
       .catch(() => { /* mantém padrões */ });
     gruposService.getTodosComQuantidade()
@@ -646,6 +659,10 @@ function App() {
     setView('configuracoes');
   };
 
+  const handleDashboard = () => {
+    setView('dashboard');
+  };
+
   const handleBackup = async () => {
     try {
       const resultado = await configuracoesService.fazerBackup();
@@ -656,11 +673,13 @@ function App() {
     }
   };
 
-  const handleSalvarConfiguracoes = (novoUsarDelivery: boolean, novoUsarForcaVendas: boolean, novoUsarComanda: boolean, novoHabilitarImprimirDuasVias: boolean) => {
+  const handleSalvarConfiguracoes = (novoUsarDelivery: boolean, novoUsarForcaVendas: boolean, novoUsarComanda: boolean, novoHabilitarImprimirDuasVias: boolean, novoUsarCozinha: boolean, novoUsarCardapio: boolean) => {
     setUsarDelivery(novoUsarDelivery);
     setUsarForcaVendas(novoUsarForcaVendas);
     setUsarComanda(novoUsarComanda);
     setHabilitarImprimirDuasVias(novoHabilitarImprimirDuasVias);
+    setUsarCozinha(novoUsarCozinha);
+    setUsarCardapio(novoUsarCardapio);
   };
 
   // Handlers Força de Vendas
@@ -860,6 +879,44 @@ function App() {
     );
   }
 
+  if (view === 'dashboard') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <DashboardPage
+          onClose={() => setView('menu')}
+          totalComandasAbertas={totalComandasAbertas}
+          totalValorAberto={totalValorAberto}
+          totalDeliveryAbertos={totalDeliveryAbertos}
+          totalValorDelivery={totalValorDelivery}
+        />
+      </QueryClientProvider>
+    );
+  }
+
+  if (view === 'usuarios') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <UsuariosPage onClose={() => setView('menu')} />
+      </QueryClientProvider>
+    );
+  }
+
+  if (view === 'rel-cancelamentos') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <RelCancelamentosPage onClose={() => setView('menu')} />
+      </QueryClientProvider>
+    );
+  }
+
+  if (view === 'formas-pagamento') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <FormasPagamentoPage onClose={() => setView('menu')} />
+      </QueryClientProvider>
+    );
+  }
+
   if (view === 'configuracoes') {
     return (
       <QueryClientProvider client={queryClient}>
@@ -867,6 +924,30 @@ function App() {
           onClose={() => setView('menu')}
           onSalvar={handleSalvarConfiguracoes}
         />
+      </QueryClientProvider>
+    );
+  }
+
+  if (view === 'kds') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <KdsPage onClose={() => setView('menu')} />
+      </QueryClientProvider>
+    );
+  }
+
+  if (view === 'qrcode-mesas') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <QrCodeMesasPage onClose={() => setView('menu')} />
+      </QueryClientProvider>
+    );
+  }
+
+  if (view === 'gerenciar-pizza') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <GerenciarPizzaPage onClose={() => setView('menu')} />
       </QueryClientProvider>
     );
   }
@@ -1003,8 +1084,17 @@ function App() {
             onForcaVendas={usarForcaVendas ? handleFVHome : undefined}
             onFVRotas={usarForcaVendas ? handleFVRotas : undefined}
             onConectarWhatsApp={() => setShowConectarWhatsAppModal(true)}
-            onConfiguracoes={handleConfiguracoes}
-            onBackup={handleBackup}
+            onConfiguracoes={isGerente(currentUser) ? handleConfiguracoes : undefined}
+            onDashboard={isGerente(currentUser) ? handleDashboard : undefined}
+            onUsuarios={isGerente(currentUser) ? () => setView('usuarios') : undefined}
+            onRelCancelamentos={isGerente(currentUser) ? () => setView('rel-cancelamentos') : undefined}
+            onFormasPagamento={isGerente(currentUser) ? () => setView('formas-pagamento') : undefined}
+            onBackup={isGerente(currentUser) ? handleBackup : undefined}
+            userName={currentUser?.nome}
+            userRole={currentUser?.role}
+            onKds={usarCozinha ? () => setView('kds') : undefined}
+            onQrCodeMesas={usarCardapio ? () => setView('qrcode-mesas') : undefined}
+            onGerenciarPizza={usarCozinha ? () => setView('gerenciar-pizza') : undefined}
             onIrParaDelivery={usarDelivery ? handleDeliveryAbertos : undefined}
             onIrParaForcaVendas={usarForcaVendas ? handleFVHome : undefined}
             usarComanda={usarComanda}

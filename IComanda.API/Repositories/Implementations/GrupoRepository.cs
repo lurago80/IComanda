@@ -43,7 +43,8 @@ public class GrupoRepository : IGrupoRepository
 
         var sql = @"
             SELECT ID as Id, DESCRICAO as Descricao,
-                   COALESCE(IMPRIMIR2VIAS, 0) as ImprimirDuasVias
+                   COALESCE(IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
+                   COALESCE(TIPO, 'NORMAL') as Tipo
             FROM GRUPO
             ORDER BY DESCRICAO";
 
@@ -94,7 +95,8 @@ public class GrupoRepository : IGrupoRepository
 
         var sql = @"
             SELECT ID as Id, DESCRICAO as Descricao,
-                   COALESCE(IMPRIMIR2VIAS, 0) as ImprimirDuasVias
+                   COALESCE(IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
+                   COALESCE(TIPO, 'NORMAL') as Tipo
             FROM GRUPO
             WHERE ID = @Id";
 
@@ -134,13 +136,14 @@ public class GrupoRepository : IGrupoRepository
         using var connection = _connectionFactory.CreateConnection();
 
         var sql = @"
-            SELECT g.ID as Id, 
-                   g.DESCRICAO as Descricao, 
+            SELECT g.ID as Id,
+                   g.DESCRICAO as Descricao,
                    COUNT(p3.ID) as QuantidadeProdutos,
-                   COALESCE(g.IMPRIMIR2VIAS, 0) as ImprimirDuasVias
+                   COALESCE(g.IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
+                   COALESCE(g.TIPO, 'NORMAL') as Tipo
             FROM GRUPO g
             LEFT JOIN PRODUTOESERVICO p3 ON g.ID = p3.GRUPO AND CAST(p3.ATIVO AS INTEGER) = 1
-            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS
+            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS, g.TIPO
             HAVING COUNT(p3.ID) > 0
             ORDER BY g.DESCRICAO";
 
@@ -181,14 +184,15 @@ public class GrupoRepository : IGrupoRepository
         // Query principal: buscar da tabela GRUPO com contagem de produtos ativos
         // Usando a mesma query que funciona no IBManager
         var sql = @"
-            SELECT g.ID as Id, 
+            SELECT g.ID as Id,
                    g.DESCRICAO as Descricao,
                    COUNT(p3.ID) as QuantidadeProdutos,
-                   COALESCE(g.IMPRIMIR2VIAS, 0) as ImprimirDuasVias
+                   COALESCE(g.IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
+                   COALESCE(g.TIPO, 'NORMAL') as Tipo
             FROM GRUPO g
             LEFT JOIN PRODUTOESERVICO p3 ON g.ID = p3.GRUPO AND CAST(p3.ATIVO AS INTEGER) = 1
             WHERE g.ID IS NOT NULL
-            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS
+            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS, g.TIPO
             ORDER BY g.DESCRICAO";
         
         // Query alternativa: se não houver grupos na tabela GRUPO, buscar grupos distintos da PRODUTOESERVICO
@@ -332,7 +336,8 @@ public class GrupoRepository : IGrupoRepository
                 Id = r.Id,
                 Descricao = r.Descricao ?? string.Empty,
                 QuantidadeProdutos = (int)r.QuantidadeProdutos,
-                ImprimirDuasVias = r.ImprimirDuasVias
+                ImprimirDuasVias = r.ImprimirDuasVias,
+                Tipo = r.Tipo ?? "NORMAL"
             }).ToList();
 
             _logger.LogInformation("✅ [GrupoRepository] GetGruposComQuantidadeTodosAsync retornou {Count} grupos mapeados", grupos.Count);

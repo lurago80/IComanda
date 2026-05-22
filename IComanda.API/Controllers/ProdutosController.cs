@@ -674,4 +674,86 @@ public class ProdutosController : ControllerBase
             return StatusCode(500, new { error = "Erro ao executar diagnóstico", message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// Retorna a imagem do produto como arquivo de imagem.
+    /// Público para ser usado no cardápio digital (sem autenticação).
+    /// </summary>
+    [HttpGet("{id}/imagem")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetImagem(int id)
+    {
+        try
+        {
+            var bytes = await _produtoService.GetImagemAsync(id);
+            if (bytes == null || bytes.Length == 0)
+                return NotFound();
+
+            // Detecta o tipo pelo magic bytes
+            var contentType = DetectarContentType(bytes);
+            return File(bytes, contentType);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar imagem do produto {Id}", id);
+            return StatusCode(500);
+        }
+    }
+
+    /// <summary>
+    /// Atualiza a imagem do produto. Recebe base64 no body.
+    /// </summary>
+    [HttpPut("{id}/imagem")]
+    public async Task<IActionResult> AtualizarImagem(int id, [FromBody] AtualizarImagemRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(request.ImagemBase64))
+                return BadRequest(new { mensagem = "Imagem não informada." });
+
+            var bytes = Convert.FromBase64String(request.ImagemBase64);
+            if (bytes.Length > 5 * 1024 * 1024)
+                return BadRequest(new { mensagem = "Imagem muito grande. Máximo: 5 MB." });
+
+            var ok = await _produtoService.AtualizarImagemAsync(id, bytes);
+            if (!ok) return NotFound(new { mensagem = "Produto não encontrado." });
+            return Ok(new { mensagem = "Imagem atualizada." });
+        }
+        catch (FormatException)
+        {
+            return BadRequest(new { mensagem = "Base64 inválido." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao atualizar imagem do produto {Id}", id);
+            return StatusCode(500, new { mensagem = "Erro ao salvar imagem." });
+        }
+    }
+
+    /// <summary>
+    /// Remove a imagem do produto.
+    /// </summary>
+    [HttpDelete("{id}/imagem")]
+    public async Task<IActionResult> RemoverImagem(int id)
+    {
+        try
+        {
+            await _produtoService.RemoverImagemAsync(id);
+            return Ok(new { mensagem = "Imagem removida." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao remover imagem do produto {Id}", id);
+            return StatusCode(500);
+        }
+    }
+
+    private static string DetectarContentType(byte[] bytes)
+    {
+        if (bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF) return "image/jpeg";
+        if (bytes.Length >= 8 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47) return "image/png";
+        if (bytes.Length >= 6 && bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46) return "image/gif";
+        if (bytes.Length >= 4 && bytes[0] == 0x52 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x46) return "image/webp";
+        return "image/jpeg"; // fallback
+    }
 }

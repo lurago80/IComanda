@@ -394,6 +394,32 @@ export interface DashboardVendedor {
   ultimosPedidos: PedidoFV[];
 }
 
+/* ============================================================
+   KDS - Kitchen Display System
+   ============================================================ */
+
+export interface KdsItem {
+  item: number;
+  codigo: number;
+  descricao: string;
+  qtd: number;
+  observacao?: string;
+}
+
+export interface KdsPedido {
+  nota: string;
+  origem: string;
+  comanda?: number;
+  mesa?: number;
+  nomeCliente?: string;
+  statusCozinha: 'PENDENTE' | 'EM_PREPARO' | 'PRONTO' | 'ENTREGUE';
+  lancado: string;
+  emissao: string;
+  hora: string;
+  minutosEspera: number;
+  itens: KdsItem[];
+}
+
 /** Venda fechada/recebida no período (reimpressão de recibos). */
 export interface VendaFechadaRecibo {
   nota: string;

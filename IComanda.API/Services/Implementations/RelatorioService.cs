@@ -68,5 +68,13 @@ public class RelatorioService : IRelatorioService
             throw new ArgumentException("Data inicial não pode ser maior que data final");
         return await _relatorioRepository.GetRelatorioCaixaConsolidadoAsync(dataInicio, dataFim, origem);
     }
+
+    public async Task<RelatorioDashboardDto> GetDashboardAsync(DateTime dataInicio, DateTime dataFim, string? origem = null)
+    {
+        _logger.LogInformation("📊 Gerando dashboard - Período: {DataInicio} a {DataFim}", dataInicio, dataFim);
+        if (dataInicio > dataFim)
+            throw new ArgumentException("Data inicial não pode ser maior que data final");
+        return await _relatorioRepository.GetDashboardAsync(dataInicio, dataFim, origem);
+    }
 }
 

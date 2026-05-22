@@ -191,4 +191,88 @@ public class ConfiguracoesRepository : IConfiguracoesRepository
 
         _logger.LogInformation("[Configuracoes] HABILITAR_IMPRIMIR_2VIAS gravado como '{Valor}'", valor);
     }
+
+    /// <inheritdoc/>
+    public async Task<bool> GetUsarCozinhaAsync()
+    {
+        try
+        {
+            using var conn = _connectionFactory.CreateConnection();
+            var valor = await conn.QueryFirstOrDefaultAsync<string>(
+                "SELECT FIRST 1 VALOR FROM PARAMETROS WHERE PARAMETRO = 'USAR_COZINHA'");
+
+            if (string.IsNullOrWhiteSpace(valor))
+                return true; // padrão: habilitado
+
+            return valor.Trim().ToUpper() != "N";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[Configuracoes] Não foi possível ler USAR_COZINHA — retornando padrão true.");
+            return true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task SetUsarCozinhaAsync(bool usarCozinha)
+    {
+        using var conn = _connectionFactory.CreateConnection();
+        var valor = usarCozinha ? "S" : "N";
+
+        var linhas = await conn.ExecuteAsync(
+            "UPDATE PARAMETROS SET VALOR = @Valor WHERE PARAMETRO = 'USAR_COZINHA'",
+            new { Valor = valor });
+
+        if (linhas == 0)
+        {
+            await conn.ExecuteAsync(
+                @"INSERT INTO PARAMETROS (ID_EMITENTE, PARAMETRO, VALOR, TIPO)
+                  SELECT FIRST 1 ID_EMITENTE, 'USAR_COZINHA', @Valor, 'BOOLEAN' FROM PARAMETROS",
+                new { Valor = valor });
+        }
+
+        _logger.LogInformation("[Configuracoes] USAR_COZINHA gravado como '{Valor}'", valor);
+    }
+
+    /// <inheritdoc/>
+    public async Task<bool> GetUsarCardapioAsync()
+    {
+        try
+        {
+            using var conn = _connectionFactory.CreateConnection();
+            var valor = await conn.QueryFirstOrDefaultAsync<string>(
+                "SELECT FIRST 1 VALOR FROM PARAMETROS WHERE PARAMETRO = 'USAR_CARDAPIO'");
+
+            if (string.IsNullOrWhiteSpace(valor))
+                return true; // padrão: habilitado
+
+            return valor.Trim().ToUpper() != "N";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "[Configuracoes] Não foi possível ler USAR_CARDAPIO — retornando padrão true.");
+            return true;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task SetUsarCardapioAsync(bool usarCardapio)
+    {
+        using var conn = _connectionFactory.CreateConnection();
+        var valor = usarCardapio ? "S" : "N";
+
+        var linhas = await conn.ExecuteAsync(
+            "UPDATE PARAMETROS SET VALOR = @Valor WHERE PARAMETRO = 'USAR_CARDAPIO'",
+            new { Valor = valor });
+
+        if (linhas == 0)
+        {
+            await conn.ExecuteAsync(
+                @"INSERT INTO PARAMETROS (ID_EMITENTE, PARAMETRO, VALOR, TIPO)
+                  SELECT FIRST 1 ID_EMITENTE, 'USAR_CARDAPIO', @Valor, 'BOOLEAN' FROM PARAMETROS",
+                new { Valor = valor });
+        }
+
+        _logger.LogInformation("[Configuracoes] USAR_CARDAPIO gravado como '{Valor}'", valor);
+    }
 }

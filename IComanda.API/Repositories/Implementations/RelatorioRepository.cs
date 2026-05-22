@@ -549,5 +549,123 @@ public class RelatorioRepository : IRelatorioRepository
             Resumo = resumo
         };
     }
+
+    public async Task<RelatorioDashboardDto> GetDashboardAsync(DateTime dataInicio, DateTime dataFim, string? origem = null)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+
+        var origemFilter = origem switch
+        {
+            "BA" => " AND V.ORIGEM = 'BA'",
+            "DL" => " AND V.ORIGEM = 'DL'",
+            _ => ""
+        };
+
+        // Ticket médio por dia
+        var sqlPorDia = $@"
+            SELECT
+                V.DATA_SAIDA AS Data,
+                COUNT(*) AS Quantidade,
+                COALESCE(SUM(V.TOTAL), 0) AS ValorTotal
+            FROM VENDAS V
+            WHERE V.DATA_SAIDA IS NOT NULL
+              AND V.DATA_SAIDA >= @DataInicio
+              AND V.DATA_SAIDA <= @DataFim
+              AND V.LANCADO = 'EFETIVADO'
+              {origemFilter}
+            GROUP BY V.DATA_SAIDA
+            ORDER BY V.DATA_SAIDA";
+
+        var porDia = (await connection.QueryAsync<dynamic>(sqlPorDia, new { DataInicio = dataInicio.Date, DataFim = dataFim.Date })).ToList();
+
+        var ticketPorDia = porDia.Select(r => {
+            var d = (IDictionary<string, object>)r;
+            int qty = d.TryGetValue("QUANTIDADE", out var q) && q != null ? Convert.ToInt32(q) : 0;
+            decimal val = d.TryGetValue("VALORTOTAL", out var v) && v != null ? Convert.ToDecimal(v) : 0m;
+            DateTime dt = d.TryGetValue("DATA", out var dd) && dd != null ? Convert.ToDateTime(dd) : DateTime.MinValue;
+            return new TicketMedioDiaDto
+            {
+                Data = dt,
+                Quantidade = qty,
+                ValorTotal = val,
+                TicketMedio = qty > 0 ? val / qty : 0m
+            };
+        }).ToList();
+
+        // Vendas por hora
+        var sqlPorHora = $@"
+            SELECT
+                EXTRACT(HOUR FROM V.HORA_SAIDA) AS Hora,
+                COUNT(*) AS Quantidade,
+                COALESCE(SUM(V.TOTAL), 0) AS ValorTotal
+            FROM VENDAS V
+            WHERE V.DATA_SAIDA IS NOT NULL
+              AND V.DATA_SAIDA >= @DataInicio
+              AND V.DATA_SAIDA <= @DataFim
+              AND V.LANCADO = 'EFETIVADO'
+              AND V.HORA_SAIDA IS NOT NULL
+              {origemFilter}
+            GROUP BY EXTRACT(HOUR FROM V.HORA_SAIDA)
+            ORDER BY Hora";
+
+        var porHora = (await connection.QueryAsync<dynamic>(sqlPorHora, new { DataInicio = dataInicio.Date, DataFim = dataFim.Date })).ToList();
+
+        var vendasPorHora = porHora.Select(r => {
+            var d = (IDictionary<string, object>)r;
+            return new VendasPorHoraDto
+            {
+                Hora = d.TryGetValue("HORA", out var h) && h != null ? Convert.ToInt32(h) : 0,
+                Quantidade = d.TryGetValue("QUANTIDADE", out var q) && q != null ? Convert.ToInt32(q) : 0,
+                ValorTotal = d.TryGetValue("VALORTOTAL", out var v) && v != null ? Convert.ToDecimal(v) : 0m
+            };
+        }).ToList();
+
+        // Vendas por dia da semana (0=Dom ... 6=Sáb no Firebird)
+        var sqlPorSemana = $@"
+            SELECT
+                EXTRACT(WEEKDAY FROM V.DATA_SAIDA) AS DiaSemana,
+                COUNT(*) AS Quantidade,
+                COALESCE(SUM(V.TOTAL), 0) AS ValorTotal
+            FROM VENDAS V
+            WHERE V.DATA_SAIDA IS NOT NULL
+              AND V.DATA_SAIDA >= @DataInicio
+              AND V.DATA_SAIDA <= @DataFim
+              AND V.LANCADO = 'EFETIVADO'
+              {origemFilter}
+            GROUP BY EXTRACT(WEEKDAY FROM V.DATA_SAIDA)
+            ORDER BY DiaSemana";
+
+        var porSemana = (await connection.QueryAsync<dynamic>(sqlPorSemana, new { DataInicio = dataInicio.Date, DataFim = dataFim.Date })).ToList();
+
+        string[] nomesDia = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+        var vendasPorDiaSemana = porSemana.Select(r =>
+        {
+            var d = (IDictionary<string, object>)r;
+            var dia = d.TryGetValue("DIASEMANA", out var ds) && ds != null ? Convert.ToInt32(ds) : 0;
+            return new VendasPorDiaSemanaDto
+            {
+                DiaSemana = dia,
+                NomeDia = dia >= 0 && dia < nomesDia.Length ? nomesDia[dia] : dia.ToString(),
+                Quantidade = d.TryGetValue("QUANTIDADE", out var dq) && dq != null ? Convert.ToInt32(dq) : 0,
+                ValorTotal = d.TryGetValue("VALORTOTAL", out var dv) && dv != null ? Convert.ToDecimal(dv) : 0m
+            };
+        }).ToList();
+
+        var totalVendas = ticketPorDia.Sum(d => d.Quantidade);
+        var valorTotal = ticketPorDia.Sum(d => d.ValorTotal);
+
+        return new RelatorioDashboardDto
+        {
+            DataInicio = dataInicio,
+            DataFim = dataFim,
+            TotalVendas = totalVendas,
+            ValorTotal = valorTotal,
+            TicketMedio = totalVendas > 0 ? valorTotal / totalVendas : 0m,
+            TicketPorDia = ticketPorDia,
+            VendasPorHora = vendasPorHora,
+            VendasPorDiaSemana = vendasPorDiaSemana
+        };
+    }
 }
 

@@ -55,6 +55,9 @@ public class ForcaVendasDbInitializer
         // ── 5. Tabela METAS_FV ───────────────────────────────────────────
         await EnsureTableMetasFVAsync(fbConn);
 
+        // ── 6. Colunas faltando em tabelas já existentes ─────────────────
+        await EnsureExistingTablesColumnsAsync(fbConn);
+
         Console.WriteLine("✅ FORÇA DE VENDAS — verificação concluída.");
         Console.WriteLine("========================================");
         _logger.LogInformation("✅ [FV] Verificação de estrutura concluída.");
@@ -289,7 +292,7 @@ CREATE TABLE VISITAS_FV (
     DATA_CHECKOUT     TIMESTAMP,
     LAT_CHECKOUT      DECIMAL(10,6),
     LNG_CHECKOUT      DECIMAL(10,6),
-    RESUMO            VARCHAR(500),
+    RESULTADO         VARCHAR(300),
     MOTIVO_CANCEL     VARCHAR(300),
     ID_PEDIDO_FV      INTEGER,
     CONSTRAINT PK_VISITAS_FV PRIMARY KEY (ID),
@@ -332,12 +335,13 @@ END", "Trigger TRG_VISITAS_FV_BI");
 
         ExecDDL(conn, @"
 CREATE TABLE METAS_FV (
-    ID          INTEGER        NOT NULL,
-    ID_VENDEDOR INTEGER        NOT NULL,
-    MES         SMALLINT       NOT NULL,
-    ANO         SMALLINT       NOT NULL,
-    VALOR_META  DECIMAL(15,2)  DEFAULT 0 NOT NULL,
-    COMISSAO    DECIMAL(5,2)   DEFAULT 0 NOT NULL,
+    ID               INTEGER        NOT NULL,
+    ID_VENDEDOR      INTEGER        NOT NULL,
+    MES              SMALLINT       NOT NULL,
+    ANO              SMALLINT       NOT NULL,
+    VALOR_META       DECIMAL(15,2)  DEFAULT 0 NOT NULL,
+    VALOR_REALIZADO  DECIMAL(15,2)  DEFAULT 0 NOT NULL,
+    COMISSAO         DECIMAL(5,2)   DEFAULT 0 NOT NULL,
     CONSTRAINT PK_METAS_FV PRIMARY KEY (ID),
     CONSTRAINT FK_MFV_VENDEDOR FOREIGN KEY (ID_VENDEDOR) REFERENCES VENDEDOR (ID),
     CONSTRAINT UQ_METAS_FV UNIQUE (ID_VENDEDOR, MES, ANO)
@@ -353,5 +357,66 @@ END", "Trigger TRG_METAS_FV_BI");
 
         if (!await IndexExistsAsync(conn, "IDX_MFV_VENDEDOR"))
             ExecDDL(conn, "CREATE INDEX IDX_MFV_VENDEDOR ON METAS_FV (ID_VENDEDOR)", "Index IDX_MFV_VENDEDOR");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 6. Colunas faltando em tabelas que já existem (ALTER TABLE)
+    //    Necessário quando o banco foi criado por uma versão anterior do código.
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureExistingTablesColumnsAsync(FbConnection conn)
+    {
+        // METAS_FV.VALOR_REALIZADO — era ausente no CREATE TABLE original
+        if (await TableExistsAsync(conn, "METAS_FV") &&
+            !await ColumnExistsAsync(conn, "METAS_FV", "VALOR_REALIZADO"))
+        {
+            ExecDDL(conn,
+                "ALTER TABLE METAS_FV ADD VALOR_REALIZADO DECIMAL(15,2) DEFAULT 0 NOT NULL",
+                "METAS_FV.VALOR_REALIZADO adicionada");
+        }
+        else
+        {
+            Console.WriteLine("  ✔ METAS_FV.VALOR_REALIZADO já existe.");
+        }
+
+        // VISITAS_FV.RESULTADO — era ausente no CREATE TABLE original (havia RESUMO no lugar)
+        if (await TableExistsAsync(conn, "VISITAS_FV") &&
+            !await ColumnExistsAsync(conn, "VISITAS_FV", "RESULTADO"))
+        {
+            ExecDDL(conn,
+                "ALTER TABLE VISITAS_FV ADD RESULTADO VARCHAR(300)",
+                "VISITAS_FV.RESULTADO adicionada");
+        }
+        else
+        {
+            Console.WriteLine("  ✔ VISITAS_FV.RESULTADO já existe.");
+        }
+
+        // PEDIDOS_FV — garantir colunas que podem ter sido criadas sem elas
+        if (await TableExistsAsync(conn, "PEDIDOS_FV"))
+        {
+            var pedidosCols = new Dictionary<string, string>
+            {
+                ["ACRESCIMO"]        = "ALTER TABLE PEDIDOS_FV ADD ACRESCIMO DECIMAL(15,2) DEFAULT 0 NOT NULL",
+                ["CONDICAO_PGTO"]    = "ALTER TABLE PEDIDOS_FV ADD CONDICAO_PGTO VARCHAR(60)",
+                ["DATA_APROVACAO"]   = "ALTER TABLE PEDIDOS_FV ADD DATA_APROVACAO TIMESTAMP",
+                ["ID_APROVADOR"]     = "ALTER TABLE PEDIDOS_FV ADD ID_APROVADOR INTEGER",
+                ["MOTIVO_CANCEL"]    = "ALTER TABLE PEDIDOS_FV ADD MOTIVO_CANCEL VARCHAR(300)",
+                ["NOTA_FISCAL"]      = "ALTER TABLE PEDIDOS_FV ADD NOTA_FISCAL VARCHAR(20)",
+                ["DATA_FATURAMENTO"] = "ALTER TABLE PEDIDOS_FV ADD DATA_FATURAMENTO TIMESTAMP",
+            };
+            foreach (var (col, ddl) in pedidosCols)
+            {
+                if (!await ColumnExistsAsync(conn, "PEDIDOS_FV", col))
+                    ExecDDL(conn, ddl, $"PEDIDOS_FV.{col} adicionada");
+            }
+        }
+
+        // ITENS_PEDIDO_FV — garantir coluna OBS
+        if (await TableExistsAsync(conn, "ITENS_PEDIDO_FV") &&
+            !await ColumnExistsAsync(conn, "ITENS_PEDIDO_FV", "OBS"))
+        {
+            ExecDDL(conn, "ALTER TABLE ITENS_PEDIDO_FV ADD OBS VARCHAR(300)", "ITENS_PEDIDO_FV.OBS adicionada");
+        }
     }
 }

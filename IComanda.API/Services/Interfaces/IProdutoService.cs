@@ -18,4 +18,9 @@ public interface IProdutoService
     Task<int> CriarProdutoAsync(CriarProdutoRequest request);
     Task<bool> AtualizarProdutoAsync(int id, AtualizarProdutoRequest request);
     Task<bool> ExcluirProdutoAsync(int id);
+
+    // Imagem
+    Task<byte[]?> GetImagemAsync(int id);
+    Task<bool> AtualizarImagemAsync(int id, byte[] imagem);
+    Task<bool> RemoverImagemAsync(int id);
 }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using IComanda.API.Models.DTOs;
+using IComanda.API.Repositories.Interfaces;
 using IComanda.API.Services.Interfaces;
 
 namespace IComanda.API.Controllers;
@@ -15,13 +16,16 @@ namespace IComanda.API.Controllers;
 public class RelatoriosController : ControllerBase
 {
     private readonly IRelatorioService _relatorioService;
+    private readonly IVendaRepository _vendaRepository;
     private readonly ILogger<RelatoriosController> _logger;
 
     public RelatoriosController(
         IRelatorioService relatorioService,
+        IVendaRepository vendaRepository,
         ILogger<RelatoriosController> logger)
     {
         _relatorioService = relatorioService;
+        _vendaRepository = vendaRepository;
         _logger = logger;
     }
 
@@ -184,6 +188,62 @@ public class RelatoriosController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao gerar relatório caixa consolidado");
+            return StatusCode(500, new { mensagem = "Erro interno do servidor", detalhes = ex.Message });
+        }
+    }
+
+    [HttpGet("dashboard")]
+    [ProducesResponseType(typeof(RelatorioDashboardDto), 200)]
+    public async Task<ActionResult<RelatorioDashboardDto>> GetDashboard(
+        [FromQuery] DateTime dataInicio,
+        [FromQuery] DateTime dataFim,
+        [FromQuery] string? origem = null)
+    {
+        try
+        {
+            if (dataInicio > dataFim)
+                return BadRequest(new { mensagem = "Data inicial não pode ser maior que data final" });
+            var relatorio = await _relatorioService.GetDashboardAsync(dataInicio, dataFim, origem);
+            return Ok(relatorio);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao gerar dashboard");
+            return StatusCode(500, new { mensagem = "Erro interno do servidor", detalhes = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Relatório de vendas canceladas com filtro por período
+    /// </summary>
+    [HttpGet("cancelamentos")]
+    [ProducesResponseType(200)]
+    public async Task<IActionResult> GetCancelamentos(
+        [FromQuery] DateTime? de = null,
+        [FromQuery] DateTime? ate = null,
+        [FromQuery] string origem = "BA")
+    {
+        try
+        {
+            _logger.LogInformation("📋 Gerando relatório de cancelamentos. De: {De}, Até: {Ate}, Origem: {Origem}", de, ate, origem);
+            var vendas = await _vendaRepository.GetVendasCanceladasAsync(origem, de, ate);
+            var lista = vendas.Select(v => new
+            {
+                nota          = v.Nota,
+                emissao       = v.Emissao,
+                hora          = v.Hora,
+                comanda       = v.Comanda,
+                mesa          = v.Mesa,
+                nomeCliente   = v.NomeCliente ?? (v.Cliente > 0 ? v.Cliente.ToString() : null),
+                operador      = v.Operador,
+                total         = v.Total,
+                justificativa = v.Justificativa
+            });
+            return Ok(lista);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao gerar relatório de cancelamentos");
             return StatusCode(500, new { mensagem = "Erro interno do servidor", detalhes = ex.Message });
         }
     }

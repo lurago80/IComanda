@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BuscarProdutoRequest, Cliente, CriarVendaRequest, Grupo, ItemVenda, Produto, ProdutoCompleto, TaxaEntrega, Venda, VendaFechadaRecibo } from '../types/api';
+import { BuscarProdutoRequest, Cliente, CriarVendaRequest, Grupo, ItemVenda, KdsPedido, Produto, ProdutoCompleto, TaxaEntrega, Venda, VendaFechadaRecibo } from '../types/api';
 
 // URL da API: use REACT_APP_API_URL se definido (ex: em .env), senão detecta pelo host
 const getApiBaseUrl = (): string => {
@@ -242,6 +242,16 @@ export const produtosService = {
 
   excluir: async (id: number): Promise<void> => {
     await api.delete(`/produtos/${id}`);
+  },
+
+  getImagemUrl: (id: number): string => `${getApiBaseUrl()}/produtos/${id}/imagem`,
+
+  atualizarImagem: async (id: number, imagemBase64: string): Promise<void> => {
+    await api.put(`/produtos/${id}/imagem`, { imagemBase64 });
+  },
+
+  removerImagem: async (id: number): Promise<void> => {
+    await api.delete(`/produtos/${id}/imagem`);
   },
 };
 
@@ -676,6 +686,35 @@ export const relatoriosService = {
     const response = await api.get('/relatorios/caixa-consolidado', { params: { dataInicio, dataFim } });
     return response.data;
   },
+  getDashboard: async (dataInicio: string, dataFim: string, origem?: string): Promise<any> => {
+    const response = await api.get('/relatorios/dashboard', { params: { dataInicio, dataFim, origem } });
+    return response.data;
+  },
+
+  getCancelamentos: async (de?: string, ate?: string, origem = 'BA'): Promise<any[]> => {
+    const response = await api.get('/relatorios/cancelamentos', { params: { de, ate, origem } });
+    return response.data;
+  },
+};
+
+// Serviços para Formas de Pagamento (gestão)
+export const formasPagamentoService = {
+  listar: async (): Promise<any[]> => {
+    const response = await api.get('/formas-pagamento');
+    return response.data;
+  },
+  atualizar: async (id: number, data: { descricao: string; indice?: number | null; meioPagto: number; permiteTroco: boolean; tipo?: string | null }): Promise<any> => {
+    const response = await api.put(`/formas-pagamento/${id}`, data);
+    return response.data;
+  },
+  toggleAtivo: async (id: number): Promise<{ id: number; ativo: boolean }> => {
+    const response = await api.patch(`/formas-pagamento/${id}/ativo`);
+    return response.data;
+  },
+  criar: async (data: { descricao: string; indice?: number | null; meioPagto: number; permiteTroco: boolean; tipo?: string | null }): Promise<any> => {
+    const response = await api.post('/formas-pagamento', data);
+    return response.data;
+  },
 };
 
 // Serviços para Mesas
@@ -687,6 +726,11 @@ export const mesasService = {
 
   getById: async (id: number): Promise<any> => {
     const response = await api.get(`/mesas/${id}`);
+    return response.data;
+  },
+
+  liberar: async (numero: number): Promise<any> => {
+    const response = await api.post(`/mesas/${numero}/liberar`);
     return response.data;
   },
 
@@ -944,21 +988,128 @@ export const forcaVendasService = {
 
 export const configuracoesService = {
   /** Retorna as configurações gerais do sistema. */
-  getSistema: async (): Promise<{ usarDelivery: boolean; usarForcaVendas: boolean; usarComanda: boolean; habilitarImprimirDuasVias: boolean }> => {
+  getSistema: async (): Promise<{ usarDelivery: boolean; usarForcaVendas: boolean; usarComanda: boolean; habilitarImprimirDuasVias: boolean; usarCozinha: boolean; usarCardapio: boolean }> => {
     const response = await api.get('/configuracoes/sistema');
     return response.data;
   },
 
   /** Salva as configurações gerais do sistema. */
-  putSistema: async (dados: { usarDelivery: boolean; usarForcaVendas: boolean; usarComanda: boolean; habilitarImprimirDuasVias: boolean }): Promise<{ mensagem: string }> => {
+  putSistema: async (dados: { usarDelivery: boolean; usarForcaVendas: boolean; usarComanda: boolean; habilitarImprimirDuasVias: boolean; usarCozinha: boolean; usarCardapio: boolean }): Promise<{ mensagem: string }> => {
     const response = await api.put('/configuracoes/sistema', dados);
     return response.data;
   },
 
-  /** Realiza backup do banco de dados para C:\ICcomanda\Backup. */
-  fazerBackup: async (): Promise<{ mensagem: string; arquivo: string; caminho: string; tamanhoMb: number }> => {
+  /** Realiza backup do banco de dados, compacta em ZIP e envia por email se configurado. */
+  fazerBackup: async (): Promise<{
+    mensagem: string;
+    arquivo: string;
+    caminho: string;
+    tamanhoMb: number;
+    emailEnviado: boolean;
+    emailDestino?: string;
+    emailErro?: string;
+  }> => {
     const response = await api.post('/configuracoes/backup');
     return response.data;
+  },
+
+  /** Retorna as configurações de email para backup. */
+  getBackupEmail: async (): Promise<{
+    smtpHost: string;
+    smtpPort: number;
+    smtpUseSsl: boolean;
+    usuario: string;
+    senhaCadastrada: boolean;
+    remetente: string;
+    nomeRemetente: string;
+    destinatario: string;
+  }> => {
+    const response = await api.get('/configuracoes/backup-email');
+    return response.data;
+  },
+
+  /** Salva as configurações de email para backup. */
+  putBackupEmail: async (dados: {
+    smtpHost: string;
+    smtpPort: number;
+    smtpUseSsl: boolean;
+    usuario: string;
+    senha?: string;
+    remetente: string;
+    nomeRemetente: string;
+    destinatario: string;
+  }): Promise<{ mensagem: string }> => {
+    const response = await api.put('/configuracoes/backup-email', dados);
+    return response.data;
+  },
+};
+
+// KDS - Kitchen Display System
+export const kdsService = {
+  getPedidos: async (): Promise<KdsPedido[]> => {
+    const response = await api.get('/kds/pedidos');
+    return response.data;
+  },
+
+  atualizarStatus: async (nota: string, statusCozinha: string): Promise<void> => {
+    await api.put(`/kds/pedidos/${nota}/status`, { statusCozinha });
+  },
+};
+
+export interface UsuarioDto {
+  id: number;
+  nome: string;
+  ativo: boolean;
+  bloqueado: boolean;
+  tipo: string;
+  podeVisualizar: boolean;
+  podeVerTotal: boolean;
+  podeCancelar: boolean;
+}
+
+export interface CreateUsuarioRequest {
+  nome: string;
+  senha: string;
+  ativo: boolean;
+  bloqueado: boolean;
+  podeVisualizar: boolean;
+  podeVerTotal: boolean;
+  podeCancelar: boolean;
+  tipo: string;
+}
+
+export interface UpdateUsuarioRequest {
+  nome: string;
+  ativo: boolean;
+  bloqueado: boolean;
+  podeVisualizar: boolean;
+  podeVerTotal: boolean;
+  podeCancelar: boolean;
+  tipo: string;
+}
+
+export const usuariosService = {
+  listar: async (): Promise<UsuarioDto[]> => {
+    const { data } = await api.get('/usuarios');
+    return data;
+  },
+  buscarPorId: async (id: number): Promise<UsuarioDto> => {
+    const { data } = await api.get(`/usuarios/${id}`);
+    return data;
+  },
+  criar: async (req: CreateUsuarioRequest): Promise<UsuarioDto> => {
+    const { data } = await api.post('/usuarios', req);
+    return data;
+  },
+  atualizar: async (id: number, req: UpdateUsuarioRequest): Promise<UsuarioDto> => {
+    const { data } = await api.put(`/usuarios/${id}`, req);
+    return data;
+  },
+  alterarSenha: async (id: number, novaSenha: string): Promise<void> => {
+    await api.put(`/usuarios/${id}/senha`, { novaSenha });
+  },
+  excluir: async (id: number): Promise<void> => {
+    await api.delete(`/usuarios/${id}`);
   },
 };
 

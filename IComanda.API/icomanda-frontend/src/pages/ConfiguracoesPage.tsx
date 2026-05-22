@@ -1,4 +1,4 @@
-import { ArrowLeft, Bike, Briefcase, Building2, CheckCircle2, ClipboardList, Database, Download, Printer, Save, Settings } from 'lucide-react'
+import { ArrowLeft, Bike, Briefcase, Building2, ChefHat, CheckCircle2, ClipboardList, Database, Download, Eye, EyeOff, Mail, Printer, QrCode, Save, Settings } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 import { Button } from '../components/ui/button'
 import { configuracoesService, emitenteService, Emitente } from '../services/api'
@@ -21,7 +21,7 @@ const Toggle = ({
 
 interface ConfiguracoesPageProps {
   onClose: () => void
-  onSalvar?: (usarDelivery: boolean, usarForcaVendas: boolean, usarComanda: boolean, habilitarImprimirDuasVias: boolean) => void
+  onSalvar?: (usarDelivery: boolean, usarForcaVendas: boolean, usarComanda: boolean, habilitarImprimirDuasVias: boolean, usarCozinha: boolean, usarCardapio: boolean) => void
 }
 
 const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar }) => {
@@ -29,11 +29,23 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
   const [usarForcaVendas, setUsarForcaVendas]                   = useState(true)
   const [usarComanda, setUsarComanda]                           = useState(true)
   const [habilitarImprimirDuasVias, setHabilitarImprimirDuasVias] = useState(false)
+  const [usarCozinha, setUsarCozinha]                           = useState(true)
+  const [usarCardapio, setUsarCardapio]                         = useState(true)
   const [carregando, setCarregando]             = useState(true)
   const [salvando, setSalvando]                 = useState(false)
   const [mensagem, setMensagem] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
   const [fazendoBackup, setFazendoBackup]       = useState(false)
-  const [mensagemBackup, setMensagemBackup]     = useState<{ tipo: 'sucesso' | 'erro'; texto: string; detalhe?: string } | null>(null)
+  const [mensagemBackup, setMensagemBackup]     = useState<{ tipo: 'sucesso' | 'erro'; texto: string; detalhe?: string; emailInfo?: string } | null>(null)
+
+  // Email backup config
+  const [emailCfg, setEmailCfg] = useState({
+    smtpHost: '', smtpPort: 587, smtpUseSsl: true,
+    usuario: '', senha: '', remetente: '', nomeRemetente: 'IComanda Backup', destinatario: ''
+  })
+  const [senhaCadastrada, setSenhaCadastrada] = useState(false)
+  const [mostrarSenha, setMostrarSenha] = useState(false)
+  const [salvandoEmail, setSalvandoEmail] = useState(false)
+  const [mensagemEmail, setMensagemEmail] = useState<{ tipo: 'sucesso' | 'erro'; texto: string } | null>(null)
 
   // Emitente
   const [emitente, setEmitente] = useState<Partial<Emitente>>({})
@@ -43,15 +55,26 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
   useEffect(() => {
     const carregar = async () => {
       try {
-        const [cfg, emit] = await Promise.all([
+        const [cfg, emit, emailBkp] = await Promise.all([
           configuracoesService.getSistema(),
           emitenteService.getEmitente(),
+          configuracoesService.getBackupEmail().catch(() => null),
         ])
         setUsarDelivery(cfg.usarDelivery)
         setUsarForcaVendas(cfg.usarForcaVendas ?? true)
         setUsarComanda(cfg.usarComanda ?? true)
         setHabilitarImprimirDuasVias(cfg.habilitarImprimirDuasVias ?? false)
+        setUsarCozinha(cfg.usarCozinha ?? true)
+        setUsarCardapio(cfg.usarCardapio ?? true)
         if (emit) setEmitente(emit)
+        if (emailBkp) {
+          setEmailCfg({
+            smtpHost: emailBkp.smtpHost, smtpPort: emailBkp.smtpPort, smtpUseSsl: emailBkp.smtpUseSsl,
+            usuario: emailBkp.usuario, senha: '', remetente: emailBkp.remetente,
+            nomeRemetente: emailBkp.nomeRemetente, destinatario: emailBkp.destinatario
+          })
+          setSenhaCadastrada(emailBkp.senhaCadastrada)
+        }
       } catch {
         // silencioso — mantém padrões
       } finally {
@@ -74,15 +97,45 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
     }
   }
 
+  const handleSalvarEmailCfg = async () => {
+    setSalvandoEmail(true)
+    setMensagemEmail(null)
+    try {
+      await configuracoesService.putBackupEmail({
+        smtpHost: emailCfg.smtpHost,
+        smtpPort: emailCfg.smtpPort,
+        smtpUseSsl: emailCfg.smtpUseSsl,
+        usuario: emailCfg.usuario,
+        senha: emailCfg.senha || undefined,
+        remetente: emailCfg.remetente,
+        nomeRemetente: emailCfg.nomeRemetente,
+        destinatario: emailCfg.destinatario,
+      })
+      if (emailCfg.senha) setSenhaCadastrada(true)
+      setEmailCfg(p => ({ ...p, senha: '' }))
+      setMensagemEmail({ tipo: 'sucesso', texto: 'Configurações de email salvas!' })
+    } catch {
+      setMensagemEmail({ tipo: 'erro', texto: 'Erro ao salvar configurações de email.' })
+    } finally {
+      setSalvandoEmail(false)
+    }
+  }
+
   const handleBackup = async () => {
     setFazendoBackup(true)
     setMensagemBackup(null)
     try {
       const resultado = await configuracoesService.fazerBackup()
+      let emailInfo: string | undefined
+      if (resultado.emailEnviado && resultado.emailDestino)
+        emailInfo = `✉ Email enviado para ${resultado.emailDestino}`
+      else if (resultado.emailErro)
+        emailInfo = `⚠ Falha ao enviar email: ${resultado.emailErro}`
       setMensagemBackup({
         tipo: 'sucesso',
         texto: resultado.mensagem,
-        detalhe: `${resultado.arquivo} (${resultado.tamanhoMb} MB) → ${resultado.caminho}`
+        detalhe: `${resultado.arquivo} (${resultado.tamanhoMb} MB) → ${resultado.caminho}`,
+        emailInfo,
       })
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.message || 'Erro desconhecido ao fazer backup.'
@@ -96,12 +149,12 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
     setSalvando(true)
     setMensagem(null)
     try {
-      await configuracoesService.putSistema({ usarDelivery, usarForcaVendas, usarComanda, habilitarImprimirDuasVias })
+      await configuracoesService.putSistema({ usarDelivery, usarForcaVendas, usarComanda, habilitarImprimirDuasVias, usarCozinha, usarCardapio })
       setMensagem({ tipo: 'sucesso', texto: 'Configurações salvas! Voltando ao menu...' })
       // Após 1,5s: atualiza estado no App e fecha — chamadas sincronas no mesmo setTimeout
       // garante que React processa tudo num único batch, evitando conflito de reconciliação
       setTimeout(() => {
-        onSalvar?.(usarDelivery, usarForcaVendas, usarComanda, habilitarImprimirDuasVias)
+        onSalvar?.(usarDelivery, usarForcaVendas, usarComanda, habilitarImprimirDuasVias, usarCozinha, usarCardapio)
         onClose()
       }, 1500)
     } catch {
@@ -151,6 +204,26 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
       color: 'bg-green-500',
       value: habilitarImprimirDuasVias,
       onChange: () => setHabilitarImprimirDuasVias(p => !p),
+    },
+    {
+      id: 'toggle-cozinha',
+      label: 'Módulo Cozinha (KDS)',
+      desc: 'Exibe os botões de Cozinha (KDS e Gerenciar Pizzas) no menu principal',
+      icon: <ChefHat className="w-5 h-5 text-orange-700" />,
+      bg: 'bg-orange-100',
+      color: 'bg-orange-700',
+      value: usarCozinha,
+      onChange: () => setUsarCozinha(p => !p),
+    },
+    {
+      id: 'toggle-cardapio',
+      label: 'Módulo Cardápio (QR Code)',
+      desc: 'Exibe o botão de QR Code das Mesas (cardápio digital) no menu principal',
+      icon: <QrCode className="w-5 h-5 text-indigo-600" />,
+      bg: 'bg-indigo-100',
+      color: 'bg-indigo-500',
+      value: usarCardapio,
+      onChange: () => setUsarCardapio(p => !p),
     },
   ]
 
@@ -393,7 +466,7 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
             <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
               <div className="px-5 py-4 bg-amber-500/10 border-b border-border">
                 <h2 className="text-sm font-semibold text-amber-700 uppercase tracking-wide" translate="no">Backup do Banco de Dados</h2>
-                <p className="text-xs text-text-muted mt-0.5">Copia o banco de dados para <span className="font-mono text-xs bg-background-secondary px-1 rounded">C:\IComanda\Backup</span></p>
+                <p className="text-xs text-text-muted mt-0.5">Copia o banco de dados para <span className="font-mono text-xs bg-background-secondary px-1 rounded">C:\IComanda\Backup</span> e compacta em ZIP</p>
               </div>
               <div className="px-5 py-5">
                 <div className="flex items-start gap-4">
@@ -419,6 +492,9 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
                       <p className={`text-xs mt-1 opacity-80 font-mono break-all ${mensagemBackup?.detalhe ? '' : 'hidden'}`}>
                         {mensagemBackup?.detalhe ?? ''}
                       </p>
+                      <p className={`text-xs mt-1 font-medium ${mensagemBackup?.emailInfo ? '' : 'hidden'}`}>
+                        {mensagemBackup?.emailInfo ?? ''}
+                      </p>
                     </div>
 
                     <Button
@@ -440,6 +516,144 @@ const ConfiguracoesPage: React.FC<ConfiguracoesPageProps> = ({ onClose, onSalvar
                     </Button>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Seção: Email para Backup */}
+            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+              <div className="px-5 py-4 bg-sky-500/10 border-b border-border">
+                <h2 className="text-sm font-semibold text-sky-700 uppercase tracking-wide">Email para Backup</h2>
+                <p className="text-xs text-text-muted mt-0.5">Configure o SMTP para envio automático do backup por email após cada execução</p>
+              </div>
+              <div className="px-5 py-5 space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-10 h-10 rounded-xl bg-sky-100 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-sky-600" />
+                  </div>
+                  <p className="text-sm text-text-muted">Preencha as configurações SMTP. Deixe em branco para desativar o envio por email.</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">Servidor SMTP</label>
+                    <input
+                      type="text"
+                      value={emailCfg.smtpHost}
+                      onChange={e => setEmailCfg(p => ({ ...p, smtpHost: e.target.value }))}
+                      placeholder="smtp.gmail.com"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">Porta</label>
+                    <input
+                      type="number"
+                      value={emailCfg.smtpPort}
+                      onChange={e => setEmailCfg(p => ({ ...p, smtpPort: Number(e.target.value) }))}
+                      placeholder="587"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3 pt-5">
+                    <Toggle
+                      id="toggle-smtp-ssl"
+                      value={emailCfg.smtpUseSsl}
+                      onChange={() => setEmailCfg(p => ({ ...p, smtpUseSsl: !p.smtpUseSsl }))}
+                      color="bg-sky-500"
+                    />
+                    <label htmlFor="toggle-smtp-ssl" className="text-sm text-text-primary cursor-pointer">Usar SSL/TLS</label>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">Usuário SMTP</label>
+                    <input
+                      type="text"
+                      value={emailCfg.usuario}
+                      onChange={e => setEmailCfg(p => ({ ...p, usuario: e.target.value }))}
+                      placeholder="seu@email.com"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">
+                      Senha SMTP {senhaCadastrada && <span className="text-green-600 font-normal">(cadastrada)</span>}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={mostrarSenha ? 'text' : 'password'}
+                        value={emailCfg.senha}
+                        onChange={e => setEmailCfg(p => ({ ...p, senha: e.target.value }))}
+                        placeholder={senhaCadastrada ? '••••••••' : 'Senha de app'}
+                        className="w-full px-3 py-2 pr-9 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setMostrarSenha(p => !p)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-text-muted hover:text-text-primary"
+                      >
+                        {mostrarSenha ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">Email Remetente</label>
+                    <input
+                      type="email"
+                      value={emailCfg.remetente}
+                      onChange={e => setEmailCfg(p => ({ ...p, remetente: e.target.value }))}
+                      placeholder="backup@empresa.com"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">Nome Remetente</label>
+                    <input
+                      type="text"
+                      value={emailCfg.nomeRemetente}
+                      onChange={e => setEmailCfg(p => ({ ...p, nomeRemetente: e.target.value }))}
+                      placeholder="IComanda Backup"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-xs font-semibold text-text-secondary mb-1">Email Destinatário (para quem enviar)</label>
+                    <input
+                      type="email"
+                      value={emailCfg.destinatario}
+                      onChange={e => setEmailCfg(p => ({ ...p, destinatario: e.target.value }))}
+                      placeholder="gerencia@empresa.com"
+                      className="w-full px-3 py-2 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                    />
+                  </div>
+                </div>
+
+                <div className={`px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 ${
+                  mensagemEmail === null
+                    ? 'hidden'
+                    : mensagemEmail.tipo === 'sucesso'
+                      ? 'bg-green-50 border border-green-200 text-green-800'
+                      : 'bg-red-50 border border-red-200 text-red-700'
+                }`}>
+                  <CheckCircle2 className={`w-4 h-4 flex-shrink-0 ${mensagemEmail?.tipo === 'sucesso' ? '' : 'hidden'}`} />
+                  {mensagemEmail?.texto ?? ''}
+                </div>
+
+                <Button
+                  onClick={handleSalvarEmailCfg}
+                  disabled={salvandoEmail}
+                  className="mt-1 bg-sky-600 hover:bg-sky-700 text-white h-10 px-5 text-sm font-semibold"
+                >
+                  {salvandoEmail ? (
+                    <span className="flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                      Salvando...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <Save className="w-4 h-4" />
+                      Salvar Config. de Email
+                    </span>
+                  )}
+                </Button>
               </div>
             </div>
 

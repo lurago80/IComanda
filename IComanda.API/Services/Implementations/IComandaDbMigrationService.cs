@@ -44,6 +44,18 @@ public class IComandaDbMigrationService
         // ── 2. Parâmetro HABILITAR_IMPRIMIR_2VIAS na tabela PARAMETROS ───
         await EnsureParametroHabilitarImprimir2ViasAsync(fbConn);
 
+        // ── 3. USUARIO.SENHA — tamanho mínimo para BCrypt (60 chars) ─────
+        await EnsureUsuarioSenhaTypeAsync(fbConn);
+
+        // ── 4. METAS_FV.VALOR_REALIZADO — coluna ausente em versões anteriores ──
+        await EnsureMetasFvValorRealizadoAsync(fbConn);
+
+        // ── 5. VISITAS_FV.RESULTADO — coluna ausente em versões anteriores ──
+        await EnsureVisitasFvResultadoAsync(fbConn);
+
+        // ── 6. GRUPO.TIPO — necessário para cardápio/pizza ────────────────
+        await EnsureGrupoTipoAsync(fbConn);
+
         Console.WriteLine("✅ MIGRAÇÕES — verificação concluída.");
         Console.WriteLine("========================================");
         _logger.LogInformation("✅ [Migration] Verificação de estrutura concluída.");
@@ -129,5 +141,113 @@ public class IComandaDbMigrationService
             _logger.LogWarning("  ⚠️ PARAMETROS.HABILITAR_IMPRIMIR_2VIAS: {Error}", ex.Message);
             Console.WriteLine($"  ⚠️ PARAMETROS.HABILITAR_IMPRIMIR_2VIAS: {ex.Message}");
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 3. USUARIO.SENHA — VARCHAR(72) para suportar BCrypt
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureUsuarioSenhaTypeAsync(FbConnection conn)
+    {
+        // Obtém o tamanho atual do campo SENHA na tabela USUARIO
+        var fieldLength = await conn.ExecuteScalarAsync<int?>(
+            @"SELECT F.RDB$FIELD_LENGTH
+              FROM RDB$RELATION_FIELDS RF
+              JOIN RDB$FIELDS F ON F.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE
+              WHERE TRIM(RF.RDB$RELATION_NAME) = 'USUARIO'
+                AND TRIM(RF.RDB$FIELD_NAME)    = 'SENHA'");
+
+        if (fieldLength == null)
+        {
+            Console.WriteLine("  ✔ USUARIO.SENHA: tabela/coluna não encontrada, ignorando.");
+            return;
+        }
+
+        if (fieldLength >= 72)
+        {
+            Console.WriteLine($"  ✔ USUARIO.SENHA já suporta BCrypt ({fieldLength} chars).");
+            return;
+        }
+
+        _logger.LogInformation("[Migration] Expandindo USUARIO.SENHA para VARCHAR(72)...");
+        ExecDDL(conn,
+            "ALTER TABLE USUARIO ALTER COLUMN SENHA TYPE VARCHAR(72)",
+            $"USUARIO.SENHA expandida de {fieldLength} para VARCHAR(72)");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 4. METAS_FV.VALOR_REALIZADO — ausente em versões anteriores
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureMetasFvValorRealizadoAsync(FbConnection conn)
+    {
+        // Só executa se a tabela já existir (pode ter sido criada pela versão antiga)
+        if (!await TableExistsAsync(conn, "METAS_FV"))
+        {
+            Console.WriteLine("  ✔ METAS_FV não existe ainda, nenhuma migração necessária.");
+            return;
+        }
+
+        if (await ColumnExistsAsync(conn, "METAS_FV", "VALOR_REALIZADO"))
+        {
+            Console.WriteLine("  ✔ METAS_FV.VALOR_REALIZADO já existe.");
+            return;
+        }
+
+        _logger.LogInformation("[Migration] Adicionando METAS_FV.VALOR_REALIZADO...");
+        ExecDDL(conn,
+            "ALTER TABLE METAS_FV ADD VALOR_REALIZADO DECIMAL(15,2) DEFAULT 0 NOT NULL",
+            "METAS_FV.VALOR_REALIZADO criada (DECIMAL(15,2) DEFAULT 0)");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 5. VISITAS_FV.RESULTADO — ausente em versões anteriores
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureVisitasFvResultadoAsync(FbConnection conn)
+    {
+        // Só executa se a tabela já existir
+        if (!await TableExistsAsync(conn, "VISITAS_FV"))
+        {
+            Console.WriteLine("  ✔ VISITAS_FV não existe ainda, nenhuma migração necessária.");
+            return;
+        }
+
+        if (await ColumnExistsAsync(conn, "VISITAS_FV", "RESULTADO"))
+        {
+            Console.WriteLine("  ✔ VISITAS_FV.RESULTADO já existe.");
+            return;
+        }
+
+        _logger.LogInformation("[Migration] Adicionando VISITAS_FV.RESULTADO...");
+        ExecDDL(conn,
+            "ALTER TABLE VISITAS_FV ADD RESULTADO VARCHAR(300)",
+            "VISITAS_FV.RESULTADO criada (VARCHAR(300))");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 6. GRUPO.TIPO — coluna necessária para grupos do tipo PIZZA
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureGrupoTipoAsync(FbConnection conn)
+    {
+        if (await ColumnExistsAsync(conn, "GRUPO", "TIPO"))
+        {
+            Console.WriteLine("  ✔ GRUPO.TIPO já existe.");
+            return;
+        }
+
+        _logger.LogInformation("[Migration] Adicionando coluna GRUPO.TIPO...");
+        ExecDDL(conn,
+            "ALTER TABLE GRUPO ADD TIPO VARCHAR(10) DEFAULT 'NORMAL'",
+            "GRUPO.TIPO criada (VARCHAR(10) DEFAULT 'NORMAL')");
+    }
+
+    private static async Task<bool> TableExistsAsync(FbConnection conn, string tableName)
+    {
+        var count = await conn.ExecuteScalarAsync<int>(
+            "SELECT COUNT(*) FROM RDB$RELATIONS WHERE TRIM(RDB$RELATION_NAME) = @Name",
+            new { Name = tableName.ToUpper() });
+        return count > 0;
     }
 }

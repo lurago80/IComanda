@@ -1,11 +1,13 @@
-import { 
-  Loader2, 
-  X, 
+import {
+  Loader2,
+  X,
   Save,
   Package,
-  ChevronDown
+  ChevronDown,
+  ImagePlus,
+  Trash2
 } from 'lucide-react';
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useToast } from '../hooks/useToast';
 import { produtosService, gruposService } from '../services/api';
 import { Button } from '../components/ui/button';
@@ -22,6 +24,13 @@ const CadastroProdutoPage: React.FC<CadastroProdutoPageProps> = ({ onClose, prod
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [carregandoGrupos, setCarregandoGrupos] = useState(false);
   const { showSuccess, showError } = useToast();
+
+  // Imagem
+  const [imagemUrl, setImagemUrl] = useState<string | null>(null);
+  const [novaImagemBase64, setNovaImagemBase64] = useState<string | null>(null);
+  const [removerImagem, setRemoverImagem] = useState(false);
+  const [salvandoImagem, setSalvandoImagem] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Campos principais - PRODUTOESERVICO
   const [descricao, setDescricao] = useState('');
@@ -105,6 +114,8 @@ const CadastroProdutoPage: React.FC<CadastroProdutoPageProps> = ({ onClose, prod
       setPrecoCustoMedio(produto.precoCustoMedio);
       setAtacado(produto.atacado);
       setPreco3(produto.preco3);
+      // Marca a URL da imagem com cache-busting para forçar reload
+      setImagemUrl(`${produtosService.getImagemUrl(produtoId)}?t=${Date.now()}`);
     } catch (error: any) {
       showError('Erro', 'Não foi possível carregar os dados do produto');
       console.error('Erro ao carregar produto:', error);
@@ -112,6 +123,33 @@ const CadastroProdutoPage: React.FC<CadastroProdutoPageProps> = ({ onClose, prod
       setLoading(false);
     }
   }, [produtoId, showError]);
+
+  const handleSelecionarImagem = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      showError('Erro', 'Imagem muito grande. Máximo 5 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      // Remove o prefixo "data:image/xxx;base64,"
+      const base64 = dataUrl.split(',')[1];
+      setNovaImagemBase64(base64);
+      setRemoverImagem(false);
+      setImagemUrl(dataUrl); // preview imediato
+    };
+    reader.readAsDataURL(file);
+    // Limpa o input para permitir reselecionar o mesmo arquivo
+    e.target.value = '';
+  };
+
+  const handleRemoverImagem = () => {
+    setNovaImagemBase64(null);
+    setRemoverImagem(true);
+    setImagemUrl(null);
+  };
 
   const carregarGrupos = useCallback(async () => {
     try {
@@ -182,15 +220,30 @@ const CadastroProdutoPage: React.FC<CadastroProdutoPageProps> = ({ onClose, prod
 
       console.log('📤 Dados do produto a serem enviados:', dadosProduto);
 
+      let idProduto = produtoId;
       if (produtoId) {
         await produtosService.atualizar(produtoId, dadosProduto);
-        showSuccess('Sucesso', 'Produto atualizado com sucesso');
       } else {
-        const id = await produtosService.criar(dadosProduto);
-        console.log('✅ Produto criado com ID:', id);
-        showSuccess('Sucesso', 'Produto criado com sucesso');
+        idProduto = await produtosService.criar(dadosProduto);
       }
 
+      // Salvar/remover imagem se houve alteração
+      if (idProduto) {
+        setSalvandoImagem(true);
+        try {
+          if (novaImagemBase64) {
+            await produtosService.atualizarImagem(idProduto, novaImagemBase64);
+          } else if (removerImagem) {
+            await produtosService.removerImagem(idProduto);
+          }
+        } catch {
+          showError('Aviso', 'Produto salvo, mas houve erro ao salvar a imagem.');
+        } finally {
+          setSalvandoImagem(false);
+        }
+      }
+
+      showSuccess('Sucesso', produtoId ? 'Produto atualizado com sucesso' : 'Produto criado com sucesso');
       setTimeout(() => {
         onClose();
       }, 1000);
@@ -414,6 +467,64 @@ const CadastroProdutoPage: React.FC<CadastroProdutoPageProps> = ({ onClose, prod
                   />
                   <span className="text-sm text-text-secondary">Produto Ativo</span>
                 </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Imagem do Produto */}
+          <div>
+            <h2 className="text-lg font-bold text-text-primary mb-4">Imagem do Produto</h2>
+            <div className="flex flex-col sm:flex-row items-start gap-6">
+              {/* Preview */}
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-40 h-40 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center cursor-pointer transition-colors overflow-hidden shrink-0
+                  ${imagemUrl ? 'border-primary/30 bg-transparent' : 'border-border bg-background-secondary hover:border-primary/50 hover:bg-primary/5'}`}
+              >
+                {imagemUrl ? (
+                  <img
+                    src={imagemUrl}
+                    alt="Imagem do produto"
+                    className="w-full h-full object-cover"
+                    onError={() => setImagemUrl(null)}
+                  />
+                ) : (
+                  <>
+                    <ImagePlus className="w-10 h-10 text-text-muted mb-2" />
+                    <p className="text-xs text-text-muted text-center px-2">Clique para adicionar imagem</p>
+                  </>
+                )}
+              </div>
+
+              {/* Ações */}
+              <div className="flex flex-col gap-3 justify-center">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  className="hidden"
+                  onChange={handleSelecionarImagem}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-2 border-2 border-primary text-primary rounded-xl text-sm font-medium hover:bg-primary/5 transition-colors"
+                >
+                  <ImagePlus className="w-4 h-4" />
+                  {imagemUrl ? 'Trocar imagem' : 'Selecionar imagem'}
+                </button>
+                {imagemUrl && (
+                  <button
+                    type="button"
+                    onClick={handleRemoverImagem}
+                    className="flex items-center gap-2 px-4 py-2 border-2 border-red-300 text-red-500 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Remover imagem
+                  </button>
+                )}
+                <p className="text-xs text-text-muted">JPG, PNG, WebP ou GIF • Máx. 5 MB</p>
+                <p className="text-xs text-text-muted">A imagem será exibida no cardápio digital.</p>
               </div>
             </div>
           </div>

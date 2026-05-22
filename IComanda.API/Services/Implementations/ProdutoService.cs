@@ -126,4 +126,8 @@ public class ProdutoService : IProdutoService
 
         return await _produtoRepository.ExcluirProdutoAsync(id);
     }
+
+    public Task<byte[]?> GetImagemAsync(int id) => _produtoRepository.GetImagemAsync(id);
+    public Task<bool> AtualizarImagemAsync(int id, byte[] imagem) => _produtoRepository.AtualizarImagemAsync(id, imagem);
+    public Task<bool> RemoverImagemAsync(int id) => _produtoRepository.RemoverImagemAsync(id);
 }

@@ -90,18 +90,18 @@ public class ProdutoRepository : IProdutoRepository
         // Filtro de ativo
         if (ativo.HasValue)
         {
-            // Firebird: ativo é SMALLINT (1/0) ou NULL
+            // Neste banco ATIVO=0 significa ativo e ATIVO=1 significa inativo
             if (ativo.Value)
             {
-                // Produto ativo: ATIVO = 1 ou NULL (tratar NULL como ativo)
-                sql += " AND (p3.ATIVO = 1 OR p3.ATIVO IS NULL)";
-                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos ativos (ATIVO = 1 ou NULL)");
+                // Apenas ativos: ATIVO = 0 ou NULL (não marcado como inativo)
+                sql += " AND (p3.ATIVO = 0 OR p3.ATIVO IS NULL)";
+                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos ativos (ATIVO = 0 ou NULL)");
             }
             else
             {
-                // Produto inativo: ATIVO = 0
-                sql += " AND p3.ATIVO = 0";
-                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos inativos (ATIVO = 0)");
+                // Apenas inativos: ATIVO = 1
+                sql += " AND p3.ATIVO = 1";
+                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos inativos (ATIVO = 1)");
             }
         }
         else
@@ -223,7 +223,7 @@ public class ProdutoRepository : IProdutoRepository
             INNER JOIN PRODUTOEMPRESA p2 ON p1.id = p2.id
             INNER JOIN PRODUTOESERVICO p3 ON p1.id = p3.id
             INNER JOIN PRODUTOESERVICOEMPRESA p4 ON p1.id = p4.id
-            WHERE p1.codigobarra = @CodigoBarra AND p3.ativo = 1";
+            WHERE p1.codigobarra = @CodigoBarra AND (p3.ativo = 0 OR p3.ativo IS NULL)";
 
         return await connection.QueryFirstOrDefaultAsync<Produto>(sql, new { CodigoBarra = codigoBarra });
     }
@@ -243,7 +243,7 @@ public class ProdutoRepository : IProdutoRepository
             INNER JOIN PRODUTOEMPRESA p2 ON p1.id = p2.id
             INNER JOIN PRODUTOESERVICO p3 ON p1.id = p3.id
             INNER JOIN PRODUTOESERVICOEMPRESA p4 ON p1.id = p4.id
-            WHERE p3.codigointerno = @CodigoInterno AND p3.ativo = 1";
+            WHERE p3.codigointerno = @CodigoInterno AND (p3.ativo = 0 OR p3.ativo IS NULL)";
 
         return await connection.QueryFirstOrDefaultAsync<Produto>(sql, new { CodigoInterno = codigoInterno });
     }
@@ -282,16 +282,14 @@ public class ProdutoRepository : IProdutoRepository
 
         if (ativo.HasValue)
         {
-            // Firebird: ativo é SMALLINT (1/0) ou NULL
+            // Neste banco ATIVO=0 significa ativo e ATIVO=1 significa inativo
             if (ativo.Value)
             {
-                // Produto ativo: ATIVO = 1 ou NULL (tratar NULL como ativo)
-                sql += " AND (p3.ativo = 1 OR p3.ativo IS NULL)";
+                sql += " AND (p3.ativo = 0 OR p3.ativo IS NULL)";
             }
             else
             {
-                // Produto inativo: ATIVO = 0
-                sql += " AND p3.ativo = 0";
+                sql += " AND p3.ativo = 1";
             }
         }
 
@@ -314,7 +312,6 @@ public class ProdutoRepository : IProdutoRepository
                 p3.ID as Id,
                 p1.CODIGOBARRA as CodigoBarra,
                 CAST(NULL AS VARCHAR(50)) as PadraoBarra,
-                CAST(NULL AS BLOB) as Imagem,
                 CAST(NULL AS VARCHAR(50)) as Classificacao,
                 CAST(NULL AS INTEGER) as DiasValidade,
                 CAST(NULL AS DECIMAL(18,2)) as PesoLiquido,
@@ -471,7 +468,6 @@ public class ProdutoRepository : IProdutoRepository
                 p3.ID as Id,
                 p1.CODIGOBARRA as CodigoBarra,
                 CAST(NULL AS VARCHAR(50)) as PadraoBarra,
-                CAST(NULL AS BLOB) as Imagem,
                 CAST(NULL AS VARCHAR(50)) as Classificacao,
                 CAST(NULL AS INTEGER) as DiasValidade,
                 CAST(NULL AS DECIMAL(18,2)) as PesoLiquido,
@@ -626,16 +622,14 @@ public class ProdutoRepository : IProdutoRepository
 
         if (ativo.HasValue)
         {
-            // Firebird: ativo é SMALLINT (1/0) ou NULL
+            // Neste banco ATIVO=0 significa ativo e ATIVO=1 significa inativo
             if (ativo.Value)
             {
-                // Produto ativo: ATIVO = 1 ou NULL (tratar NULL como ativo)
-                sql += " AND (p3.ATIVO = 1 OR p3.ATIVO IS NULL)";
+                sql += " AND (p3.ATIVO = 0 OR p3.ATIVO IS NULL)";
             }
             else
             {
-                // Produto inativo: ATIVO = 0
-                sql += " AND p3.ATIVO = 0";
+                sql += " AND p3.ATIVO = 1";
             }
         }
 
@@ -1031,6 +1025,44 @@ public class ProdutoRepository : IProdutoRepository
             _logger.LogError(ex, "Erro ao excluir produto - ID: {Id}", id);
             throw;
         }
+    }
+
+    public async Task<byte[]?> GetImagemAsync(int id)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        // Lê apenas a coluna IMAGEM — evita carregar BLOB em queries de listagem
+        var sql = "SELECT p.IMAGEM FROM PRODUTO p WHERE p.ID = @Id";
+        var result = await connection.QueryFirstOrDefaultAsync<dynamic>(sql, new { Id = id });
+        if (result == null) return null;
+        var raw = result.IMAGEM;
+        if (raw == null) return null;
+        if (raw is byte[] bytes) return bytes;
+        // Firebird pode retornar como stream
+        if (raw is System.IO.Stream stream)
+        {
+            using var ms = new System.IO.MemoryStream();
+            await stream.CopyToAsync(ms);
+            return ms.ToArray();
+        }
+        return null;
+    }
+
+    public async Task<bool> AtualizarImagemAsync(int id, byte[] imagem)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var rows = await connection.ExecuteAsync(
+            "UPDATE PRODUTO SET IMAGEM = @Imagem WHERE ID = @Id",
+            new { Imagem = imagem, Id = id });
+        return rows > 0;
+    }
+
+    public async Task<bool> RemoverImagemAsync(int id)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var rows = await connection.ExecuteAsync(
+            "UPDATE PRODUTO SET IMAGEM = NULL WHERE ID = @Id",
+            new { Id = id });
+        return rows > 0;
     }
 
 }

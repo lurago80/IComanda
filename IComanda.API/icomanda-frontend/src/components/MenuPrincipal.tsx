@@ -1,10 +1,10 @@
-import { 
-  ClipboardList, 
-  FileText, 
+import {
+  ClipboardList,
+  FileText,
   LayoutGrid,
-  LogOut, 
-  Receipt, 
-  Search, 
+  LogOut,
+  Receipt,
+  Search,
   ShoppingBag,
   TrendingUp,
   DollarSign,
@@ -25,11 +25,17 @@ import {
   Settings,
   Briefcase,
   MapPin,
-  Database
+  Database,
+  ChefHat,
+  QrCode,
+  Pizza,
+  Users,
+  FileX
 } from 'lucide-react'
 import React from 'react'
 import { Button } from './ui/button'
 import NavModulos from './NavModulos'
+import { roleLabelPtBr } from '../hooks/useCurrentUser'
 
 interface MenuPrincipalProps {
   onNovaComanda: () => void
@@ -61,6 +67,15 @@ interface MenuPrincipalProps {
   onBackup?: () => void
   onIrParaDelivery?: () => void
   onIrParaForcaVendas?: () => void
+  onKds?: () => void
+  onQrCodeMesas?: () => void
+  onGerenciarPizza?: () => void
+  onDashboard?: () => void
+  onUsuarios?: () => void
+  onRelCancelamentos?: () => void
+  onFormasPagamento?: () => void
+  userName?: string
+  userRole?: string
   usarComanda?: boolean
   totalComandasAbertas?: number
   totalValorAberto?: number
@@ -106,6 +121,15 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
   onBackup,
   onIrParaDelivery,
   onIrParaForcaVendas,
+  onKds,
+  onQrCodeMesas,
+  onGerenciarPizza,
+  onDashboard,
+  onUsuarios,
+  onRelCancelamentos,
+  onFormasPagamento,
+  userName,
+  userRole,
   totalComandasAbertas = 0,
   totalValorAberto = 0,
   totalDeliveryAbertos = 0,
@@ -247,7 +271,14 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
       label: 'Relatórios',
       onClick: onRelatorios!,
       category: 'Financeiro'
-    }
+    },
+    ...(onDashboard ? [{
+      icon: <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7" />,
+      label: 'Dashboard',
+      onClick: onDashboard,
+      variant: 'primary' as const,
+      category: 'Financeiro'
+    }] : [])
   ].filter(item => item.onClick)
 
   // Seção: UTILITÁRIOS
@@ -282,6 +313,24 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
       onClick: onConfiguracoes || (() => {}),
       category: 'Utilitários'
     },
+    ...(onUsuarios ? [{
+      icon: <Users className="w-6 h-6 sm:w-7 sm:h-7" />,
+      label: 'Usuários',
+      onClick: onUsuarios,
+      category: 'Utilitários'
+    }] : []),
+    ...(onRelCancelamentos ? [{
+      icon: <FileX className="w-6 h-6 sm:w-7 sm:h-7" />,
+      label: 'Cancelamentos',
+      onClick: onRelCancelamentos,
+      category: 'Utilitários'
+    }] : []),
+    ...(onFormasPagamento ? [{
+      icon: <CreditCard className="w-6 h-6 sm:w-7 sm:h-7" />,
+      label: 'Formas Pgto',
+      onClick: onFormasPagamento,
+      category: 'Utilitários'
+    }] : []),
     ...(onBackup ? [{
       icon: <Database className="w-6 h-6 sm:w-7 sm:h-7" />,
       label: 'Backup',
@@ -305,6 +354,8 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
       categoryColor = "border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-50/50 hover:bg-indigo-50"
     } else if (item.category === 'Financeiro') {
       categoryColor = "border-green-500/30 hover:border-green-500/60 bg-green-50/50 hover:bg-green-50"
+    } else if (item.category === 'Cozinha') {
+      categoryColor = "border-orange-600/30 hover:border-orange-600/60 bg-orange-50/50 hover:bg-orange-50"
     } else if (item.category === 'Utilitários') {
       categoryColor = "border-purple-500/30 hover:border-purple-500/60 bg-purple-50/50 hover:bg-purple-50"
     }
@@ -368,6 +419,18 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
             </div>
           </div>
           <p className="text-sm sm:text-base text-text-muted">Sistema de Gestão de Comandas</p>
+          {/* Badge de usuário logado */}
+          {userName && (
+            <div className="inline-flex items-center gap-2 mt-3 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm font-medium text-primary">
+              <User className="w-4 h-4" />
+              <span>{userName}</span>
+              {userRole && (
+                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-xs font-semibold text-primary">
+                  {roleLabelPtBr(userRole)}
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Card de Resumo - Responsivo */}
@@ -417,6 +480,50 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
             {itensComandas.map((item, index) => renderMenuItem(item, index))}
           </div>
         </div>
+        )}
+
+        {/* Seção: COZINHA (KDS) + QR Code */}
+        {(onKds || onQrCodeMesas || onGerenciarPizza) && (
+          <div className="space-y-4 bg-orange-50/30 rounded-2xl p-4 sm:p-6 border border-orange-200/50">
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-600/40 to-transparent"></div>
+              <h2 className="text-base sm:text-lg font-bold text-orange-700 px-5 py-2 bg-orange-100 rounded-full border-2 border-orange-300 shadow-sm">
+                🍳 COZINHA & CARDÁPIO
+              </h2>
+              <div className="h-px flex-1 bg-gradient-to-r from-transparent via-orange-600/40 to-transparent"></div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {onKds && (
+                <Button
+                  onClick={onKds}
+                  className="h-24 sm:h-28 flex flex-col items-center justify-center space-y-2 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 bg-gradient-to-br from-orange-600 to-orange-800 hover:from-orange-700 hover:to-orange-900 text-white"
+                >
+                  <ChefHat className="w-7 h-7 sm:w-8 sm:h-8" />
+                  <span className="font-bold text-sm sm:text-base">Tela da Cozinha (KDS)</span>
+                </Button>
+              )}
+              {onQrCodeMesas && (
+                <Button
+                  onClick={onQrCodeMesas}
+                  variant="outline"
+                  className="h-24 sm:h-28 flex flex-col items-center justify-center space-y-2 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-indigo-400/50 hover:border-indigo-500 bg-indigo-50/50 hover:bg-indigo-50"
+                >
+                  <QrCode className="w-7 h-7 sm:w-8 sm:h-8 text-indigo-600" />
+                  <span className="font-bold text-sm sm:text-base text-indigo-700">QR Code das Mesas</span>
+                </Button>
+              )}
+              {onGerenciarPizza && (
+                <Button
+                  onClick={onGerenciarPizza}
+                  variant="outline"
+                  className="h-24 sm:h-28 flex flex-col items-center justify-center space-y-2 rounded-xl sm:rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 active:scale-95 border-2 border-rose-400/50 hover:border-rose-500 bg-rose-50/50 hover:bg-rose-50"
+                >
+                  <Pizza className="w-7 h-7 sm:w-8 sm:h-8 text-rose-600" />
+                  <span className="font-bold text-sm sm:text-base text-rose-700">Gerenciar Pizzas</span>
+                </Button>
+              )}
+            </div>
+          </div>
         )}
 
         {/* Card de Resumo Delivery */}

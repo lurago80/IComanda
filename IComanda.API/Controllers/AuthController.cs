@@ -332,6 +332,29 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Retorna o perfil do usuário autenticado (role + permissões)
+    /// </summary>
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public IActionResult Me()
+    {
+        var userId = User.FindFirst("UserId")?.Value;
+        var username = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        var role = User.FindFirst("Role")?.Value;
+        var permissions = User.FindAll("Permission").Select(c => c.Value).ToList();
+
+        return Ok(new
+        {
+            userId = userId != null ? int.Parse(userId) : 0,
+            username,
+            role,
+            permissions
+        });
+    }
+
+    /// <summary>
     /// Determina o role de um usuário baseado nos campos CANCELAR e VISUALIZAR
     /// </summary>
     private UserRole DetermineUserRole(Models.Entities.Usuario usuario)

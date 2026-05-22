@@ -33,11 +33,21 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IConfiguracoesRepository, ConfiguracoesRepository>();
 
+        // KDS - Kitchen Display System
+        services.AddScoped<IKdsRepository, KdsRepository>();
+
+        // Pizza
+        services.AddScoped<IPizzaRepository, PizzaRepository>();
+
         // Força de Vendas
         services.AddScoped<IVendedorRepository, VendedorRepository>();
         services.AddScoped<IPedidoFVRepository, PedidoFVRepository>();
         services.AddScoped<IVisitaFVRepository, VisitaFVRepository>();
         services.AddScoped<IMetaFVRepository, MetaFVRepository>();
+
+        // Grupos de Produto e Comissões
+        services.AddScoped<IGrupoProdutoRepository, GrupoProdutoRepository>();
+        services.AddScoped<IOperadorComissaoRepository, OperadorComissaoRepository>();
 
         return services;
     }
@@ -60,6 +70,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificacaoService, NotificacaoService>();
         services.AddScoped<ITaxaEntregaService, TaxaEntregaService>();
         
+        // KDS - Kitchen Display System
+        services.AddScoped<IKdsService, KdsService>();
+
         // Força de Vendas
         services.AddScoped<IVendedorService, VendedorService>();
         services.AddScoped<IPedidoFVService, PedidoFVService>();
