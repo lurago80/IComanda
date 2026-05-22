@@ -56,6 +56,9 @@ public class IComandaDbMigrationService
         // ── 6. GRUPO.TIPO — necessário para cardápio/pizza ────────────────
         await EnsureGrupoTipoAsync(fbConn);
 
+        // ── 7. USUARIO LOJA — garantir permissões de Gerente ─────────────
+        await EnsureLojaUserPermissoesAsync(fbConn);
+
         Console.WriteLine("✅ MIGRAÇÕES — verificação concluída.");
         Console.WriteLine("========================================");
         _logger.LogInformation("✅ [Migration] Verificação de estrutura concluída.");
@@ -241,6 +244,45 @@ public class IComandaDbMigrationService
         ExecDDL(conn,
             "ALTER TABLE GRUPO ADD TIPO VARCHAR(10) DEFAULT 'NORMAL'",
             "GRUPO.TIPO criada (VARCHAR(10) DEFAULT 'NORMAL')");
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 7. USUARIO LOJA — garantir CANCELAR='1' e VISUALIZAR='1' para acesso Gerente
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureLojaUserPermissoesAsync(FbConnection conn)
+    {
+        try
+        {
+            // Verifica se o usuário LOJA já tem permissões de gerente (CANCELAR='1')
+            var cancelar = await conn.ExecuteScalarAsync<string?>(
+                "SELECT FIRST 1 CANCELAR FROM USUARIO WHERE UPPER(NOME) = 'LOJA' AND ATIVO = '1'");
+
+            if (cancelar == "1")
+            {
+                Console.WriteLine("  ✔ USUARIO LOJA já possui permissões de Gerente (CANCELAR='1').");
+                return;
+            }
+
+            _logger.LogInformation("[Migration] Corrigindo permissões do usuário LOJA...");
+            var updated = await conn.ExecuteAsync(
+                "UPDATE USUARIO SET CANCELAR = '1', VISUALIZAR = '1' WHERE UPPER(NOME) = 'LOJA' AND ATIVO = '1'");
+
+            if (updated > 0)
+            {
+                _logger.LogInformation("  ✅ USUARIO LOJA: CANCELAR e VISUALIZAR definidos como '1' (acesso Gerente).");
+                Console.WriteLine("  ✅ USUARIO LOJA: permissões de Gerente aplicadas (CANCELAR='1', VISUALIZAR='1').");
+            }
+            else
+            {
+                Console.WriteLine("  ℹ️ USUARIO LOJA não encontrado ou inativo — nenhuma alteração.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning("  ⚠️ EnsureLojaUserPermissoesAsync: {Error}", ex.Message);
+            Console.WriteLine($"  ⚠️ USUARIO LOJA permissões: {ex.Message}");
+        }
     }
 
     private static async Task<bool> TableExistsAsync(FbConnection conn, string tableName)
