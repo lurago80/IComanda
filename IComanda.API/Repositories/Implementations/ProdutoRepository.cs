@@ -90,18 +90,18 @@ public class ProdutoRepository : IProdutoRepository
         // Filtro de ativo
         if (ativo.HasValue)
         {
-            // Neste banco ATIVO=0 significa ativo e ATIVO=1 significa inativo
+            // Neste banco ATIVO=1 significa ativo e ATIVO=0 ou NULL significa inativo
             if (ativo.Value)
             {
-                // Apenas ativos: ATIVO = 0 ou NULL (não marcado como inativo)
-                sql += " AND (p3.ATIVO = 0 OR p3.ATIVO IS NULL)";
-                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos ativos (ATIVO = 0 ou NULL)");
+                // Apenas ativos: ATIVO = 1
+                sql += " AND p3.ATIVO = 1";
+                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos ativos (ATIVO = 1)");
             }
             else
             {
-                // Apenas inativos: ATIVO = 1
-                sql += " AND p3.ATIVO = 1";
-                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos inativos (ATIVO = 1)");
+                // Apenas inativos: ATIVO = 0 ou NULL
+                sql += " AND (p3.ATIVO = 0 OR p3.ATIVO IS NULL)";
+                _logger.LogInformation("🔍 [ProdutoRepository] Filtrando apenas produtos inativos (ATIVO = 0 ou NULL)");
             }
         }
         else
@@ -223,7 +223,7 @@ public class ProdutoRepository : IProdutoRepository
             INNER JOIN PRODUTOEMPRESA p2 ON p1.id = p2.id
             INNER JOIN PRODUTOESERVICO p3 ON p1.id = p3.id
             INNER JOIN PRODUTOESERVICOEMPRESA p4 ON p1.id = p4.id
-            WHERE p1.codigobarra = @CodigoBarra AND (p3.ativo = 0 OR p3.ativo IS NULL)";
+            WHERE p1.codigobarra = @CodigoBarra AND p3.ativo = 1";
 
         return await connection.QueryFirstOrDefaultAsync<Produto>(sql, new { CodigoBarra = codigoBarra });
     }
@@ -243,7 +243,7 @@ public class ProdutoRepository : IProdutoRepository
             INNER JOIN PRODUTOEMPRESA p2 ON p1.id = p2.id
             INNER JOIN PRODUTOESERVICO p3 ON p1.id = p3.id
             INNER JOIN PRODUTOESERVICOEMPRESA p4 ON p1.id = p4.id
-            WHERE p3.codigointerno = @CodigoInterno AND (p3.ativo = 0 OR p3.ativo IS NULL)";
+            WHERE p3.codigointerno = @CodigoInterno AND p3.ativo = 1";
 
         return await connection.QueryFirstOrDefaultAsync<Produto>(sql, new { CodigoInterno = codigoInterno });
     }
@@ -282,14 +282,14 @@ public class ProdutoRepository : IProdutoRepository
 
         if (ativo.HasValue)
         {
-            // Neste banco ATIVO=0 significa ativo e ATIVO=1 significa inativo
+            // Neste banco ATIVO=1 significa ativo e ATIVO=0 ou NULL significa inativo
             if (ativo.Value)
             {
-                sql += " AND (p3.ativo = 0 OR p3.ativo IS NULL)";
+                sql += " AND p3.ativo = 1";
             }
             else
             {
-                sql += " AND p3.ativo = 1";
+                sql += " AND (p3.ativo = 0 OR p3.ativo IS NULL)";
             }
         }
 
@@ -622,14 +622,14 @@ public class ProdutoRepository : IProdutoRepository
 
         if (ativo.HasValue)
         {
-            // Neste banco ATIVO=0 significa ativo e ATIVO=1 significa inativo
+            // Neste banco ATIVO=1 significa ativo e ATIVO=0 ou NULL significa inativo
             if (ativo.Value)
             {
-                sql += " AND (p3.ATIVO = 0 OR p3.ATIVO IS NULL)";
+                sql += " AND p3.ATIVO = 1";
             }
             else
             {
-                sql += " AND p3.ATIVO = 1";
+                sql += " AND (p3.ATIVO = 0 OR p3.ATIVO IS NULL)";
             }
         }
 
