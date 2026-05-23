@@ -1,1 +1,77 @@
-N├úo foi poss├¡vel localizar um projeto para executar. Verifique se existe um projeto em C:\VS_Code\icomanda ou passe o caminho para o projeto usando --project.
+Usando as configura├º├Áes de inicializa├º├úo de C:\VS_Code\icomanda\IComanda.API\Properties\launchSettings.json...
+[17:22:09 INF] Iniciando IComanda API
+[17:22:09 INF] Ambiente: Development
+[17:22:09 INF] Porta: 65375
+info: IComanda.API.Data.DbConnectionFactory[0]
+      DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+[17:22:09 INF] DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+info: IComanda.API.Data.DbConnectionFactory[0]
+      DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+[17:22:09 INF] DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+info: IComanda.API.Repositories.Implementations.RefreshTokenRepository[0]
+      Ô£à [RefreshToken] Tabela REFRESH_TOKEN j├í existe no banco Firebird.
+[17:22:09 INF] Ô£à [RefreshToken] Tabela REFRESH_TOKEN j├í existe no banco Firebird.
+Ô£à Tabela REFRESH_TOKEN: j├í existe.
+info: IComanda.API.Data.DbConnectionFactory[0]
+      DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+[17:22:09 INF] DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+[17:22:09 INF] ­ƒöì [FV] Verificando estrutura de banco ÔÇö m├│dulo For├ºa de Vendas...
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      ­ƒöì [FV] Verificando estrutura de banco ÔÇö m├│dulo For├ºa de Vendas...
+========================================
+­ƒöì FOR├çA DE VENDAS ÔÇö verificando tabelas...
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+        Ô£à VENDEDOR.SENHA expandida para VARCHAR(72) (suporte a BCrypt)
+[17:22:09 INF]   Ô£à VENDEDOR.SENHA expandida para VARCHAR(72) (suporte a BCrypt)
+  Ô£à VENDEDOR.SENHA expandida para VARCHAR(72) (suporte a BCrypt)
+  Ô£ö PEDIDOS_FV j├í existe.
+  Ô£ö ITENS_PEDIDO_FV j├í existe.
+  Ô£ö VISITAS_FV j├í existe.
+  Ô£ö METAS_FV j├í existe.
+  Ô£ö METAS_FV.VALOR_REALIZADO j├í existe.
+  Ô£ö VISITAS_FV.RESULTADO j├í existe.
+Ô£à FOR├çA DE VENDAS ÔÇö verifica├º├úo conclu├¡da.
+========================================
+info: IComanda.API.Services.Implementations.ForcaVendasDbInitializer[0]
+      Ô£à [FV] Verifica├º├úo de estrutura conclu├¡da.
+[17:22:09 INF] Ô£à [FV] Verifica├º├úo de estrutura conclu├¡da.
+[17:22:09 INF] DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+info: IComanda.API.Data.DbConnectionFactory[0]
+      DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+info: IComanda.API.Services.Implementations.IComandaDbMigrationService[0]
+      ­ƒöì [Migration] Verificando estrutura do banco de dados...
+[17:22:09 INF] ­ƒöì [Migration] Verificando estrutura do banco de dados...
+========================================
+­ƒöì MIGRA├ç├òES ÔÇö verificando banco de dados...
+  Ô£ö GRUPO.IMPRIMIR2VIAS j├í existe.
+  Ô£ö PARAMETROS.HABILITAR_IMPRIMIR_2VIAS j├í existe.
+  Ô£ö USUARIO.SENHA j├í suporta BCrypt (72 chars).
+  Ô£ö METAS_FV.VALOR_REALIZADO j├í existe.
+  Ô£ö VISITAS_FV.RESULTADO j├í existe.
+  Ô£ö GRUPO.TIPO j├í existe.
+  Ô£ö USUARIO LOJA j├í possui permiss├Áes de Gerente (CANCELAR='1').
+Ô£à MIGRA├ç├òES ÔÇö verifica├º├úo conclu├¡da.
+========================================
+info: IComanda.API.Services.Implementations.IComandaDbMigrationService[0]
+      Ô£à [Migration] Verifica├º├úo de estrutura conclu├¡da.
+[17:22:09 INF] Ô£à [Migration] Verifica├º├úo de estrutura conclu├¡da.
+warn: Microsoft.AspNetCore.Server.Kestrel[0]
+      Overriding address(es) 'http://localhost:5000'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+[17:22:09 WRN] Overriding address(es) 'http://localhost:5000'. Binding to endpoints defined via IConfiguration and/or UseKestrel() instead.
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://[::]:65375
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\VS_Code\icomanda\IComanda.API
+info: IComanda.API.Data.DbConnectionFactory[0]
+      DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+[17:22:31 INF] DbConnectionFactory inicializado. Banco: C:\Users\usuario\Desktop\Base\Eduardo\DADOSG5.FDB | Existe: True
+info: IComanda.API.Services.Implementations.RefreshTokenDatabaseService[0]
+      Ô£à Refresh token gerado e salvo: ID=183, Usuario=1 (LOJA), Expira=05/29/2026 20:22:31
+[17:22:31 INF] Ô£à Refresh token gerado e salvo: ID=183, Usuario=1 (LOJA), Expira=05/29/2026 20:22:31
+info: IComanda.API.Controllers.AuthController[0]
+      Usu├írio autenticado com sucesso: 1
+[17:22:31 INF] Usu├írio autenticado com sucesso: 1

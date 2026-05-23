@@ -1107,7 +1107,7 @@ function App() {
             onUsuarios={isGerente(currentUser) ? () => setView('usuarios') : undefined}
             onRelCancelamentos={isGerente(currentUser) ? () => setView('rel-cancelamentos') : undefined}
             onFormasPagamento={isGerente(currentUser) ? () => setView('formas-pagamento') : undefined}
-            onBackup={isGerente(currentUser) ? handleBackup : undefined}
+            onBackup={handleBackup}
             userName={currentUser?.nome}
             userRole={currentUser?.role}
             onKds={usarCozinha ? () => setView('kds') : undefined}

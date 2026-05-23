@@ -331,12 +331,12 @@ const MenuPrincipal: React.FC<MenuPrincipalProps> = ({
       onClick: onFormasPagamento,
       category: 'Utilitários'
     }] : []),
-    ...(onBackup ? [{
+    {
       icon: <Database className="w-6 h-6 sm:w-7 sm:h-7" />,
       label: 'Backup',
-      onClick: onBackup,
+      onClick: onBackup || (() => {}),
       category: 'Utilitários'
-    }] : [])
+    }
   ].filter(item => item.onClick)
 
   const renderMenuItem = (item: MenuItem, index: number) => {
