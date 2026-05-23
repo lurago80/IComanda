@@ -1102,11 +1102,11 @@ function App() {
             onForcaVendas={usarForcaVendas ? handleFVHome : undefined}
             onFVRotas={usarForcaVendas ? handleFVRotas : undefined}
             onConectarWhatsApp={() => setShowConectarWhatsAppModal(true)}
-            onConfiguracoes={isGerente(currentUser) ? handleConfiguracoes : undefined}
-            onDashboard={isGerente(currentUser) ? handleDashboard : undefined}
-            onUsuarios={isGerente(currentUser) ? () => setView('usuarios') : undefined}
-            onRelCancelamentos={isGerente(currentUser) ? () => setView('rel-cancelamentos') : undefined}
-            onFormasPagamento={isGerente(currentUser) ? () => setView('formas-pagamento') : undefined}
+            onConfiguracoes={handleConfiguracoes}
+            onDashboard={handleDashboard}
+            onUsuarios={() => setView('usuarios')}
+            onRelCancelamentos={() => setView('rel-cancelamentos')}
+            onFormasPagamento={() => setView('formas-pagamento')}
             onBackup={handleBackup}
             userName={currentUser?.nome}
             userRole={currentUser?.role}
