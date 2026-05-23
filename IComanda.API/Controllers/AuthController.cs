@@ -334,6 +334,7 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Retorna o perfil atualizado do usuário autenticado, consultando o banco de dados.
     /// Garante que mudanças de permissão reflitam sem necessidade de novo login.
+    /// Se o role no banco for diferente do role no JWT, re-emite o cookie JWT.
     /// </summary>
     [HttpGet("me")]
     [Authorize]
@@ -350,6 +351,26 @@ public class AuthController : ControllerBase
             return Unauthorized(new { error = "Usuário não encontrado" });
 
         var role = DetermineUserRole(usuario);
+
+        // Se o role do banco difere do role no JWT, re-emite o cookie para corrigir sem novo login
+        var jwtRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+        if (!jwtRole.Equals(role.ToString(), StringComparison.OrdinalIgnoreCase))
+        {
+            var expirationHours = int.Parse(_configuration["Jwt:ExpirationHours"] ?? "2");
+            var newToken = _jwtTokenProvider.GenerateToken(
+                userId: usuario.Id,
+                username: usuario.Nome ?? "",
+                role: role
+            );
+            Response.Cookies.Append("jwt_access_token", newToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = _env.IsProduction(),
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddHours(expirationHours)
+            });
+            _logger.LogInformation("JWT re-emitido para usuário {UserId}: role {OldRole} → {NewRole}", userId, jwtRole, role);
+        }
 
         return Ok(new
         {
