@@ -61,14 +61,9 @@ if errorlevel 1 (
 REM Parar processos anteriores se existirem
 echo [INFO] Verificando processos anteriores...
 taskkill /F /IM "IComanda.API.exe" >nul 2>&1
-REM Matar TODOS os processos dotnet.exe (mais confiavel do que filtrar por titulo)
-taskkill /F /IM "dotnet.exe" >nul 2>&1
-for /f "tokens=2" %%a in ('tasklist /FI "IMAGENAME eq node.exe" /FO LIST 2^>nul ^| findstr /C:"PID:"') do (
-    if not "%%a"=="" taskkill /F /PID %%a >nul 2>&1
-)
-timeout /t 2 /nobreak >nul
-REM Liberar portas 65375, 3000 e 3001 (mata pelo PID dono da porta - mais eficaz)
+REM Liberar portas 65375, 3000 e 3001 pelo PID dono da porta (mais seguro que matar todos os dotnet.exe)
 powershell -Command "Get-NetTCPConnection -LocalPort 65375,3000,3001 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }" 2>nul
+timeout /t 2 /nobreak >nul
 
 REM Aguardar porta 65375 ficar realmente livre (max 15s)
 echo [INFO] Aguardando porta 65375 ficar livre...
@@ -132,19 +127,25 @@ echo [INFO] Health Check: http://localhost:65375/health
 echo.
 
 set "BACKEND_DIR=%CD%\IComanda.API"
-start "🚀 IComanda - Backend" /D "%BACKEND_DIR%" cmd /k "echo Compilando backend... && dotnet build --configuration Release --no-incremental -v quiet && echo. && echo Iniciando Backend... && dotnet bin\Release\net8.0\IComanda.API.dll"
+start "🚀 IComanda - Backend" /D "%BACKEND_DIR%" cmd /k "echo Compilando backend... && dotnet build --configuration Release -v minimal && echo. && echo Iniciando Backend... && dotnet bin\Release\net8.0\IComanda.API.dll"
 
-REM Aguardar backend iniciar
-echo [INFO] Aguardando backend iniciar...
-timeout /t 8 /nobreak >nul
-
-REM Verificar se o backend está respondendo
-echo [INFO] Verificando se o backend está respondendo...
-curl -s http://localhost:65375/health >nul 2>&1
-if errorlevel 1 (
-    echo [⚠️ AVISO] Backend ainda não está respondendo, mas continuando...
-) else (
-    echo [✅] Backend está respondendo!
+REM Aguardar backend iniciar (build pode levar 30-60s; verificar health em loop)
+echo [INFO] Aguardando backend compilar e iniciar (pode levar até 60s)...
+set BACKEND_READY=0
+for /L %%i in (1,1,12) do (
+    if "!BACKEND_READY!"=="0" (
+        timeout /t 5 /nobreak >nul
+        curl -s http://localhost:65375/health >nul 2>&1
+        if not errorlevel 1 (
+            set BACKEND_READY=1
+            echo [✅] Backend está respondendo!
+        ) else (
+            echo [INFO] Aguardando... ^(tentativa %%i/12^)
+        )
+    )
+)
+if "!BACKEND_READY!"=="0" (
+    echo [⚠️ AVISO] Backend demorou mais que o esperado, mas continuando...
 )
 echo.
 
@@ -158,7 +159,7 @@ echo [INFO] URL: http://localhost:3000
 echo.
 
 set "FRONTEND_DIR=%CD%\IComanda.API\icomanda-frontend"
-start "🎨 IComanda - Frontend" /D "%FRONTEND_DIR%" cmd /k "echo Iniciando Frontend... && set DISABLE_ESLINT_PLUGIN=true && npm start"
+start "🎨 IComanda - Frontend" /D "%FRONTEND_DIR%" cmd /k "echo Iniciando Frontend... && set DISABLE_ESLINT_PLUGIN=true && set PORT=3000 && set BROWSER=none && npm start"
 
 echo [INFO] Aguardando frontend iniciar...
 timeout /t 5 /nobreak >nul
@@ -192,8 +193,8 @@ if exist "%BAILEYS_DIR%\package.json" (
 )
 
 REM Abrir navegador uma unica vez na porta 3000 ^(iComanda^)
-echo [INFO] O navegador sera aberto em 12 segundos em http://localhost:3000
-start /B cmd /c "timeout /t 12 /nobreak >nul && start http://localhost:3000"
+echo [INFO] O navegador sera aberto em 20 segundos em http://localhost:3000
+start /B cmd /c "timeout /t 20 /nobreak >nul && start http://localhost:3000"
 
 goto :SUCCESS
 
@@ -203,7 +204,7 @@ echo   📦 Iniciando APENAS BACKEND
 echo ========================================
 echo.
 set "BACKEND_DIR=%CD%\IComanda.API"
-start "🚀 IComanda - Backend" /D "%BACKEND_DIR%" cmd /k "echo Restaurando pacotes NuGet... && dotnet restore && echo Compilando backend... && dotnet build --configuration Release --no-incremental -v quiet && echo. && echo Iniciando Backend... && dotnet bin\Release\net8.0\IComanda.API.dll"
+start "🚀 IComanda - Backend" /D "%BACKEND_DIR%" cmd /k "echo Restaurando pacotes NuGet... && dotnet restore && echo Compilando backend... && dotnet build --configuration Release -v minimal && echo. && echo Iniciando Backend... && dotnet bin\Release\net8.0\IComanda.API.dll"
 timeout /t 3 /nobreak >nul
 goto :SUCCESS
 
