@@ -10,7 +10,7 @@ namespace IComanda.API.Controllers;
 /// Gerenciamento de formas de pagamento (Admin/Gerente)
 /// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/formas-pagamento")]
 [Produces("application/json")]
 [Authorize]
 public class FormasPagamentoController : ControllerBase

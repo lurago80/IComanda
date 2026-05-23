@@ -702,7 +702,8 @@ export const relatoriosService = {
 export const formasPagamentoService = {
   listar: async (): Promise<any[]> => {
     const response = await api.get('/formas-pagamento');
-    return response.data;
+    const d = response.data;
+    return Array.isArray(d) ? d : (d?.$values ?? []);
   },
   atualizar: async (id: number, data: { descricao: string; indice?: number | null; meioPagto: number; permiteTroco: boolean; tipo?: string | null }): Promise<any> => {
     const response = await api.put(`/formas-pagamento/${id}`, data);
