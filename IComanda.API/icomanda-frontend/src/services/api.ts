@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { BuscarProdutoRequest, Cliente, CriarVendaRequest, Grupo, ItemVenda, KdsPedido, Produto, ProdutoCompleto, TaxaEntrega, Venda, VendaFechadaRecibo } from '../types/api';
+import { BuscarProdutoRequest, Cliente, CriarVendaRequest, Grupo, ItemVenda, KdsPedido, Produto, ProdutoCompleto, RelatorioConsignacao, TaxaEntrega, Venda, VendaFechadaRecibo } from '../types/api';
 
 // URL da API: use REACT_APP_API_URL se definido (ex: em .env), senão detecta pelo host
 const getApiBaseUrl = (): string => {
@@ -133,13 +133,13 @@ export const gruposService = {
     return response.data;
   },
 
-  criar: async (descricao: string, imprimirDuasVias = false): Promise<Grupo> => {
-    const response = await api.post('/grupos', { descricao, imprimirDuasVias });
+  criar: async (descricao: string, imprimirDuasVias = false, percentual = 0): Promise<Grupo> => {
+    const response = await api.post('/grupos', { descricao, imprimirDuasVias, percentual });
     return response.data;
   },
 
-  atualizar: async (id: number, descricao: string, imprimirDuasVias = false): Promise<Grupo> => {
-    const response = await api.put(`/grupos/${id}`, { descricao, imprimirDuasVias });
+  atualizar: async (id: number, descricao: string, imprimirDuasVias = false, percentual = 0): Promise<Grupo> => {
+    const response = await api.put(`/grupos/${id}`, { descricao, imprimirDuasVias, percentual });
     return response.data;
   },
 
@@ -694,6 +694,11 @@ export const relatoriosService = {
 
   getCancelamentos: async (de?: string, ate?: string, origem = 'BA'): Promise<any[]> => {
     const response = await api.get('/relatorios/cancelamentos', { params: { de, ate, origem } });
+    return response.data;
+  },
+
+  getConsignacao: async (grupoId: number, dataInicio: string, dataFim: string): Promise<RelatorioConsignacao> => {
+    const response = await api.get('/relatorios/consignacao', { params: { grupoId, dataInicio, dataFim } });
     return response.data;
   },
 };

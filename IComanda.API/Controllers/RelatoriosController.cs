@@ -213,6 +213,31 @@ public class RelatoriosController : ControllerBase
         }
     }
 
+    [HttpGet("consignacao")]
+    [ProducesResponseType(typeof(RelatorioConsignacaoDto), 200)]
+    public async Task<ActionResult<RelatorioConsignacaoDto>> GetConsignacao(
+        [FromQuery] int grupoId,
+        [FromQuery] DateTime dataInicio,
+        [FromQuery] DateTime dataFim)
+    {
+        try
+        {
+            if (dataInicio > dataFim)
+                return BadRequest(new { mensagem = "Data inicial não pode ser maior que data final" });
+            var relatorio = await _relatorioService.GetRelatorioConsignacaoAsync(grupoId, dataInicio, dataFim);
+            return Ok(relatorio);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { mensagem = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao gerar relatório de consignação");
+            return StatusCode(500, new { mensagem = "Erro interno do servidor", detalhes = ex.Message });
+        }
+    }
+
     /// <summary>
     /// Relatório de vendas canceladas com filtro por período
     /// </summary>

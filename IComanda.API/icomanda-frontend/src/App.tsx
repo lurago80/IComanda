@@ -23,6 +23,7 @@ import GridComandas from './pages/GridComandas';
 import CaixasPage from './pages/CaixasPage';
 import RelatoriosPage from './pages/RelatoriosPage';
 import RelatorioPeriodoPage from './pages/RelatorioPeriodoPage';
+import RelatorioConsignacaoPage from './pages/RelatorioConsignacaoPage';
 import MesasPage from './pages/MesasPage';
 import ContasReceberPage from './pages/ContasReceberPage';
 import HistoricoPage from './pages/HistoricoPage';
@@ -67,7 +68,7 @@ const queryClient = new QueryClient({
   },
 });
 
-type View = 'menu' | 'produtos' | 'conferencia' | 'pesquisa' | 'grid-comandas' | 'caixas' | 'relatorios' | 'relatorio-periodo' | 'mesas' | 'contas-receber' | 'historico' | 'notificacoes' | 'recebimento' | 'relatorio-recebimentos' | 'reimpressao-recibos' | 'receber-contas-receber' | 'clientes' | 'cadastro-cliente' | 'produtos-cadastro' | 'cadastro-produto' | 'grupos' | 'taxas-entrega' | 'delivery-abertos' | 'delivery-novo' | 'configuracoes' | 'fv-home' | 'fv-novo-pedido' | 'fv-dashboard-vendedor' | 'fv-rotas' | 'fv-cadastro-vendedores' | 'fv-ranking' | 'kds' | 'qrcode-mesas' | 'gerenciar-pizza' | 'dashboard' | 'usuarios' | 'rel-cancelamentos' | 'formas-pagamento';
+type View = 'menu' | 'produtos' | 'conferencia' | 'pesquisa' | 'grid-comandas' | 'caixas' | 'relatorios' | 'relatorio-periodo' | 'relatorio-consignacao' | 'mesas' | 'contas-receber' | 'historico' | 'notificacoes' | 'recebimento' | 'relatorio-recebimentos' | 'reimpressao-recibos' | 'receber-contas-receber' | 'clientes' | 'cadastro-cliente' | 'produtos-cadastro' | 'cadastro-produto' | 'grupos' | 'taxas-entrega' | 'delivery-abertos' | 'delivery-novo' | 'configuracoes' | 'fv-home' | 'fv-novo-pedido' | 'fv-dashboard-vendedor' | 'fv-rotas' | 'fv-cadastro-vendedores' | 'fv-ranking' | 'kds' | 'qrcode-mesas' | 'gerenciar-pizza' | 'dashboard' | 'usuarios' | 'rel-cancelamentos' | 'formas-pagamento';
 
 function App() {
   const [view, setView] = useState<View>('menu');
@@ -759,6 +760,14 @@ function App() {
     );
   }
 
+  if (view === 'relatorio-consignacao') {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <RelatorioConsignacaoPage onClose={() => setView('grupos')} />
+      </QueryClientProvider>
+    );
+  }
+
   if (view === 'mesas') {
     return (
       <QueryClientProvider client={queryClient}>
@@ -878,13 +887,16 @@ function App() {
   if (view === 'grupos') {
     return (
       <QueryClientProvider client={queryClient}>
-        <GruposPage onClose={() => {
-          // Recarregar grupos para atualizar flags imprimirDuasVias no CartDrawer
-          gruposService.getTodosComQuantidade()
-            .then(g => setGruposParaImpressao(g))
-            .catch(() => {});
-          setView('menu');
-        }} />
+        <GruposPage
+          onClose={() => {
+            // Recarregar grupos para atualizar flags imprimirDuasVias no CartDrawer
+            gruposService.getTodosComQuantidade()
+              .then(g => setGruposParaImpressao(g))
+              .catch(() => {});
+            setView('menu');
+          }}
+          onRelatorioConsignacao={() => setView('relatorio-consignacao')}
+        />
       </QueryClientProvider>
     );
   }

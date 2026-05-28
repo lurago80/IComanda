@@ -14,4 +14,9 @@ public class AtualizarGrupoRequest
     /// Indica se o grupo deve imprimir 2 vias automaticamente (se habilitado nas configurações)
     /// </summary>
     public bool ImprimirDuasVias { get; set; } = false;
+
+    /// <summary>
+    /// Percentual a pagar ao fornecedor (consignação). 0 = sem percentual.
+    /// </summary>
+    public decimal Percentual { get; set; } = 0;
 }

@@ -44,7 +44,8 @@ public class GrupoRepository : IGrupoRepository
         var sql = @"
             SELECT ID as Id, DESCRICAO as Descricao,
                    COALESCE(IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
-                   COALESCE(TIPO, 'NORMAL') as Tipo
+                   COALESCE(TIPO, 'NORMAL') as Tipo,
+                   COALESCE(PERCENTUAL, 0) as Percentual
             FROM GRUPO
             ORDER BY DESCRICAO";
 
@@ -96,7 +97,8 @@ public class GrupoRepository : IGrupoRepository
         var sql = @"
             SELECT ID as Id, DESCRICAO as Descricao,
                    COALESCE(IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
-                   COALESCE(TIPO, 'NORMAL') as Tipo
+                   COALESCE(TIPO, 'NORMAL') as Tipo,
+                   COALESCE(PERCENTUAL, 0) as Percentual
             FROM GRUPO
             WHERE ID = @Id";
 
@@ -140,10 +142,11 @@ public class GrupoRepository : IGrupoRepository
                    g.DESCRICAO as Descricao,
                    COUNT(p3.ID) as QuantidadeProdutos,
                    COALESCE(g.IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
-                   COALESCE(g.TIPO, 'NORMAL') as Tipo
+                   COALESCE(g.TIPO, 'NORMAL') as Tipo,
+                   COALESCE(g.PERCENTUAL, 0) as Percentual
             FROM GRUPO g
             LEFT JOIN PRODUTOESERVICO p3 ON g.ID = p3.GRUPO AND CAST(p3.ATIVO AS INTEGER) = 1
-            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS, g.TIPO
+            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS, g.TIPO, g.PERCENTUAL
             HAVING COUNT(p3.ID) > 0
             ORDER BY g.DESCRICAO";
 
@@ -188,11 +191,12 @@ public class GrupoRepository : IGrupoRepository
                    g.DESCRICAO as Descricao,
                    COUNT(p3.ID) as QuantidadeProdutos,
                    COALESCE(g.IMPRIMIR2VIAS, 0) as ImprimirDuasVias,
-                   COALESCE(g.TIPO, 'NORMAL') as Tipo
+                   COALESCE(g.TIPO, 'NORMAL') as Tipo,
+                   COALESCE(g.PERCENTUAL, 0) as Percentual
             FROM GRUPO g
             LEFT JOIN PRODUTOESERVICO p3 ON g.ID = p3.GRUPO AND CAST(p3.ATIVO AS INTEGER) = 1
             WHERE g.ID IS NOT NULL
-            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS, g.TIPO
+            GROUP BY g.ID, g.DESCRICAO, g.IMPRIMIR2VIAS, g.TIPO, g.PERCENTUAL
             ORDER BY g.DESCRICAO";
         
         // Query alternativa: se não houver grupos na tabela GRUPO, buscar grupos distintos da PRODUTOESERVICO
@@ -337,7 +341,8 @@ public class GrupoRepository : IGrupoRepository
                 Descricao = r.Descricao ?? string.Empty,
                 QuantidadeProdutos = (int)r.QuantidadeProdutos,
                 ImprimirDuasVias = r.ImprimirDuasVias,
-                Tipo = r.Tipo ?? "NORMAL"
+                Tipo = r.Tipo ?? "NORMAL",
+                Percentual = r.Percentual
             }).ToList();
 
             _logger.LogInformation("✅ [GrupoRepository] GetGruposComQuantidadeTodosAsync retornou {Count} grupos mapeados", grupos.Count);
@@ -362,22 +367,22 @@ public class GrupoRepository : IGrupoRepository
         }
     }
 
-    public async Task<int> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false)
+    public async Task<int> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false, decimal percentual = 0)
     {
         using var connection = _connectionFactory.CreateConnection();
 
         // Firebird pode não suportar RETURNING em todas as versões
         // Usar abordagem alternativa: inserir e buscar o último ID gerado
         var sql = @"
-            INSERT INTO GRUPO (DESCRICAO, IMPRIMIR2VIAS)
-            VALUES (@Descricao, @Imprimir2Vias)";
+            INSERT INTO GRUPO (DESCRICAO, IMPRIMIR2VIAS, PERCENTUAL)
+            VALUES (@Descricao, @Imprimir2Vias, @Percentual)";
 
         try
         {
             _logger.LogInformation("🔍 [GrupoRepository] Criando grupo - Descricao: {Descricao}, ImprimirDuasVias: {ImprimirDuasVias}", descricao, imprimirDuasVias);
             _logger.LogInformation("📝 SQL: {Sql}", sql);
 
-            await connection.ExecuteAsync(sql, new { Descricao = descricao, Imprimir2Vias = imprimirDuasVias ? 1 : 0 });
+            await connection.ExecuteAsync(sql, new { Descricao = descricao, Imprimir2Vias = imprimirDuasVias ? 1 : 0, Percentual = percentual });
 
             // Buscar o ID do grupo recém-criado
             var sqlBuscarId = @"
@@ -397,14 +402,15 @@ public class GrupoRepository : IGrupoRepository
         }
     }
 
-    public async Task<bool> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false)
+    public async Task<bool> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false, decimal percentual = 0)
     {
         using var connection = _connectionFactory.CreateConnection();
 
         var sql = @"
             UPDATE GRUPO
             SET DESCRICAO = @Descricao,
-                IMPRIMIR2VIAS = @Imprimir2Vias
+                IMPRIMIR2VIAS = @Imprimir2Vias,
+                PERCENTUAL = @Percentual
             WHERE ID = @Id";
 
         try
@@ -412,7 +418,7 @@ public class GrupoRepository : IGrupoRepository
             _logger.LogInformation("🔍 [GrupoRepository] Atualizando grupo - ID: {Id}, Descricao: {Descricao}, ImprimirDuasVias: {ImprimirDuasVias}", id, descricao, imprimirDuasVias);
             _logger.LogInformation("📝 SQL: {Sql}", sql);
 
-            var linhasAfetadas = await connection.ExecuteAsync(sql, new { Id = id, Descricao = descricao, Imprimir2Vias = imprimirDuasVias ? 1 : 0 });
+            var linhasAfetadas = await connection.ExecuteAsync(sql, new { Id = id, Descricao = descricao, Imprimir2Vias = imprimirDuasVias ? 1 : 0, Percentual = percentual });
 
             if (linhasAfetadas > 0)
             {

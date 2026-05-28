@@ -9,4 +9,6 @@ public class GrupoDto
     public string Descricao { get; set; } = string.Empty;
     public int QuantidadeProdutos { get; set; }
     public bool ImprimirDuasVias { get; set; } = false;
+    /// <summary>Percentual a pagar ao fornecedor (consignação). 0 = sem percentual.</summary>
+    public decimal Percentual { get; set; } = 0;
 }

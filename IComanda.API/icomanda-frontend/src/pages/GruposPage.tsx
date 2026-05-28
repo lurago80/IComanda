@@ -21,9 +21,10 @@ import { normalizarTexto } from '../lib/utils';
 
 interface GruposPageProps {
   onClose: () => void;
+  onRelatorioConsignacao?: () => void;
 }
 
-const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
+const GruposPage: React.FC<GruposPageProps> = ({ onClose, onRelatorioConsignacao }) => {
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [loading, setLoading] = useState(false);
   const [busca, setBusca] = useState<string>('');
@@ -31,6 +32,7 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
   const [grupoEditando, setGrupoEditando] = useState<Grupo | null>(null);
   const [descricao, setDescricao] = useState<string>('');
   const [imprimirDuasVias, setImprimirDuasVias] = useState(false);
+  const [percentual, setPercentual] = useState<number>(0);
   const [salvando, setSalvando] = useState(false);
   const [grupoSelecionado, setGrupoSelecionado] = useState<Grupo | null>(null);
   const [produtosGrupo, setProdutosGrupo] = useState<Produto[]>([]);
@@ -65,6 +67,7 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
     setGrupoEditando(null);
     setDescricao('');
     setImprimirDuasVias(false);
+    setPercentual(0);
     setMostrarFormulario(true);
   };
 
@@ -72,6 +75,7 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
     setGrupoEditando(grupo);
     setDescricao(grupo.descricao);
     setImprimirDuasVias(grupo.imprimirDuasVias ?? false);
+    setPercentual(grupo.percentual ?? 0);
     setMostrarFormulario(true);
   };
 
@@ -80,6 +84,7 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
     setGrupoEditando(null);
     setDescricao('');
     setImprimirDuasVias(false);
+    setPercentual(0);
   };
 
   const salvarGrupo = async () => {
@@ -92,10 +97,10 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
       setSalvando(true);
       
       if (grupoEditando) {
-        await gruposService.atualizar(grupoEditando.id, descricao, imprimirDuasVias);
+        await gruposService.atualizar(grupoEditando.id, descricao, imprimirDuasVias, percentual);
         showSuccess('Sucesso', 'Grupo atualizado com sucesso');
       } else {
-        await gruposService.criar(descricao, imprimirDuasVias);
+        await gruposService.criar(descricao, imprimirDuasVias, percentual);
         showSuccess('Sucesso', 'Grupo criado com sucesso');
       }
 
@@ -235,13 +240,24 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
               <p className="text-sm text-text-muted">Cadastro e consulta de grupos de produtos</p>
             </div>
           </div>
-          <Button
-            onClick={abrirFormularioNovo}
-            className="flex items-center space-x-2"
-          >
-            <FolderPlus className="w-4 h-4" />
-            <span>Novo Grupo</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            {onRelatorioConsignacao && (
+              <Button
+                onClick={onRelatorioConsignacao}
+                variant="outline"
+                className="flex items-center space-x-2"
+              >
+                <span>Relatório Consignação</span>
+              </Button>
+            )}
+            <Button
+              onClick={abrirFormularioNovo}
+              className="flex items-center space-x-2"
+            >
+              <FolderPlus className="w-4 h-4" />
+              <span>Novo Grupo</span>
+            </Button>
+          </div>
         </div>
 
         {/* Campo de Busca */}
@@ -299,11 +315,18 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
                     <p className="text-sm text-text-muted">
                       {grupo.quantidadeProdutos} {grupo.quantidadeProdutos === 1 ? 'produto' : 'produtos'}
                     </p>
-                    {grupo.imprimirDuasVias && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 mt-1">
-                        2 vias
-                      </span>
-                    )}
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {grupo.imprimirDuasVias && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                          2 vias
+                        </span>
+                      )}
+                      {(grupo.percentual ?? 0) > 0 && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                          {grupo.percentual}% consignação
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
@@ -478,6 +501,21 @@ const GruposPage: React.FC<GruposPageProps> = ({ onClose }) => {
                       }
                     }}
                   />
+                </div>
+
+                <div className="flex flex-col gap-1 py-2">
+                  <label className="block text-sm font-medium text-text-primary">Percentual Consignação (%)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                    value={percentual}
+                    onChange={e => setPercentual(Number(e.target.value))}
+                    className="w-full px-3 py-2 rounded-lg border border-border bg-bg-primary text-text-primary text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    placeholder="0.00"
+                  />
+                  <p className="text-xs text-text-muted">Percentual para cálculo de consignação ao fornecedor (deixe 0 se não aplicável)</p>
                 </div>
 
                 <div className="flex items-center justify-between py-2">

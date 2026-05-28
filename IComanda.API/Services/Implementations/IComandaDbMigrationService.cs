@@ -59,6 +59,9 @@ public class IComandaDbMigrationService
         // ── 7. USUARIO LOJA — garantir permissões de Gerente ─────────────
         await EnsureLojaUserPermissoesAsync(fbConn);
 
+        // ── 8. GRUPO.PERCENTUAL — percentual de consignação por grupo ────
+        await EnsureGrupoPercentualAsync(fbConn);
+
         Console.WriteLine("✅ MIGRAÇÕES — verificação concluída.");
         Console.WriteLine("========================================");
         _logger.LogInformation("✅ [Migration] Verificação de estrutura concluída.");
@@ -283,6 +286,24 @@ public class IComandaDbMigrationService
             _logger.LogWarning("  ⚠️ EnsureLojaUserPermissoesAsync: {Error}", ex.Message);
             Console.WriteLine($"  ⚠️ USUARIO LOJA permissões: {ex.Message}");
         }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // 8. GRUPO.PERCENTUAL — percentual de consignação por grupo
+    // ─────────────────────────────────────────────────────────────────────
+
+    private async Task EnsureGrupoPercentualAsync(FbConnection conn)
+    {
+        if (await ColumnExistsAsync(conn, "GRUPO", "PERCENTUAL"))
+        {
+            Console.WriteLine("  ✔ GRUPO.PERCENTUAL já existe.");
+            return;
+        }
+
+        _logger.LogInformation("[Migration] Adicionando coluna GRUPO.PERCENTUAL...");
+        ExecDDL(conn,
+            "ALTER TABLE GRUPO ADD PERCENTUAL NUMERIC(5,2) DEFAULT 0",
+            "GRUPO.PERCENTUAL criada (NUMERIC(5,2) DEFAULT 0)");
     }
 
     private static async Task<bool> TableExistsAsync(FbConnection conn, string tableName)

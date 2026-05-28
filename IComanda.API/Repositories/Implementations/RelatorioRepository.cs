@@ -667,5 +667,67 @@ public class RelatorioRepository : IRelatorioRepository
             VendasPorDiaSemana = vendasPorDiaSemana
         };
     }
+
+    public async Task<RelatorioConsignacaoDto> GetRelatorioConsignacaoAsync(int grupoId, DateTime dataInicio, DateTime dataFim)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var dataFimLimite = dataFim.Date.AddDays(1).AddSeconds(-1);
+
+        // Buscar dados do grupo — usa ExecuteScalarAsync para evitar problemas de casing com dynamic/Firebird
+        var grupoDescricao = await connection.ExecuteScalarAsync<string>(
+            "SELECT DESCRICAO FROM GRUPO WHERE ID = @GrupoId", new { GrupoId = grupoId });
+
+        if (grupoDescricao == null)
+            throw new KeyNotFoundException($"Grupo com ID {grupoId} não encontrado.");
+
+        var percentual = await connection.ExecuteScalarAsync<decimal>(
+            "SELECT COALESCE(PERCENTUAL, 0) FROM GRUPO WHERE ID = @GrupoId", new { GrupoId = grupoId });
+
+        // Buscar itens vendidos do grupo no período — mapeamento tipado (Dapper case-insensitive)
+        var sqlItens = @"
+            SELECT
+                I.CODIGO AS ProdutoId,
+                P.DESCRICAO AS Descricao,
+                SUM(I.QTD) AS QuantidadeVendida,
+                SUM(I.TOTAL) AS ValorTotal
+            FROM ITEVENDAS I
+            INNER JOIN VENDAS V ON V.NOTA = I.NOTA
+            INNER JOIN PRODUTOESERVICO P ON P.ID = I.CODIGO
+            WHERE V.DATA_SAIDA >= @DataInicio
+              AND V.DATA_SAIDA <= @DataFim
+              AND V.LANCADO = 'EFETIVADO'
+              AND CAST(I.CANCELADO AS INTEGER) = 0
+              AND P.GRUPO = @GrupoId
+            GROUP BY I.CODIGO, P.DESCRICAO
+            ORDER BY P.DESCRICAO";
+
+        var itens = (await connection.QueryAsync<ItemConsignacaoDto>(sqlItens, new
+        {
+            DataInicio = dataInicio.Date,
+            DataFim = dataFimLimite,
+            GrupoId = grupoId
+        })).ToList();
+
+        foreach (var item in itens)
+            item.ValorPercentual = Math.Round(item.ValorTotal * percentual / 100m, 2);
+
+        var totalValor = itens.Sum(i => i.ValorTotal);
+        var totalPercentual = Math.Round(totalValor * percentual / 100m, 2);
+
+        _logger.LogInformation("📊 Relatório consignação - Grupo {GrupoId} ({GrupoDesc}), Período: {DataInicio} a {DataFim}, Itens: {Qtd}, Total: {Total}",
+            grupoId, grupoDescricao, dataInicio, dataFim, itens.Count, totalValor);
+
+        return new RelatorioConsignacaoDto
+        {
+            GrupoId = grupoId,
+            GrupoDescricao = grupoDescricao,
+            Percentual = percentual,
+            DataInicio = dataInicio,
+            DataFim = dataFim,
+            Itens = itens,
+            TotalValor = totalValor,
+            TotalPercentual = totalPercentual
+        };
+    }
 }
 

@@ -8,7 +8,7 @@ public interface IGrupoRepository
     Task<Grupo?> GetGrupoAsync(int id);
     Task<IEnumerable<Grupo>> GetGruposComQuantidadeAsync();
     Task<IEnumerable<Grupo>> GetGruposComQuantidadeTodosAsync();
-    Task<int> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false);
-    Task<bool> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false);
+    Task<int> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false, decimal percentual = 0);
+    Task<bool> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false, decimal percentual = 0);
     Task<bool> ExcluirGrupoAsync(int id);
 }

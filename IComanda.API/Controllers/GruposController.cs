@@ -192,7 +192,7 @@ public class GruposController : ControllerBase
 
             _logger.LogInformation("🔍 [GruposController] Criando grupo - Descricao: {Descricao}", request.Descricao);
 
-            var grupo = await _grupoService.CriarGrupoAsync(request.Descricao, request.ImprimirDuasVias);
+            var grupo = await _grupoService.CriarGrupoAsync(request.Descricao, request.ImprimirDuasVias, request.Percentual);
 
             _logger.LogInformation("✅ [GruposController] Grupo criado com sucesso - ID: {Id}", grupo.Id);
 
@@ -231,7 +231,7 @@ public class GruposController : ControllerBase
 
             _logger.LogInformation("🔍 [GruposController] Atualizando grupo - ID: {Id}, Descricao: {Descricao}", id, request.Descricao);
 
-            var grupo = await _grupoService.AtualizarGrupoAsync(id, request.Descricao, request.ImprimirDuasVias);
+            var grupo = await _grupoService.AtualizarGrupoAsync(id, request.Descricao, request.ImprimirDuasVias, request.Percentual);
 
             _logger.LogInformation("✅ [GruposController] Grupo atualizado com sucesso - ID: {Id}", id);
 

@@ -1,0 +1,20 @@
+{
+  "short_name": "iComanda",
+  "name": "iComanda - Sistema de Gestão de Comandas e Delivery",
+  "icons": [
+    {
+      "src": "iComanda.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "iComanda.jpg",
+      "type": "image/jpeg",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff"
+}

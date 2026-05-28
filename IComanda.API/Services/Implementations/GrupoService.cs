@@ -43,31 +43,32 @@ public class GrupoService : IGrupoService
             Id = g.Id,
             Descricao = g.Descricao,
             QuantidadeProdutos = g.QuantidadeProdutos,
-            ImprimirDuasVias = g.ImprimirDuasVias
+            ImprimirDuasVias = g.ImprimirDuasVias,
+            Percentual = g.Percentual
         });
     }
 
-    public async Task<GrupoDto> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false)
+    public async Task<GrupoDto> CriarGrupoAsync(string descricao, bool imprimirDuasVias = false, decimal percentual = 0)
     {
         if (string.IsNullOrWhiteSpace(descricao))
         {
             throw new ArgumentException("A descrição do grupo é obrigatória", nameof(descricao));
         }
 
-        var id = await _grupoRepository.CriarGrupoAsync(descricao, imprimirDuasVias);
+        var id = await _grupoRepository.CriarGrupoAsync(descricao, imprimirDuasVias, percentual);
         var grupo = await _grupoRepository.GetGrupoAsync(id);
         
         return _mapper.Map<GrupoDto>(grupo!);
     }
 
-    public async Task<GrupoDto> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false)
+    public async Task<GrupoDto> AtualizarGrupoAsync(int id, string descricao, bool imprimirDuasVias = false, decimal percentual = 0)
     {
         if (string.IsNullOrWhiteSpace(descricao))
         {
             throw new ArgumentException("A descrição do grupo é obrigatória", nameof(descricao));
         }
 
-        var atualizado = await _grupoRepository.AtualizarGrupoAsync(id, descricao, imprimirDuasVias);
+        var atualizado = await _grupoRepository.AtualizarGrupoAsync(id, descricao, imprimirDuasVias, percentual);
         
         if (!atualizado)
         {

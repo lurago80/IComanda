@@ -4,6 +4,26 @@ export interface Grupo {
   descricao: string;
   quantidadeProdutos: number;
   imprimirDuasVias: boolean;
+  percentual?: number;
+}
+
+export interface ItemConsignacao {
+  produtoId: number;
+  descricao: string;
+  quantidadeVendida: number;
+  valorTotal: number;
+  valorPercentual: number;
+}
+
+export interface RelatorioConsignacao {
+  grupoId: number;
+  grupoDescricao: string;
+  percentual: number;
+  dataInicio: string;
+  dataFim: string;
+  itens: ItemConsignacao[];
+  totalValor: number;
+  totalPercentual: number;
 }
 
 export interface TaxaEntrega {

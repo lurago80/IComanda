@@ -17,5 +17,6 @@ public interface IRelatorioService
     /// <param name="origem">BA = só comandas, DL = só delivery, null = todos</param>
     Task<RelatorioCaixaConsolidadoDto> GetRelatorioCaixaConsolidadoAsync(DateTime dataInicio, DateTime dataFim, string? origem = null);
     Task<RelatorioDashboardDto> GetDashboardAsync(DateTime dataInicio, DateTime dataFim, string? origem = null);
+    Task<RelatorioConsignacaoDto> GetRelatorioConsignacaoAsync(int grupoId, DateTime dataInicio, DateTime dataFim);
 }
 

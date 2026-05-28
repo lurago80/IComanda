@@ -76,5 +76,13 @@ public class RelatorioService : IRelatorioService
             throw new ArgumentException("Data inicial não pode ser maior que data final");
         return await _relatorioRepository.GetDashboardAsync(dataInicio, dataFim, origem);
     }
+
+    public async Task<RelatorioConsignacaoDto> GetRelatorioConsignacaoAsync(int grupoId, DateTime dataInicio, DateTime dataFim)
+    {
+        _logger.LogInformation("📊 Gerando relatório consignação - Grupo: {GrupoId}, Período: {DataInicio} a {DataFim}", grupoId, dataInicio, dataFim);
+        if (dataInicio > dataFim)
+            throw new ArgumentException("Data inicial não pode ser maior que data final");
+        return await _relatorioRepository.GetRelatorioConsignacaoAsync(grupoId, dataInicio, dataFim);
+    }
 }
 
